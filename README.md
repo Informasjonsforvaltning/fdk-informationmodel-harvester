@@ -6,6 +6,9 @@
 
 Module for harvesting and querying information models.
 
+## Api-specification
+https://raw.githubusercontent.com/brreg/openAPI/master/specs/informationmodel-cat.yaml
+
 ## Data types
 
-### ApiDocument
+### InformationModelDocument
