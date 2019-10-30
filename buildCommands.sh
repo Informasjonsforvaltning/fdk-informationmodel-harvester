@@ -10,7 +10,7 @@ for docker_app in $docker_apps; do
     BUILD_CMD[$i]="( cd $docker_app && ./buildDocker.sh )"
 done
 
-maven_apps="api-cat"
+maven_apps="informationmodel-cat"
 
 
 for maven_app in $maven_apps; do
