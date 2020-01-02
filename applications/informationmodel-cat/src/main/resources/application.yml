@@ -14,7 +14,7 @@ logging:
   level.org.springframework.web: WARN
   level.org.springframework.data.elasticsearch: ${LOG_LEVEL:INFO}
 application:
-  apiRootUrl: http://nginx-search:8080/api
+  apiRootUrl: http://fdk-nginx-search:8080/api
   harvestSourceUri: https://fellesdatakatalog.brreg.no/api
   harvestSourceURIBase: ${FDK_ALTINN_MODELS_URL:https://fdk-dev-altinn.appspot.com/api/v1/schemas}
   # harvest every sixth hour, 10 minutes after apicatalogs update
