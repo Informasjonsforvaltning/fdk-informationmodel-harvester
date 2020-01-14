@@ -1,7 +1,7 @@
 name: Build, test and deploy to production on merge to master branch
 
 on:
-  push:
+  pull_request:
     branches:
       - master
 
