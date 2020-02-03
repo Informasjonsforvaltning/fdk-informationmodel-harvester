@@ -81,13 +81,28 @@ components:
       properties:
         aggregations:
           $ref: "#/components/schemas/Aggregation"
-        hits:
-          type: array
-          items:
-            $ref: "#/components/schemas/InformationModelDocument"
-        total:
-          type: integer
-          format: int64
+        _embedded:
+          type: object
+          properties:
+            informationmodels:
+              type: array
+              items:
+                $ref: "#/components/schemas/InformationModelDocument"
+        page:
+          type: object
+          properties:
+            size:
+              type: integer
+              format: int64
+            totalElements:
+              type: integer
+              format: int64
+            totalPages:
+              type: integer
+              format: int64
+            number:
+              type: integer
+              format: int64
     Aggregation:
       type: object
     InformationModelDocument:
