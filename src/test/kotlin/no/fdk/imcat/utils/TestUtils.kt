@@ -8,7 +8,7 @@ import java.net.HttpURLConnection
 
 fun apiGet(endpoint: String, acceptHeader: String?): Map<String,Any> {
 
-    return try{
+    return try {
         val connection = URL(getApiAddress(endpoint)).openConnection() as HttpURLConnection
         if(acceptHeader != null) connection.setRequestProperty("Accept", acceptHeader)
         connection.connect()
@@ -26,7 +26,7 @@ fun apiGet(endpoint: String, acceptHeader: String?): Map<String,Any> {
                 "body"   to " "
             )
         }
-    } catch (e: Exception){
+    } catch (e: Exception) {
         mapOf(
             "status" to e.toString(),
             "header" to " ",
@@ -41,7 +41,9 @@ fun apiAuthorizedRequest(endpoint : String, body: String?, token: String?, metho
     connection.setRequestProperty("Content-type", "application/json")
     connection.setRequestProperty("Accept", "application/json")
 
-    if(!token.isNullOrEmpty()) {connection.setRequestProperty("Authorization", "Bearer $token")}
+    if(!token.isNullOrEmpty()) {
+        connection.setRequestProperty("Authorization", "Bearer $token")
+    }
 
     return try {
         connection.doOutput = true
@@ -53,7 +55,7 @@ fun apiAuthorizedRequest(endpoint : String, body: String?, token: String?, metho
             writer.close()
         }
 
-        if(isOK(connection.responseCode)){
+        if(isOK(connection.responseCode)) {
             mapOf(
                 "body"   to connection.inputStream.bufferedReader().use(BufferedReader :: readText),
                 "header" to connection.headerFields.toString(),

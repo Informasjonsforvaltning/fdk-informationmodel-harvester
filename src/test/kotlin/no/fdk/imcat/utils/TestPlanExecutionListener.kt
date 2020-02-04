@@ -7,9 +7,9 @@ class TestPlanExecutionListener : TestExecutionListener {
 
     override fun testPlanExecutionFinished(testPlan: TestPlan?) {
 
-        val testType = System.getProperty("test.type")
+        val testType: String? = System.getProperty("test.type")
 
-        if (testType != null && testType.contains("contract")) {
+        if (testType?.contains("contract") == true) {
             ApiTestContainer.stopGracefully()
         }
     }
