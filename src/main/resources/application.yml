@@ -5,7 +5,11 @@ spring:
     elasticsearch:
       clusterNodes: ${FDK_ES_CLUSTERNODES:elasticsearch5:9300}
       clusterName: ${FDK_ES_CLUSTERNAME:elasticsearch}
-
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: ${RABBIT_USERNAME}
+    password: ${RABBIT_PASSWORD}
 logging:
   level.root: WARN
   level.no.fdk.imcat: DEBUG
@@ -17,6 +21,7 @@ application:
   apiRootUrl: http://fdk-nginx-search:8080/api
   harvestSourceUri: https://fellesdatakatalog.brreg.no/api
   harvestSourceURIBase: ${FDK_ALTINN_MODELS_URL:https://fdk-dev-altinn.appspot.com/api/v1/schemas}
+  harvestAdminRootUrl: ${HARVEST_ADMIN_ROOT_URL:http://localhost:8135/api}
   # harvest every sixth hour, 10 minutes after apicatalogs update
   harvestCron: 0 10 */6 * * *
 
@@ -30,6 +35,11 @@ spring:
     elasticsearch:
       clusterNodes: localhost:9300
       clusterName: elasticsearch
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: admin
+    password: admin
 application:
   apiRootUrl: http://localhost:8080/api
 server:
