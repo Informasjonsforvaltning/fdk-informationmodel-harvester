@@ -37,6 +37,7 @@ public class DCATNOINFO {
     public static final Property type = m.createProperty( uri + "type");
     public static final Property version = m.createProperty(uri + "version");
     public static final Property hasProperty = m.createProperty(uri + "hasProperty");
+    public static final Property isSubclassOf = m.createProperty(uri + "isSubclassOf");
     public static final Property propertyType = m.createProperty(uri + "propertyType");
     public static final Property isDescribedBy = m.createProperty(uri + "isDescribedBy");
     public static final Property typeDefinitionReference = m.createProperty(uri + "typeDefinitionReference");

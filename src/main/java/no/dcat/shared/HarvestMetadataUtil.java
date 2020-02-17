@@ -1,8 +1,6 @@
 package no.dcat.shared;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /*
 HarvestMetadataUtil is class for logic for managing HarvestMetadata objects, which itself are Anemic DTO
@@ -21,14 +19,6 @@ public class HarvestMetadataUtil {
         metadata.setLastHarvested(harvestDate);
 
         if (!hasChanged) {
-            if (oldMetadata != null) {
-                metadata.setChanged(oldMetadata.getChanged());
-            }
-        } else {
-            List<Date> oldChanged = oldMetadata != null ? oldMetadata.getChanged() : null;
-            List<Date> changed = oldChanged != null ? new ArrayList<>(oldChanged) : new ArrayList<>();
-            changed.add(harvestDate);
-            metadata.setChanged(changed);
             metadata.setLastChanged(harvestDate);
         }
 

@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -14,22 +13,22 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Publisher {
     private String uri;
-    private String identifier;
+    private String id;
     private Map<String, String> name;
     private String orgPath;
     private Map<String, String> prefLabel;
 
-    public Publisher(String identifier) {
-        this.identifier = identifier;
+    public Publisher(String id) {
+        this.id = id;
     }
 
-    public Publisher(String identifier, String uri) {
-        this.identifier = identifier;
+    public Publisher(String id, String uri) {
+        this.id = id;
         this.uri = uri;
     }
 
-    public Publisher(String identifier, String uri, Map<String, String> name) {
-        this.identifier = identifier;
+    public Publisher(String id, String uri, Map<String, String> name) {
+        this.id = id;
         this.uri = uri;
         this.name = name;
     }
