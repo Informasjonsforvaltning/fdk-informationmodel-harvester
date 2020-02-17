@@ -36,7 +36,7 @@ abstract class ApiTestContainer {
                 .withNetwork(apiNetwork)
                 .withNetworkAliases(ELASTIC_NETWORK_NAME)
 
-            TEST_API = KGenericContainer("eu.gcr.io/fdk-infra/fdk-informationmodel-harvester:latest")
+            TEST_API = KGenericContainer(System.getProperty("testImageName") ?: "eu.gcr.io/fdk-infra/fdk-informationmodel-harvester:latest")
                 .withExposedPorts(API_PORT)
                 .dependsOn(elasticContainer)
                 .waitingFor(Wait.forHttp("/ready").forStatusCode(200))
