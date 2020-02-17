@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import no.dcat.shared.HarvestMetadata;
 import no.dcat.shared.Publisher;
-import no.fdk.imcat.dto.InformationModelDocument;
+import no.fdk.imcat.dto.HarvestDto;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.hateoas.core.Relation;
 
@@ -24,7 +24,7 @@ public class InformationModelEnhanced {
     private String harvestSourceUri;
 
     @ApiModelProperty("Information about when the model was first and last harvested by the system")
-    private HarvestMetadata harvest;
+    private HarvestDto harvest;
 
     @ApiModelProperty("The title of the information model")
     private Map<String, String> title;

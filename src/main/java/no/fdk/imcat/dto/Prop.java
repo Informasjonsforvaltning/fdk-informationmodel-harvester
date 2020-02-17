@@ -14,7 +14,6 @@ import java.util.Map;
 @ToString(includeFieldNames = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Prop {
-    private String category;
     private Map<String, String> name;
     private Map<String, String> restrictions;
 }

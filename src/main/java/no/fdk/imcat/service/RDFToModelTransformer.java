@@ -1,10 +1,12 @@
 package no.fdk.imcat.service;
 
-import no.dcat.shared.HarvestMetadata;
-import no.dcat.shared.HarvestMetadataUtil;
 import no.dcat.shared.Publisher;
-import no.fdk.imcat.dto.*;
+import no.fdk.imcat.dto.HarvestDataSource;
+import no.fdk.imcat.dto.HarvestDto;
+import no.fdk.imcat.dto.Node;
+import no.fdk.imcat.dto.Prop;
 import no.fdk.imcat.model.DCATNOINFO;
+import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.sparql.vocabulary.FOAF;
@@ -20,11 +22,13 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.StringReader;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 @Service
@@ -32,11 +36,13 @@ public class RDFToModelTransformer {
 
     private static final Logger logger = LoggerFactory.getLogger(RDFToModelTransformer.class);
     private final RestTemplate restTemplate;
+    private InformationmodelEnhancedRepository informationmodelEnhancedRepository;
     private HttpHeaders defaultHeaders;
 
     private List<Node> nodeList;
 
-    public RDFToModelTransformer() {
+    public RDFToModelTransformer(InformationmodelEnhancedRepository informationmodelEnhancedRepository) {
+        this.informationmodelEnhancedRepository = informationmodelEnhancedRepository;
         this.restTemplate = new RestTemplate();
 
         this.defaultHeaders = new HttpHeaders();
@@ -92,20 +98,19 @@ public class RDFToModelTransformer {
         return null;
     }
 
-    List<InformationModelEnhanced> getInformationModelsFromHarvestSource(HarvestDataSource harvestDataSource) {
+    void getInformationModelsFromHarvestSource(HarvestDataSource harvestDataSource) {
         String informationModelSource = harvestInformationModels(harvestDataSource.getUrl());
 
         if (informationModelSource == null) {
-            return emptyList();
+            return;
         }
 
         try {
             final Model model = ModelFactory.createDefaultModel();
             model.read(new StringReader(informationModelSource), null, "TURTLE");//Base and lang is just untested dummy values
-            return getInformationModelsFromRDF(model, harvestDataSource.getUrl());
+            getInformationModelsFromRDF(model, harvestDataSource.getUrl());
         } catch (Exception e) {
             logger.info("Got error while reading model: " + e.getMessage());
-            return Collections.emptyList();
         }
     }
 
@@ -125,43 +130,16 @@ public class RDFToModelTransformer {
         return null;
     }
 
-//    private List<SimpleType> extractSimpleTypes(List<Statement> attributes) {
-//        return attributes.stream().map(attribute -> {
-//            SimpleType simpleType = new SimpleType();
-//
-//            Resource attributeType = attribute.getResource().getProperty(DCATNOINFO.type).getResource();
-//
-//            Predicate<Statement> isRestriction = p -> p.getPredicate().getURI().contains("XMLSchema");
-//            simpleType.setRestrictions(attributeType
-//                    .listProperties()
-//                    .filterKeep(isRestriction).toList().stream()
-//                    .collect(Collectors.toMap(s -> s.getPredicate().getLocalName(), s -> s.getLiteral().getString())));
-//
-//            simpleType.setModelElementType(attributeType.getProperty(DCATNOINFO.modelElementType).getLiteral().getString());
-//
-//            simpleType.setName(extractLanguageLiteralFromResource(attributeType, DCATNOINFO.name));
-//
-//            simpleType.setIsDescribedByUri(attributeType.hasProperty(DCATNOINFO.isDescribedBy) ? attributeType.getProperty(DCATNOINFO.isDescribedBy).getLiteral().getString() : null);
-//            simpleType.setTypeDefinitionReference(attributeType.getProperty(DCATNOINFO.typeDefinitionReference).getLiteral().getString());
-//
-//            return simpleType;
-//        }).collect(Collectors.toList());
-//    }
-//
-//    private boolean isObjectType(Statement s) {
-//        return s.getResource().getProperty(DCATNOINFO.modelElementType).getLiteral().getString().equals("objekttype");
-//    }
-//
-//    private boolean isRootType(Statement s) {
-//        return s.getResource().getProperty(DCATNOINFO.modelElementType).getLiteral().getString().equals("rotObjektstype");
-//    }
-
     private String getPropertyType(Resource r) {
         return r.hasProperty(DCATNOINFO.propertyType) ? r.getProperty(DCATNOINFO.propertyType).getLiteral().getString() : null;
     }
 
     private String getPropertyLiteralValue(Resource r, Property p) {
         return r.hasProperty(p) ? r.getProperty(p).getLiteral().getString() : null;
+    }
+
+    private String getSubclassName(Resource r) {
+        return r.getPropertyResourceValue(DCATNOINFO.isSubclassOf).getProperty(DCATNOINFO.name).getLiteral().getString();
     }
 
     private Map<String, String> getRestrictions(Resource r) {
@@ -176,6 +154,12 @@ public class RDFToModelTransformer {
             return;
         }
 
+        String elementType = getPropertyLiteralValue(r, DCATNOINFO.modelElementType);
+
+        if (elementType == null) {
+            return;
+        }
+
         // TODO: remove me
         System.out.println(r.toString());
 
@@ -185,8 +169,6 @@ public class RDFToModelTransformer {
         List<Prop> otherProps = new ArrayList<>();
 
         node.setLocalUri(r.getURI());
-
-        String elementType = getPropertyLiteralValue(r, DCATNOINFO.modelElementType);
         node.setModelElementType(elementType);
 
         node.setName(extractLanguageLiteralFromResource(r, DCATNOINFO.name));
@@ -199,8 +181,12 @@ public class RDFToModelTransformer {
             node.setIsDescribedByUri(getPropertyLiteralValue(r, DCATNOINFO.isDescribedBy));
         }
 
+        if (r.hasProperty(DCATNOINFO.isSubclassOf)) {
+            node.setIsSubclassOf(getSubclassName(r));
+        }
+
         Property propSelector = DCATNOINFO.hasProperty;
-        if (elementType != null && elementType.equals("kodeliste")) {
+        if (elementType.equals("kodeliste")) {
             propSelector = DCATNOINFO.containsCodename;
         }
 
@@ -240,6 +226,10 @@ public class RDFToModelTransformer {
         nodeList.add(node);
     }
 
+    private List<String> extractThemes(Resource r) {
+        return r.listProperties(DCAT.theme).mapWith((theme) -> theme.getResource().getLocalName()).toList();
+    }
+
     private List<InformationModelEnhanced> convertRecordsToModels(List<Statement> records) {
         List<InformationModelEnhanced> modelsList = new ArrayList<>();
 
@@ -247,10 +237,20 @@ public class RDFToModelTransformer {
             Resource informationModelResource = record.getProperty(FOAF.primaryTopic).getResource();
 
             InformationModelEnhanced informationModel = new InformationModelEnhanced();
-            informationModel.setId(UUID.randomUUID().toString()); // TODO: create or update in ES5
+            informationModel.setId(informationModelResource.getURI());
             informationModel.setTitle(extractLanguageLiteralFromResource(informationModelResource, DCTerms.title));
 
+            HarvestDto metadata = new HarvestDto();
+            if (informationModelResource.hasProperty(DCTerms.modified)) {
+                metadata.setLastChanged(LocalDateTime.parse(
+                        informationModelResource.getProperty(DCTerms.modified).getLiteral().getString(),
+                        DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate());
+            }
+            informationModel.setHarvest(metadata);
+
             InformationModelDocument document = new InformationModelDocument();
+            document.setThemes(extractThemes(informationModelResource));
+            document.setContactPoint(informationModelResource.getProperty(DCAT.contactPoint).getLiteral().getString());
 
             StmtIterator modelElements = informationModelResource.listProperties(DCATNOINFO.containsModelElement);
 
@@ -267,7 +267,7 @@ public class RDFToModelTransformer {
         return modelsList;
     }
 
-    private List<InformationModelEnhanced> getInformationModelsFromRDF(Model model, String harvestSourceUri) {
+    private void getInformationModelsFromRDF(Model model, String harvestSourceUri) {
 
         List<InformationModelEnhanced> modelsList = new ArrayList<>();
 
@@ -276,21 +276,31 @@ public class RDFToModelTransformer {
             List<Statement> catalogRecords = catalogResource.listProperties(DCAT.record).toList();
 
             Publisher publisher = extractPublisher(catalogResource);
-            HarvestMetadata harvestDate = HarvestMetadataUtil.createOrUpdate(null, new Date(), false); // <-------- TODO: check for already existing
 
-            modelsList.addAll(convertRecordsToModels(catalogRecords).stream().map(record -> {
+            convertRecordsToModels(catalogRecords).forEach(record -> {
                 record.setPublisher(publisher);
-                record.setHarvest(harvestDate);
                 record.setHarvestSourceUri(harvestSourceUri);
-                return record;
-            }).collect(Collectors.toList()));
+
+                Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getById(record.getId());
+
+                HarvestDto harvestTime = new HarvestDto();
+                harvestTime.setLastChanged(record.getHarvest().getLastChanged());
+                harvestTime.setLastHarvested(LocalDate.now());
+                harvestTime.setFirstHarvested(LocalDate.now());
+
+                existing.ifPresent(present -> harvestTime.setFirstHarvested(present.getHarvest().getFirstHarvested()));
+
+                record.setHarvest(harvestTime);
+                informationmodelEnhancedRepository.save(record);
+
+                // Push to ES5
+                System.out.println(record);
+            });
 
             System.out.println(modelsList);
 
         } catch (Exception e) {
             logger.error("Got exception for Elasticsearch: {}", harvestSourceUri, e);
         }
-
-        return modelsList;
     }
 }

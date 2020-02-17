@@ -11,5 +11,6 @@ public class ImcatApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(ImcatApiApplication.class, args);
     }
+
 }
 
