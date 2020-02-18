@@ -37,10 +37,12 @@ paths:
             type: string
         - name: aggregations
           in: query
-          description: If you want aggregations, set to true.
+          description: If you want aggregations, provide a comma-separated list of filters.
           required: false
           schema:
-            type: boolean
+            type: array
+            items:
+              type: string
       responses:
         '200':
           description: OK

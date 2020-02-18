@@ -1,6 +1,8 @@
 package no.fdk.imcat.contract
 
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.MissingNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.fdk.imcat.model.InformationModel
@@ -46,6 +48,17 @@ class InformationModelSearch : ApiTestContainer() {
 
         val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
         assertEquals(1, body.metadata.totalElements)
+    }
+
+    @Test
+    fun genericSearchWithAggregations() {
+        val response = apiGet("/informationmodels?aggregations=orgPath,los", "application/json")
+        assertEquals(HttpStatus.OK.value(), response["status"])
+
+        val body: JsonNode = mapper.readValue(response["body"] as String)
+        assertEquals(4, body.at("/page/totalElements").intValue())
+        assertFalse(body.at("/aggregations/los") is MissingNode)
+        assertFalse(body.at("/aggregations/orgPath") is MissingNode)
     }
 
 }
