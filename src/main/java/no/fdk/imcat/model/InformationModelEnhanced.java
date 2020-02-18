@@ -2,7 +2,6 @@ package no.fdk.imcat.model;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import no.dcat.shared.HarvestMetadata;
 import no.dcat.shared.Publisher;
 import no.fdk.imcat.dto.HarvestDto;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -16,6 +15,8 @@ import java.util.Map;
 public class InformationModelEnhanced {
     @ApiModelProperty("The id given by the harvest system")
     private String id;
+
+    private String uniqueUri;
 
     @ApiModelProperty("The publisher of the information model")
     private Publisher publisher;
