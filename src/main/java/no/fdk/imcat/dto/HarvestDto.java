@@ -1,6 +1,7 @@
 package no.fdk.imcat.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
 public class HarvestDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

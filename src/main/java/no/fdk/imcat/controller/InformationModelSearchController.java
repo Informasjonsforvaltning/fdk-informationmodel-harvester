@@ -2,6 +2,7 @@ package no.fdk.imcat.controller;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.RequiredArgsConstructor;
 import no.fdk.imcat.model.InformationModel;
 import no.fdk.webutils.aggregation.PagedResourceWithAggregations;
 import no.fdk.webutils.aggregation.ResponseUtil;
@@ -32,17 +33,12 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @CrossOrigin
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/informationmodels")
 public class InformationModelSearchController {
-    public static final String MISSING = "MISSING";
+    private static final String MISSING = "MISSING";
     private static final Logger logger = LoggerFactory.getLogger(InformationModelSearchController.class);
-    private ElasticsearchTemplate elasticsearchTemplate;
-
-    @Autowired
-    public InformationModelSearchController(ElasticsearchTemplate elasticsearchTemplate
-    ) {
-        this.elasticsearchTemplate = elasticsearchTemplate;
-    }
+    private final ElasticsearchTemplate elasticsearchTemplate;
 
     @ApiOperation(value = "Search in Information Model catalog")
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")

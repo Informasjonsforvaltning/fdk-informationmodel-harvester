@@ -5,7 +5,7 @@ import no.fdk.imcat.dto.HarvestDataSource;
 import no.fdk.imcat.dto.HarvestDto;
 import no.fdk.imcat.dto.Node;
 import no.fdk.imcat.dto.Prop;
-import no.fdk.imcat.model.DCATNOINFO;
+import no.fdk.imcat.utils.DCATNOINFO;
 import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import org.apache.jena.rdf.model.*;
@@ -120,7 +120,7 @@ public class RDFToModelTransformer {
             if (propertyStmt != null) {
                 Resource publisherResource = resource.getModel().getResource(propertyStmt.getObject().asResource().getURI());
                 String orgNr = publisherResource.getProperty(DCTerms.identifier).getLiteral().getString();
-                Map<String, String> name = extractLanguageLiteralFromResource(publisherResource, FOAF.name);
+                String name = publisherResource.getProperty(FOAF.name).getLiteral().getString();
                 return new Publisher(orgNr, publisherResource.getURI(), name);
             }
         } catch (Exception e) {
@@ -159,9 +159,6 @@ public class RDFToModelTransformer {
         if (elementType == null) {
             return;
         }
-
-        // TODO: remove me
-        System.out.println(r.toString());
 
         Node node = new Node();
         List<Prop> attributes = new ArrayList<>();
@@ -230,14 +227,14 @@ public class RDFToModelTransformer {
         return r.listProperties(DCAT.theme).mapWith((theme) -> theme.getResource().getLocalName()).toList();
     }
 
-    private List<InformationModelEnhanced> convertRecordsToModels(List<Statement> records) {
+    private List<InformationModelEnhanced> convertRDFRecordsToModels(List<Statement> records) {
         List<InformationModelEnhanced> modelsList = new ArrayList<>();
 
         for (Statement record : records) {
             Resource informationModelResource = record.getProperty(FOAF.primaryTopic).getResource();
 
             InformationModelEnhanced informationModel = new InformationModelEnhanced();
-            informationModel.setId(informationModelResource.getURI());
+            informationModel.setUniqueUri(informationModelResource.getURI());
             informationModel.setTitle(extractLanguageLiteralFromResource(informationModelResource, DCTerms.title));
 
             HarvestDto metadata = new HarvestDto();
@@ -277,27 +274,26 @@ public class RDFToModelTransformer {
 
             Publisher publisher = extractPublisher(catalogResource);
 
-            convertRecordsToModels(catalogRecords).forEach(record -> {
+            convertRDFRecordsToModels(catalogRecords).forEach(record -> {
+                record.setId(UUID.randomUUID().toString());
                 record.setPublisher(publisher);
                 record.setHarvestSourceUri(harvestSourceUri);
 
-                Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getById(record.getId());
+                Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getByUniqueUri(record.getUniqueUri());
 
                 HarvestDto harvestTime = new HarvestDto();
                 harvestTime.setLastChanged(record.getHarvest().getLastChanged());
                 harvestTime.setLastHarvested(LocalDate.now());
                 harvestTime.setFirstHarvested(LocalDate.now());
 
-                existing.ifPresent(present -> harvestTime.setFirstHarvested(present.getHarvest().getFirstHarvested()));
+                existing.ifPresent(present -> {
+                    harvestTime.setFirstHarvested(present.getHarvest().getFirstHarvested());
+                    record.setId(present.getId());
+                });
 
                 record.setHarvest(harvestTime);
                 informationmodelEnhancedRepository.save(record);
-
-                // Push to ES5
-                System.out.println(record);
             });
-
-            System.out.println(modelsList);
 
         } catch (Exception e) {
             logger.error("Got exception for Elasticsearch: {}", harvestSourceUri, e);

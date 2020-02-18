@@ -1,14 +1,16 @@
 package no.fdk.imcat.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.dcat.shared.Publisher;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InformationModelDocumentDto {
     private String id;
     private Publisher publisher;
@@ -17,11 +19,10 @@ public class InformationModelDocumentDto {
     private Map<String, String> title;
     private String schema;
 
-    private JsonNode rootObject;
-    private JsonNode objectTypes;
-    private JsonNode codeTypes;
-    private JsonNode dataTypes;
-    private JsonNode simpleTypes;
+    private List<Node> objectTypes;
+    private List<Node> codeTypes;
+    private List<Node> dataTypes;
+    private List<Node> simpleTypes;
 
-    private JsonNode informationModelDescription;
+    private ModelDescriptionDto informationModelDescription;
 }

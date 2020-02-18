@@ -1,4 +1,4 @@
-package no.fdk.imcat.model;
+package no.fdk.imcat.utils;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
