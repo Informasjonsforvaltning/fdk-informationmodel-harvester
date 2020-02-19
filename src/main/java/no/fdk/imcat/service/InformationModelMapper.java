@@ -44,6 +44,9 @@ public class InformationModelMapper {
     }
 
     public InformationModelDocumentDto convertModel(InformationModel oldModel) {
-        return null;
+        InformationModelDocumentDto dto = new InformationModelDocumentDto();
+        dto.setSchema(oldModel.getSchema());
+        dto.setId(oldModel.getId());
+        return dto;
     }
 }

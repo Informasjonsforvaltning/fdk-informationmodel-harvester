@@ -24,6 +24,15 @@ private val mapper = jacksonObjectMapper()
 class InformationModelSearch : ApiTestContainer() {
 
     @Test
+    fun findAllHarvestedModelsFromV2() {
+        val response = apiGet("/informationmodels/v2", "application/json")
+        assertEquals(HttpStatus.OK.value(), response["status"])
+
+        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
+        assertEquals(4, body.metadata.totalElements)
+    }
+
+    @Test
     fun findAllHarvestedModels() {
         val response = apiGet("/informationmodels", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])

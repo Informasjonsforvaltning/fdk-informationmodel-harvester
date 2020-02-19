@@ -265,9 +265,6 @@ public class RDFToModelTransformer {
     }
 
     private void getInformationModelsFromRDF(Model model, String harvestSourceUri) {
-
-        List<InformationModelEnhanced> modelsList = new ArrayList<>();
-
         try {
             Resource catalogResource = model.listResourcesWithProperty(RDF.type, DCAT.Catalog).toList().get(0);
             List<Statement> catalogRecords = catalogResource.listProperties(DCAT.record).toList();

@@ -2,7 +2,6 @@ package no.fdk.webutils.aggregation;
 
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
-import org.springframework.hateoas.PagedResources;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,9 +28,5 @@ public class ResponseUtil {
         }
 
         return Collections.emptyMap();
-    }
-
-    public static <T> PagedResourceWithAggregations<T> addAggregations(PagedResources<T> conceptResources, AggregatedPage<T> aggregatedPage) {
-        return new PagedResourceWithAggregations<>(conceptResources, extractAggregations(aggregatedPage));
     }
 }
