@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -137,6 +138,8 @@ public class AltinnHarvest {
             URL altinn = new URL(harvestSourceURIBase);
             logger.debug("Retrieving all schemas from altinn.  url: {} Expected load time approx 5 minutes", altinn);
             scanner = new Scanner(altinn.openStream(), "UTF-8");
+            // TODO: remove me
+//            scanner = new Scanner(new File("test-schemas.json"), "UTF-8");
             String JSonSchemaFromFile = scanner.useDelimiter("\\A").next();
             logger.debug("Retrieved all schemas from altinn.  url: {} Now parsing", altinn);
             ObjectMapper objectMapper = new ObjectMapper();
