@@ -1,5 +1,6 @@
 package no.fdk.imcat.service;
 
+import lombok.RequiredArgsConstructor;
 import no.dcat.shared.Publisher;
 import no.fdk.imcat.dto.HarvestDataSource;
 import no.fdk.imcat.dto.HarvestDto;
@@ -21,6 +22,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.io.StringReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,30 +34,15 @@ import java.util.stream.Collectors;
 import static java.util.Collections.singletonList;
 
 @Service
+@RequiredArgsConstructor
 public class RDFToModelTransformer {
     private static final Logger logger = LoggerFactory.getLogger(RDFToModelTransformer.class);
-
-    private final RestTemplate restTemplate;
-
-    private InformationmodelEnhancedRepository informationmodelEnhancedRepository;
-    private OrganizationCatalogueClient organizationCatalogueClient;
-
-    private HttpHeaders defaultHeaders;
-
+    private final InformationmodelEnhancedRepository informationmodelEnhancedRepository;
+    private final OrganizationCatalogueClient organizationCatalogueClient;
+    private final ReferenceDataClient referenceDataClient;
+    private RestTemplate restTemplate = new RestTemplate();
+    private HttpHeaders defaultHeaders = new HttpHeaders();
     private List<Node> nodeList;
-
-    public RDFToModelTransformer(
-            InformationmodelEnhancedRepository informationmodelEnhancedRepository,
-            OrganizationCatalogueClient organizationCatalogueClient
-    ) {
-        this.informationmodelEnhancedRepository = informationmodelEnhancedRepository;
-        this.organizationCatalogueClient = organizationCatalogueClient;
-
-        this.restTemplate = new RestTemplate();
-
-        this.defaultHeaders = new HttpHeaders();
-        this.defaultHeaders.setAccept(singletonList(MediaType.valueOf("text/turtle")));
-    }
 
     private static Map<String, String> extractLanguageLiteralFromResource(Resource resource, Property property) {
         Map<String, String> map = new HashMap<>();
@@ -78,6 +65,11 @@ public class RDFToModelTransformer {
         }
 
         return null;
+    }
+
+    @PostConstruct
+    private void setDefaultHeaders() {
+        this.defaultHeaders.setAccept(singletonList(MediaType.valueOf("text/turtle")));
     }
 
     private String harvestInformationModels(String harvestSourceUrl) {
@@ -231,8 +223,8 @@ public class RDFToModelTransformer {
         nodeList.add(node);
     }
 
-    private List<String> extractThemes(Resource r) {
-        return r.listProperties(DCAT.theme).mapWith((theme) -> theme.getResource().getLocalName()).toList();
+    private List<String> extractLosThemeUris(Resource r) {
+        return r.listProperties(DCAT.theme).mapWith((theme) -> theme.getResource().getURI()).toList();
     }
 
     private List<InformationModelEnhanced> convertRDFRecordsToModels(List<Statement> records) {
@@ -254,7 +246,8 @@ public class RDFToModelTransformer {
             informationModel.setHarvest(metadata);
 
             InformationModelDocument document = new InformationModelDocument();
-            document.setThemes(extractThemes(informationModelResource));
+            List<String> themes = extractLosThemeUris(informationModelResource);
+            document.setThemes( !themes.isEmpty() ? referenceDataClient.getLosThemesByUris(themes): null);
             document.setContactPoint(informationModelResource.getProperty(DCAT.contactPoint).getLiteral().getString());
 
             StmtIterator modelElements = informationModelResource.listProperties(DCATNOINFO.containsModelElement);

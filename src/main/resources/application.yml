@@ -19,6 +19,7 @@ logging:
   level.org.springframework.data.elasticsearch: ${LOG_LEVEL:INFO}
 application:
   apiRootUrl: http://fdk-nginx-search:8080/api
+  referenceDataUrl: ${FDK_REFERENCE_DATA_URL}
   organizationCatalogueUrl: ${FDK_ORGANIZATION_CATALOGUE}
   harvestSourceUri: https://fellesdatakatalog.brreg.no/api
   harvestSourceURIBase: ${FDK_ALTINN_MODELS_URL:https://fdk-dev-altinn.appspot.com/api/v1/schemas}
@@ -43,6 +44,7 @@ spring:
     password: admin
 application:
   apiRootUrl: http://localhost:8080/api
+  referenceDataUrl: ${FDK_REFERENCE_DATA_URL:https://fellesdatakatalog.brreg.no/reference-data}
   organizationCatalogueUrl: ${FDK_ORGANIZATION_CATALOGUE:https://organization-catalogue.fellesdatakatalog.brreg.no}
 server:
   port: 8109
