@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import no.dcat.shared.LosTheme;
 import no.fdk.imcat.dto.Node;
 
 import java.time.LocalDate;
@@ -26,7 +27,7 @@ public class InformationModelDocument {
     private Map<String, String> title;
     private String contactPoint;
     private List<String> keywords;
-    private List<String> themes;
+    private List<LosTheme> themes;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateDeserializer.class)

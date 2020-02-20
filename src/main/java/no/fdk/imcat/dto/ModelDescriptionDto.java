@@ -3,6 +3,7 @@ package no.fdk.imcat.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import no.dcat.shared.LosTheme;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,6 @@ import java.util.Map;
 public class ModelDescriptionDto {
     private Map<String, String> name;
     private Map<String, String> description;
-    private List<String> themes;
+    private List<LosTheme> themes;
 
 }
