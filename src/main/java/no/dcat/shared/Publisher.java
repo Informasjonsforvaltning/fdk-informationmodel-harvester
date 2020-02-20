@@ -3,6 +3,7 @@ package no.dcat.shared;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.ToString;
+import no.fdk.imcat.dto.OrganizationDto;
 
 import java.util.Map;
 
@@ -33,5 +34,15 @@ public class Publisher {
 
     public Publisher() {
         // Default constructor needed for frameworks
+    }
+
+    public static Publisher from(OrganizationDto organizationDto) {
+        Publisher p = new Publisher();
+        p.setId(organizationDto.getId());
+        p.setUri(organizationDto.getUri());
+        p.setName(organizationDto.getName());
+        p.setOrgPath(organizationDto.getOrgPath());
+        p.setPrefLabel(organizationDto.getPrefLabel());
+        return p;
     }
 }

@@ -5,9 +5,9 @@ import no.fdk.imcat.dto.HarvestDataSource;
 import no.fdk.imcat.dto.HarvestDto;
 import no.fdk.imcat.dto.Node;
 import no.fdk.imcat.dto.Prop;
-import no.fdk.imcat.utils.DCATNOINFO;
 import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
+import no.fdk.imcat.utils.DCATNOINFO;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.DCAT;
@@ -33,16 +33,24 @@ import static java.util.Collections.singletonList;
 
 @Service
 public class RDFToModelTransformer {
-
     private static final Logger logger = LoggerFactory.getLogger(RDFToModelTransformer.class);
+
     private final RestTemplate restTemplate;
+
     private InformationmodelEnhancedRepository informationmodelEnhancedRepository;
+    private OrganizationCatalogueClient organizationCatalogueClient;
+
     private HttpHeaders defaultHeaders;
 
     private List<Node> nodeList;
 
-    public RDFToModelTransformer(InformationmodelEnhancedRepository informationmodelEnhancedRepository) {
+    public RDFToModelTransformer(
+            InformationmodelEnhancedRepository informationmodelEnhancedRepository,
+            OrganizationCatalogueClient organizationCatalogueClient
+    ) {
         this.informationmodelEnhancedRepository = informationmodelEnhancedRepository;
+        this.organizationCatalogueClient = organizationCatalogueClient;
+
         this.restTemplate = new RestTemplate();
 
         this.defaultHeaders = new HttpHeaders();
@@ -273,7 +281,7 @@ public class RDFToModelTransformer {
 
             convertRDFRecordsToModels(catalogRecords).forEach(record -> {
                 record.setId(UUID.randomUUID().toString());
-                record.setPublisher(publisher);
+                record.setPublisher(publisher != null ? Publisher.from(organizationCatalogueClient.getPublisher(publisher.getId())) : null);
                 record.setHarvestSourceUri(harvestSourceUri);
 
                 Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getByUniqueUri(record.getUniqueUri());

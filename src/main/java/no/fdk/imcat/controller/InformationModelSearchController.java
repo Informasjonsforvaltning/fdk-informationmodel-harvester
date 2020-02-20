@@ -3,7 +3,7 @@ package no.fdk.imcat.controller;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.InformationModelDocumentDto;
+import no.fdk.imcat.dto.InformationModelDto;
 import no.fdk.imcat.model.InformationModel;
 import no.fdk.imcat.service.InformationModelSearchService;
 import no.fdk.webutils.aggregation.PagedResourceWithAggregations;
@@ -45,7 +45,7 @@ public class InformationModelSearchController {
 
     @ApiOperation(value = "Search in Information Model catalog")
     @RequestMapping(value = "/v2", method = RequestMethod.GET, produces = "application/json")
-    public PagedResourceWithAggregations<InformationModelDocumentDto> searchNew(
+    public PagedResourceWithAggregations<InformationModelDto> searchNew(
             @ApiParam("The query text")
             @RequestParam(value = "q", defaultValue = "", required = false)
                     String query,
