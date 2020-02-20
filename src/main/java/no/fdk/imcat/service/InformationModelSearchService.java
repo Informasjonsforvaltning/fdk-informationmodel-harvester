@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.InformationModelDocumentDto;
+import no.fdk.imcat.dto.InformationModelDto;
 import no.fdk.imcat.model.InformationModel;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.webutils.aggregation.PagedResourceWithAggregations;
@@ -47,7 +47,7 @@ public class InformationModelSearchService {
         return matchExactlyOneWord.find();
     }
 
-    public PagedResourceWithAggregations<InformationModelDocumentDto> search(
+    public PagedResourceWithAggregations<InformationModelDto> search(
             String query,
             String orgPath,
             String harvestSourceUri,
@@ -81,7 +81,6 @@ public class InformationModelSearchService {
 
         NativeSearchQuery finalQuery = new NativeSearchQueryBuilder()
                 .withQuery(composedQuery)
-//                .withIndices("imcat", "imcatenh").withTypes("informationmodel", "informationmodelenhanced")
                 .withIndices("imcat", "imcatenh").withTypes("informationmodel", "informationmodelenhanced")
                 .withPageable(pageable)
                 .build();
@@ -118,7 +117,7 @@ public class InformationModelSearchService {
 
         AggregatedPage<JsonNode> aggregatedPage = elasticsearchTemplate.queryForPage(finalQuery, JsonNode.class);
 
-        List<InformationModelDocumentDto> informationModels = aggregatedPage.getContent().stream().map(j -> {
+        List<InformationModelDto> informationModels = aggregatedPage.getContent().stream().map(j -> {
             try {
                 if (j.has("document")) {
                     return modelMapper.convertModel(objectMapper.treeToValue(j, InformationModelEnhanced.class));

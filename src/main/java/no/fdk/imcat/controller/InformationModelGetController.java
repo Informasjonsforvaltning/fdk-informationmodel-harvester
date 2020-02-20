@@ -2,7 +2,7 @@ package no.fdk.imcat.controller;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.InformationModelDocumentDto;
+import no.fdk.imcat.dto.InformationModelDto;
 import no.fdk.imcat.model.InformationModel;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.imcat.service.InformationModelMapper;
@@ -33,7 +33,7 @@ public class InformationModelGetController {
     }
 
     @RequestMapping(value = "/v2/{id}", method = RequestMethod.GET, produces = "application/json")
-    public InformationModelDocumentDto getInformationModelEnhanced(@PathVariable String id) throws NotFoundException {
+    public InformationModelDto getInformationModelEnhanced(@PathVariable String id) throws NotFoundException {
         Optional<InformationModel> oldModel = informationmodelRepository.findById(id);
         if (oldModel.isPresent()) {
             InformationModel informationModel = oldModel.get();
