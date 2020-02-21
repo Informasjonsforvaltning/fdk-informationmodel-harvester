@@ -33,7 +33,7 @@ jobs:
         run: sudo sysctl -w vm.max_map_count=262144
 
       - name: Run contract tests
-        run: mvn -DtestImageName="eu.gcr.io/fdk-infra/fdk-informationmodel-harvester:staging_latest" verify --no-transfer-progress
+        run: mvn verify -DtestImageName="eu.gcr.io/fdk-infra/fdk-informationmodel-harvester:staging_latest" --no-transfer-progress
 
       - name: Publish docker image to Google Cloud
         run: docker -- push eu.gcr.io/fdk-infra/fdk-informationmodel-harvester
