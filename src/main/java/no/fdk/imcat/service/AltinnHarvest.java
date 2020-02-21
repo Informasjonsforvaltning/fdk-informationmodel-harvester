@@ -2,23 +2,20 @@ package no.fdk.imcat.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import no.dcat.shared.Publisher;
 import no.fdk.imcat.model.InformationModel;
-import no.fdk.imcat.model.InformationModelFactory;
 import no.fdk.imcat.model.InformationModelHarvestSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -26,20 +23,34 @@ import java.util.zip.GZIPInputStream;
  */
 
 @Service
+@RequiredArgsConstructor
 public class AltinnHarvest {
     private static final Logger logger = LoggerFactory.getLogger(AltinnHarvest.class);
-    private static String harvestSourceURIBase = null;
-    private InformationModelFactory informationModelFactory;
+    private final OrganizationCatalogueClient organizationCatalogueClient;
+    @Value("${application.harvestSourceURIBase}")
+    private String harvestSourceURIBase;
     private HashMap<String, InformationModel> everyAltinnInformationModel = new HashMap<>();
-    private PublisherCatClient publisherCatClient;
-    private OrganizationCatalogueClient organizationCatalogueClient;
 
-    @Autowired
-    public AltinnHarvest(InformationModelFactory factory, Environment env, PublisherCatClient pCatClient, OrganizationCatalogueClient organizationCatalogueClient) {
-        this.informationModelFactory = factory;
-        this.publisherCatClient = pCatClient;
-        harvestSourceURIBase = env.getProperty("application.harvestSourceURIBase");
-        this.organizationCatalogueClient = organizationCatalogueClient;
+    private static String extractSingleForm(byte[] gzippedJson) {
+        try (ByteArrayInputStream bin = new ByteArrayInputStream(gzippedJson);
+             GZIPInputStream gzipper = new GZIPInputStream(bin)) {
+            ByteArrayOutputStream myBucket = new ByteArrayOutputStream();
+            boolean done = false;
+            byte[] buffer = new byte[10000];
+            while (!done) {
+                int length = gzipper.read(buffer, 0, buffer.length);
+                if (length > 0) {
+                    myBucket.write(buffer, 0, length);
+                }
+                done = (length == -1);
+            }
+            gzipper.close();
+
+            return new String(myBucket.toByteArray(), StandardCharsets.UTF_8);
+        } catch (IOException ie) {
+            logger.debug("Failed to gunzip JSON", ie);
+        }
+        return null;
     }
 
     private InformationModel parseInformationModel(AltInnService service) {
@@ -60,11 +71,11 @@ public class AltinnHarvest {
         if (serviceHasMultipleForms) {
             //Put all the separate Schemas into a JSON Array
             formBuilder.append("[");
-            for (int i=0;i<decodedForms.size()-1;i++) {
+            for (int i = 0; i < decodedForms.size() - 1; i++) {
                 formBuilder.append(decodedForms.get(i));
                 formBuilder.append(",");
             }
-            formBuilder.append(decodedForms.get(decodedForms.size()-1));
+            formBuilder.append(decodedForms.get(decodedForms.size() - 1));
             formBuilder.append("]");
         } else {
             formBuilder.append(decodedForms.get(0));
@@ -75,31 +86,9 @@ public class AltinnHarvest {
 
     Publisher lookupPublisher(String orgNr) {
         try {
-            return Publisher.from(organizationCatalogueClient.getPublisher(orgNr));
+            return Publisher.from(organizationCatalogueClient.getOrganization(orgNr));
         } catch (Exception e) {
             logger.warn("Publisher lookup failed for orgNr={}. Error: {}", orgNr, e.getMessage());
-        }
-        return null;
-    }
-
-    private static String extractSingleForm(byte[] gzippedJson) {
-        try (ByteArrayInputStream bin = new ByteArrayInputStream(gzippedJson);
-             GZIPInputStream gzipper = new GZIPInputStream(bin)) {
-            ByteArrayOutputStream myBucket = new ByteArrayOutputStream();
-            boolean done = false;
-            byte[] buffer = new byte[10000];
-            while (!done) {
-                int length = gzipper.read(buffer, 0, buffer.length);
-                if (length > 0) {
-                    myBucket.write(buffer, 0, length);
-                }
-                done = (length == -1);
-            }
-            gzipper.close();
-
-            return new String(myBucket.toByteArray(), StandardCharsets.UTF_8);
-        } catch (IOException ie) {
-            logger.debug("Failed to gunzip JSON", ie);
         }
         return null;
     }
@@ -134,12 +123,10 @@ public class AltinnHarvest {
     }
 
     private void loadAllInformationModelsFromOurAltInnAdapter() {
-        Scanner scanner = null;
 
-        try {
+        try (Scanner scanner = new Scanner(new File("schemas.json"), "UTF-8")) {
             URL altinn = new URL(harvestSourceURIBase);
             logger.debug("Retrieving all schemas from altinn.  url: {} Expected load time approx 5 minutes", altinn);
-            scanner = new Scanner(altinn.openStream(), "UTF-8");
             String JSonSchemaFromFile = scanner.useDelimiter("\\A").next();
             logger.debug("Retrieved all schemas from altinn.  url: {} Now parsing", altinn);
             ObjectMapper objectMapper = new ObjectMapper();
@@ -148,20 +135,14 @@ public class AltinnHarvest {
             logger.debug("Done retrieving and parsing all schemas from altinn. {} ", altinn);
 
             //Now extract the subforms from base64 gzipped json
-            for (AltInnService service : servicesInAltInn) {
+            new ForkJoinPool(10).submit(() -> servicesInAltInn.parallelStream().forEach(service -> {
                 InformationModel model = parseInformationModel(service);
                 everyAltinnInformationModel.put(model.getHarvestSourceUri(), model);
-            }
+            })).get();
+        } catch (FileNotFoundException e) {
+            logger.error("Schema file is missing", e);
         } catch (Throwable e) {
-            logger.debug("Failed while reading information models from  ", e);
-        } finally  {
-            if (scanner != null) {
-                try {
-                    scanner.close();
-                } catch (Throwable t) {
-                    //We silently swallow any errors on closing, any serious errors should have been caught and logged in the exception clause above
-                }
-            }
+            logger.error("Failed while reading information models from  ", e);
         }
     }
 

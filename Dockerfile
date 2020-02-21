@@ -1,7 +1,7 @@
 FROM maven:3.6.3-ibmjava-8-alpine AS MAVEN_BUILD_ENVIRONMENT
 
 COPY pom.xml /tmp/
-COPY src /tmp/src/
+COPY src/main /tmp/src/main
 
 WORKDIR /tmp/
 RUN mvn clean package --no-transfer-progress

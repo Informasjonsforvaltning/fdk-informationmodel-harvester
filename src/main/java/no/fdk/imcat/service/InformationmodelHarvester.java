@@ -1,11 +1,11 @@
 package no.fdk.imcat.service;
 
+import lombok.RequiredArgsConstructor;
 import no.fdk.imcat.model.InformationModel;
 import no.fdk.imcat.model.InformationModelFactory;
 import no.fdk.imcat.model.InformationModelHarvestSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ import java.util.List;
     Fetch information models and insert or update them in the search index.
  */
 @Service
+@RequiredArgsConstructor
 public class InformationmodelHarvester {
 
     public static final String API_TYPE = "api";
@@ -24,19 +25,10 @@ public class InformationmodelHarvester {
 
     private static final Logger logger = LoggerFactory.getLogger(InformationmodelHarvester.class);
 
-    private InformationmodelRepository informationmodelRepository;
-    private ApiRegistrationsHarvest apiRegistrationsHarvest;
-    private AltinnHarvest altinnHarvest;
-
-    private InformationModelFactory informationModelFactory;
-
-    @Autowired
-    public InformationmodelHarvester(InformationmodelRepository informationmodelRepository, ApiRegistrationsHarvest apiRegistrationsHarvest, InformationModelFactory informationModelFactory, AltinnHarvest altinnHarvest) {
-        this.informationmodelRepository = informationmodelRepository;
-        this.apiRegistrationsHarvest = apiRegistrationsHarvest;
-        this.informationModelFactory = informationModelFactory;
-        this.altinnHarvest = altinnHarvest;
-    }
+    private final InformationmodelRepository informationmodelRepository;
+    private final ApiRegistrationsHarvest apiRegistrationsHarvest;
+    private final AltinnHarvest altinnHarvest;
+    private final InformationModelFactory informationModelFactory;
 
     public void harvestAll() {
 
@@ -47,7 +39,7 @@ public class InformationmodelHarvester {
         List<String> idsHarvested = new ArrayList<>();
 
         for (InformationModelHarvestSource source : modelSources) {
-            if (source.sourceType == API_TYPE) {
+            if (source.sourceType.equals(API_TYPE)) {
                 try {
                     InformationModel model = informationModelFactory.createInformationModel(source, harvestDate);
                     informationmodelRepository.save(model);
@@ -55,7 +47,7 @@ public class InformationmodelHarvester {
                 } catch (Exception e) {
                     logger.error("Error creating or saving InformationModel for harvestSourceUri={}", source.harvestSourceUri, e);
                 }
-            } else if (source.sourceType == ALTINN_TYPE) {
+            } else if (source.sourceType.equals(ALTINN_TYPE)) {
                 InformationModel model = altinnHarvest.getByServiceCodeAndEdition(source.serviceCode, source.serviceEditionCode);
                 model = informationModelFactory.enrichInformationModelFromAltInn(model, harvestDate);
 
@@ -65,6 +57,7 @@ public class InformationmodelHarvester {
                 }
             }
         }
+
         List<String> idsToDelete = informationmodelRepository.getAllIdsNotHarvested(idsHarvested);
         informationmodelRepository.deleteByIds(idsToDelete);
     }
@@ -72,7 +65,7 @@ public class InformationmodelHarvester {
     private List<InformationModelHarvestSource> getAllHarvestSources() {
         ArrayList<InformationModelHarvestSource> sources = new ArrayList<>();
         sources.addAll(altinnHarvest.getHarvestSources());
-//        sources.addAll(apiRegistrationsHarvest.getHarvestSources());
+        sources.addAll(apiRegistrationsHarvest.getHarvestSources());
         return sources;
     }
 }
