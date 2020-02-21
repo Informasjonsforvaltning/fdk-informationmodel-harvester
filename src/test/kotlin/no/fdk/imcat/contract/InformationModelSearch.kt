@@ -9,7 +9,9 @@ import no.fdk.imcat.dto.InformationModelDto
 import no.fdk.imcat.model.InformationModel
 import no.fdk.imcat.utils.ApiTestContainer
 import no.fdk.imcat.utils.apiGet
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -17,9 +19,10 @@ import org.springframework.hateoas.PagedResources
 import org.springframework.http.HttpStatus
 
 private val mapper = jacksonObjectMapper()
-    .findAndRegisterModules()
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .findAndRegisterModules()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
+@Disabled
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("contract")
 class InformationModelSearch : ApiTestContainer() {
@@ -70,5 +73,4 @@ class InformationModelSearch : ApiTestContainer() {
         assertFalse(body.at("/aggregations/los") is MissingNode)
         assertFalse(body.at("/aggregations/orgPath") is MissingNode)
     }
-
 }

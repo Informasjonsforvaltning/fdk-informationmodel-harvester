@@ -15,13 +15,12 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ReferenceDataClient {
-    private static final Logger logger = LoggerFactory.getLogger(HarvestAdminClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReferenceDataClient.class);
 
     private RestTemplate restTemplate = new RestTemplate();
 

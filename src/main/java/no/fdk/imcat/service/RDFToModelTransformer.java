@@ -287,7 +287,7 @@ public class RDFToModelTransformer {
 
             convertRDFRecordsToModels(catalogRecords).forEach(record -> {
                 record.setId(UUID.randomUUID().toString());
-                record.setPublisher(publisher != null ? Publisher.from(organizationCatalogueClient.getPublisher(publisher.getId())) : null);
+                record.setPublisher(publisher != null ? Publisher.from(organizationCatalogueClient.getOrganization(publisher.getId())) : null);
                 record.setHarvestSourceUri(harvestSourceUri);
 
                 Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getByUniqueUri(record.getUniqueUri());

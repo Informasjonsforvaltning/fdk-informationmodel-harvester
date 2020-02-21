@@ -13,17 +13,17 @@ fun startMockServer() {
                         .withStatus(200))
         )
 
-        mockserver.stubFor(get(urlEqualTo("/api/v1/schemas"))
-                .willReturn(okJson(File("src/test/resources/test-schemas.json").readText())))
-
         mockserver.stubFor(get(urlEqualTo("/api/registration/apis"))
             .willReturn(okJson(File("src/test/resources/api-reg.json").readText())))
 
-        mockserver.stubFor(get(urlEqualTo("/api/publishers/12345678"))
+        mockserver.stubFor(get(urlEqualTo("/organizations/985399077"))
             .willReturn(okJson(File("src/test/resources/org-0.json").readText())))
 
-        mockserver.stubFor(get(urlEqualTo("/api/publishers/87654321"))
+        mockserver.stubFor(get(urlEqualTo("/organizations/974760223"))
             .willReturn(okJson(File("src/test/resources/org-1.json").readText())))
+
+        mockserver.stubFor(get(urlEqualTo("/reference-data/los"))
+                .willReturn(okJson(File("src/test/resources/ref.json").readText())))
 
         mockserver.start()
     }

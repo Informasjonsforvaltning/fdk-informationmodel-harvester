@@ -1,14 +1,14 @@
 package no.fdk.imcat.model;
 
+import lombok.RequiredArgsConstructor;
 import no.dcat.shared.HarvestMetadata;
 import no.dcat.shared.HarvestMetadataUtil;
 import no.dcat.shared.Publisher;
 import no.fdk.imcat.service.InformationmodelRepository;
-import no.fdk.imcat.service.PublisherCatClient;
+import no.fdk.imcat.service.OrganizationCatalogueClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -16,16 +16,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class InformationModelFactory {
     private static final Logger logger = LoggerFactory.getLogger(InformationModelFactory.class);
-    private PublisherCatClient publisherCatClient;
-    private InformationmodelRepository informationmodelRepository;
-
-    @Autowired
-    public InformationModelFactory(InformationmodelRepository informationmodelRepository, PublisherCatClient publisherCatClient) {
-        this.publisherCatClient = publisherCatClient;
-        this.informationmodelRepository = informationmodelRepository;
-    }
+    private final OrganizationCatalogueClient organizationCatalogueClient;
+    private final InformationmodelRepository informationmodelRepository;
 
     public InformationModel createInformationModel(InformationModelHarvestSource source, Date harvestDate) {
 
@@ -55,16 +50,11 @@ public class InformationModelFactory {
         return model;
     }
 
-    Publisher lookupPublisher(String orgNr) {
-        try {
-            return publisherCatClient.getByOrgNr(orgNr);
-        } catch (Exception e) {
-            logger.warn("Publisher lookup failed for orgNr={}. Error: {}", orgNr, e.getMessage());
-        }
-        return null;
+    private Publisher lookupPublisher(String orgNr) {
+        return Publisher.from(organizationCatalogueClient.getOrganization(orgNr));
     }
 
-    void updateHarvestMetadata(InformationModel informationModel, Date harvestDate, InformationModel existingInformationModel) {
+    private void updateHarvestMetadata(InformationModel informationModel, Date harvestDate, InformationModel existingInformationModel) {
         HarvestMetadata oldHarvest = existingInformationModel != null ? existingInformationModel.getHarvest() : null;
 
         // new document is not considered a change
@@ -75,7 +65,7 @@ public class InformationModelFactory {
         informationModel.setHarvest(harvest);
     }
 
-    boolean isEqualContent(InformationModel first, InformationModel second) {
+    private boolean isEqualContent(InformationModel first, InformationModel second) {
         String[] ignoredProperties = {"id", "harvest"};
         InformationModel firstContent = new InformationModel();
         InformationModel secondContent = new InformationModel();

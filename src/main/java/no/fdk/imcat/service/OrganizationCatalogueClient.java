@@ -15,7 +15,7 @@ import static java.util.Collections.singletonList;
 
 @Service
 public class OrganizationCatalogueClient {
-    private static final Logger logger = LoggerFactory.getLogger(HarvestAdminClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(OrganizationCatalogueClient.class);
 
     private final RestTemplate restTemplate;
     private HttpHeaders defaultHeaders;
@@ -31,7 +31,7 @@ public class OrganizationCatalogueClient {
         defaultHeaders.setContentType(MediaType.APPLICATION_JSON);
     }
 
-    OrganizationDto getPublisher(String orgNr) {
+    public OrganizationDto getOrganization(String orgNr) {
         String url = format("%s/organizations/%s", this.apiHost, orgNr);
 
         try {
