@@ -2,10 +2,7 @@ package no.fdk.imcat.service;
 
 import lombok.RequiredArgsConstructor;
 import no.dcat.shared.Publisher;
-import no.fdk.imcat.dto.HarvestDataSource;
-import no.fdk.imcat.dto.HarvestDto;
-import no.fdk.imcat.dto.Node;
-import no.fdk.imcat.dto.Prop;
+import no.fdk.imcat.dto.*;
 import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.imcat.utils.DCATNOINFO;
@@ -14,6 +11,7 @@ import org.apache.jena.sparql.vocabulary.FOAF;
 import org.apache.jena.vocabulary.DCAT;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.VCARD4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -227,6 +225,14 @@ public class RDFToModelTransformer {
         return r.listProperties(DCAT.theme).mapWith((theme) -> theme.getResource().getURI()).toList();
     }
 
+    private String extractContactPhone(Resource r) {
+        return r.hasProperty(VCARD4.hasTelephone) ? r.getProperty(VCARD4.hasTelephone).getResource().getURI().replace("tel:", "") : null;
+    }
+
+    private String extractContactEmail(Resource r) {
+        return r.hasProperty(VCARD4.hasEmail) ? r.getProperty(VCARD4.hasEmail).getResource().getURI().replace("mailto:", "") : null;
+    }
+
     private List<InformationModelEnhanced> convertRDFRecordsToModels(List<Statement> records) {
         List<InformationModelEnhanced> modelsList = new ArrayList<>();
 
@@ -247,9 +253,16 @@ public class RDFToModelTransformer {
 
             InformationModelDocument document = new InformationModelDocument();
             List<String> themes = extractLosThemeUris(informationModelResource);
-            document.setThemes( !themes.isEmpty() ? referenceDataClient.getLosThemesByUris(themes): null);
-            document.setContactPoint(informationModelResource.getProperty(DCAT.contactPoint).getLiteral().getString());
+            document.setThemes(!themes.isEmpty() ? referenceDataClient.getLosThemesByUris(themes) : null);
 
+            Resource contactPoint = informationModelResource.getProperty(DCAT.contactPoint).getResource();
+            if (contactPoint != null) {
+                document.setContactPoint(new ContactPointDto(
+                        extractLanguageLiteralFromResource(contactPoint, VCARD4.fn),
+                        extractContactEmail(contactPoint),
+                        extractContactPhone(contactPoint)
+                ));
+            }
             StmtIterator modelElements = informationModelResource.listProperties(DCATNOINFO.containsModelElement);
 
             nodeList = new ArrayList<>();

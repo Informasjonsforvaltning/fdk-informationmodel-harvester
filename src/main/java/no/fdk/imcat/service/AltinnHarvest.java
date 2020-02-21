@@ -32,12 +32,14 @@ public class AltinnHarvest {
     private InformationModelFactory informationModelFactory;
     private HashMap<String, InformationModel> everyAltinnInformationModel = new HashMap<>();
     private PublisherCatClient publisherCatClient;
+    private OrganizationCatalogueClient organizationCatalogueClient;
 
     @Autowired
-    public AltinnHarvest(InformationModelFactory factory, Environment env, PublisherCatClient pCatClient) {
+    public AltinnHarvest(InformationModelFactory factory, Environment env, PublisherCatClient pCatClient, OrganizationCatalogueClient organizationCatalogueClient) {
         this.informationModelFactory = factory;
         this.publisherCatClient = pCatClient;
         harvestSourceURIBase = env.getProperty("application.harvestSourceURIBase");
+        this.organizationCatalogueClient = organizationCatalogueClient;
     }
 
     private InformationModel parseInformationModel(AltInnService service) {
@@ -73,7 +75,7 @@ public class AltinnHarvest {
 
     Publisher lookupPublisher(String orgNr) {
         try {
-            return publisherCatClient.getByOrgNr(orgNr);
+            return Publisher.from(organizationCatalogueClient.getPublisher(orgNr));
         } catch (Exception e) {
             logger.warn("Publisher lookup failed for orgNr={}. Error: {}", orgNr, e.getMessage());
         }
@@ -137,9 +139,7 @@ public class AltinnHarvest {
         try {
             URL altinn = new URL(harvestSourceURIBase);
             logger.debug("Retrieving all schemas from altinn.  url: {} Expected load time approx 5 minutes", altinn);
-//            scanner = new Scanner(altinn.openStream(), "UTF-8");
-            // TODO: remove me
-            scanner = new Scanner(new File("test-schemas.json"), "UTF-8");
+            scanner = new Scanner(altinn.openStream(), "UTF-8");
             String JSonSchemaFromFile = scanner.useDelimiter("\\A").next();
             logger.debug("Retrieved all schemas from altinn.  url: {} Now parsing", altinn);
             ObjectMapper objectMapper = new ObjectMapper();

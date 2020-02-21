@@ -12,8 +12,6 @@ import org.springframework.hateoas.core.Relation;
 @Data
 @Relation(value = "informationmodel", collectionRelation = "informationmodels")
 @Document(indexName = "imcat", type = "informationmodel")
-@Setting(settingPath = "imcat.settings.json")
-@Mapping(mappingPath = "informationmodel.mapping.json")
 public class InformationModel {
 
     @ApiModelProperty("The id given by the harvest system")
