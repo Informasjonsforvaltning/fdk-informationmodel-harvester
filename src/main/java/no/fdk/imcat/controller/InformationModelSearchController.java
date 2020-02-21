@@ -3,11 +3,11 @@ package no.fdk.imcat.controller;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import no.fdk.imcat.model.InformationModel;
+import no.fdk.webutils.aggregation.PagedResourceWithAggregations;
 import no.fdk.webutils.aggregation.ResponseUtil;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.slf4j.Logger;
@@ -26,6 +26,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -45,7 +46,7 @@ public class InformationModelSearchController {
 
     @ApiOperation(value = "Search in Information Model catalog")
     @RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
-    public PagedResources<InformationModel> search(
+    public PagedResourceWithAggregations<InformationModel> search(
         @ApiParam("The query text")
         @RequestParam(value = "q", defaultValue = "", required = false)
             String query,
@@ -59,8 +60,8 @@ public class InformationModelSearchController {
             String harvestSourceUri,
 
         @ApiParam("Calculate aggregations")
-        @RequestParam(value = "aggregations", defaultValue = "false", required = false)
-            String includeAggregations,
+        @RequestParam(value = "aggregations", required = false)
+            Set<String> aggregations,
 
         @ApiParam("Comma separated list of which fields should be returned. E.g id,")
         @RequestParam(value = "returnfields", defaultValue = "", required = false)
@@ -107,15 +108,23 @@ public class InformationModelSearchController {
             .withPageable(pageable)
             .build();
 
-        if ("true".equals(includeAggregations)) {
-            AbstractAggregationBuilder aggregationBuilder = AggregationBuilders
-                .terms("orgPath")
-                .field("publisher.orgPath")
-                .missing(MISSING)
-                .size(Integer.MAX_VALUE)
-                .order(Terms.Order.count(false));
-
-            finalQuery.addAggregation(aggregationBuilder);
+        if (aggregations != null && !aggregations.isEmpty()) {
+            if (aggregations.contains("orgPath")) {
+                finalQuery.addAggregation(AggregationBuilders
+                        .terms("orgPath")
+                        .field("publisher.orgPath")
+                        .missing(MISSING)
+                        .size(Integer.MAX_VALUE)
+                        .order(Terms.Order.count(false)));
+            }
+            if (aggregations.contains("los")) {
+                finalQuery.addAggregation(AggregationBuilders
+                        .terms("los")
+                        .field("document.themes.losPaths")
+                        .missing(MISSING)
+                        .size(Integer.MAX_VALUE)
+                        .order(Terms.Order.count(false)));
+            }
         }
 
         if (isNotEmpty(returnFields)) {
@@ -140,12 +149,7 @@ public class InformationModelSearchController {
             aggregatedPage.getTotalPages()
         );
 
-        PagedResources<InformationModel> informationModelResources = new PagedResources<>(informationModels, pageMetadata);
-        if (aggregatedPage.hasAggregations()) {
-            return ResponseUtil.addAggregations(informationModelResources, aggregatedPage);
-        } else {
-            return informationModelResources;
-        }
+        return ResponseUtil.addAggregations(new PagedResources<>(informationModels, pageMetadata), aggregatedPage);
     }
 
     static class QueryUtil {

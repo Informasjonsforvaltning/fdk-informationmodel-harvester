@@ -34,3 +34,18 @@ application:
   apiRootUrl: http://localhost:8080/api
 server:
   port: 8109
+
+---
+#Test-miljø
+spring:
+  profiles: test
+  data:
+    elasticsearch:
+      clusterNodes: ${FDK_ES_CLUSTERNODES:elasticsearch5:9300}
+      clusterName: ${FDK_ES_CLUSTERNAME:elasticsearch}
+application:
+  apiRootUrl: ${WIREMOCK_TEST_HOST}/api
+  harvestSourceUri: ${WIREMOCK_TEST_HOST}/api
+  harvestSourceURIBase: ${WIREMOCK_TEST_HOST}/api/v1/schemas
+server:
+  port: 8080
