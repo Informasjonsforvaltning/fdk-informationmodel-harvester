@@ -50,7 +50,7 @@ public class InformationModelSearchController {
             @RequestParam(value = "q", defaultValue = "", required = false)
                     String query,
 
-            @ApiParam("Filters on publisher's organization path (orgPath), e.g. /STAT/972417858/971040238")
+            @ApiParam("Filters on publisher's organization path (orgPath), e.g. STAT/972417858/971040238")
             @RequestParam(value = "orgPath", defaultValue = "", required = false)
                     String orgPath,
 
@@ -88,7 +88,7 @@ public class InformationModelSearchController {
             @RequestParam(value = "q", defaultValue = "", required = false)
                     String query,
 
-            @ApiParam("Filters on publisher's organization path (orgPath), e.g. /STAT/972417858/971040238")
+            @ApiParam("Filters on publisher's organization path (orgPath), e.g. STAT/972417858/971040238")
             @RequestParam(value = "orgPath", defaultValue = "", required = false)
                     String orgPath,
 

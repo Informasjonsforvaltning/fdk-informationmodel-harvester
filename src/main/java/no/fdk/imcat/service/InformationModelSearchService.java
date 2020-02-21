@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -43,8 +42,7 @@ public class InformationModelSearchService {
     private final ObjectMapper objectMapper;
 
     private static boolean containsExactlyOneWord(String haystack) {
-        Matcher matchExactlyOneWord = Pattern.compile("^[a-zA-Z0-9_]+$").matcher(haystack);
-        return matchExactlyOneWord.find();
+        return Pattern.compile("^\\w+$").matcher(haystack).find();
     }
 
     public PagedResourceWithAggregations<InformationModelDto> search(
