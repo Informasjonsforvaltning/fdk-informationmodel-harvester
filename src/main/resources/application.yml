@@ -6,7 +6,7 @@ spring:
       clusterNodes: ${FDK_ES_CLUSTERNODES:elasticsearch5:9300}
       clusterName: ${FDK_ES_CLUSTERNAME:elasticsearch}
   rabbitmq:
-    host: 127.0.0.1
+    host: rabbitmq
     port: 5672
     username: ${RABBIT_USERNAME}
     password: ${RABBIT_PASSWORD}
