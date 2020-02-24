@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.MissingNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.fdk.imcat.dto.InformationModel
+import no.fdk.imcat.dto.Informationmodel
 import no.fdk.imcat.utils.ApiTestContainer
 import no.fdk.imcat.utils.apiGet
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -31,7 +31,7 @@ class InformationModelSearch : ApiTestContainer() {
         val response = apiGet("/informationmodels/v2", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
-        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
+        val body: PagedResources<Informationmodel> = mapper.readValue(response["body"] as String)
         assertEquals(4, body.metadata.totalElements)
     }
 
@@ -40,7 +40,7 @@ class InformationModelSearch : ApiTestContainer() {
         val response = apiGet("/informationmodels", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
-        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
+        val body: PagedResources<Informationmodel> = mapper.readValue(response["body"] as String)
         assertEquals(4, body.metadata.totalElements)
     }
 
@@ -49,7 +49,7 @@ class InformationModelSearch : ApiTestContainer() {
         val response = apiGet("/informationmodels?orgPath=STAT/87654321/12345678", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
-        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
+        val body: PagedResources<Informationmodel> = mapper.readValue(response["body"] as String)
         assertEquals(3, body.metadata.totalElements)
     }
 
@@ -58,7 +58,7 @@ class InformationModelSearch : ApiTestContainer() {
         val response = apiGet("/informationmodels?q=A04", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
-        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
+        val body: PagedResources<Informationmodel> = mapper.readValue(response["body"] as String)
         assertEquals(1, body.metadata.totalElements)
     }
 

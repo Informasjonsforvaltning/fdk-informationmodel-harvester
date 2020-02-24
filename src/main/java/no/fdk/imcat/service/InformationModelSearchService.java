@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.InformationModel;
+import no.fdk.imcat.dto.Informationmodel;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.webutils.aggregation.PagedResourceWithAggregations;
 import no.fdk.webutils.aggregation.ResponseUtil;
@@ -44,7 +44,7 @@ public class InformationModelSearchService {
         return Pattern.compile("^\\w+$").matcher(haystack).find();
     }
 
-    public PagedResourceWithAggregations<InformationModel> search(
+    public PagedResourceWithAggregations<Informationmodel> search(
             String query,
             String orgPath,
             String harvestSourceUri,
@@ -114,7 +114,7 @@ public class InformationModelSearchService {
 
         AggregatedPage<JsonNode> aggregatedPage = elasticsearchTemplate.queryForPage(finalQuery, JsonNode.class);
 
-        List<InformationModel> informationModels = aggregatedPage.getContent().stream().map(j -> {
+        List<Informationmodel> informationModels = aggregatedPage.getContent().stream().map(j -> {
             try {
                 if (j.has("document")) {
                     return modelMapper.convertModel(objectMapper.treeToValue(j, InformationModelEnhanced.class));

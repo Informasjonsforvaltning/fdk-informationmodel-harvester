@@ -58,11 +58,7 @@ public class RDFToModelTransformer {
             }
         }
 
-        if (map.keySet().size() > 0) {
-            return map;
-        }
-
-        return null;
+        return !map.isEmpty() ? map : null;
     }
 
     @PostConstruct
