@@ -16,6 +16,7 @@ public class InformationModelEnhanced {
     @ApiModelProperty("The id given by the harvest system")
     private String id;
 
+    @ApiModelProperty("URI of the model")
     private String uniqueUri;
 
     @ApiModelProperty("The publisher of the information model")
@@ -33,7 +34,7 @@ public class InformationModelEnhanced {
     @ApiModelProperty("The model itself, expressed in JSON-SCHEMA. InformationModelEnhanced's schema is always null, use the model field instead")
     private String schema;
 
-    @ApiModelProperty("The model itself.")
+    @ApiModelProperty("The model itself")
     private InformationModelDocument document;
 
 }

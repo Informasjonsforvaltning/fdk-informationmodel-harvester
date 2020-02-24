@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InformationModel {
+public class Informationmodel {
     private String id;
     private Publisher publisher;
     private String harvestSourceUri;
