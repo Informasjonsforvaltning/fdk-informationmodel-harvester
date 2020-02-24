@@ -122,7 +122,6 @@ public class ApiRegistrationsHarvest {
     }
 
     List<ApiRegistrationPublic> getApiRegistrations() {
-
         List<ApiRegistrationPublic> result = new ArrayList<>();
 
         logger.info("Reg api client Root URL is " + registrationApiClient.getApiRootUrl());

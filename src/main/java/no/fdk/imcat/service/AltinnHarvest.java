@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
@@ -125,13 +124,14 @@ public class AltinnHarvest {
 
     private void loadAllInformationModelsFromOurAltInnAdapter() {
 
-        URL schemasResource = getClass().getClassLoader().getResource("schemas.json");
+        InputStream schemasResource = getClass().getClassLoader().getResourceAsStream("schemas.json");
+
         if (schemasResource == null) {
             logger.error("could not find the schema resource file");
             return;
         }
 
-        try (Scanner scanner = new Scanner(new File( schemasResource.getFile()), "UTF-8")) {
+        try (Scanner scanner = new Scanner(schemasResource, "UTF-8")) {
             String JSonSchemaFromFile = scanner.useDelimiter("\\A").next();
             List<AltInnService> servicesInAltInn = objectMapper.readValue(JSonSchemaFromFile, new TypeReference<List<AltInnService>>() {});
 
