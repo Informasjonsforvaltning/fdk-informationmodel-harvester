@@ -27,6 +27,7 @@ import java.util.zip.GZIPInputStream;
 public class AltinnHarvest {
     private static final Logger logger = LoggerFactory.getLogger(AltinnHarvest.class);
     private final OrganizationCatalogueClient organizationCatalogueClient;
+    private ObjectMapper objectMapper = new ObjectMapper();
     @Value("${application.harvestSourceURIBase}")
     private String harvestSourceURIBase;
     private HashMap<String, InformationModel> everyAltinnInformationModel = new HashMap<>();
@@ -124,15 +125,15 @@ public class AltinnHarvest {
 
     private void loadAllInformationModelsFromOurAltInnAdapter() {
 
-        try (Scanner scanner = new Scanner(new File("schemas.json"), "UTF-8")) {
-            URL altinn = new URL(harvestSourceURIBase);
-            logger.debug("Retrieving all schemas from altinn.  url: {} Expected load time approx 5 minutes", altinn);
+        URL schemasResource = getClass().getClassLoader().getResource("schemas.json");
+        if (schemasResource == null) {
+            logger.error("could not find the schema resource file");
+            return;
+        }
+
+        try (Scanner scanner = new Scanner(new File( schemasResource.getFile()), "UTF-8")) {
             String JSonSchemaFromFile = scanner.useDelimiter("\\A").next();
-            logger.debug("Retrieved all schemas from altinn.  url: {} Now parsing", altinn);
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<AltInnService> servicesInAltInn = objectMapper.readValue(JSonSchemaFromFile, new TypeReference<List<AltInnService>>() {
-            });
-            logger.debug("Done retrieving and parsing all schemas from altinn. {} ", altinn);
+            List<AltInnService> servicesInAltInn = objectMapper.readValue(JSonSchemaFromFile, new TypeReference<List<AltInnService>>() {});
 
             //Now extract the subforms from base64 gzipped json
             new ForkJoinPool(10).submit(() -> servicesInAltInn.parallelStream().forEach(service -> {
