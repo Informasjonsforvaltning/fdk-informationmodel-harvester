@@ -97,7 +97,7 @@ public class AltinnHarvest {
         return everyAltinnInformationModel.get(serviceCode + "_" + serviceEditionCode);
     }
 
-    public List<InformationModelHarvestSource> getHarvestSources() {
+    List<InformationModelHarvestSource> getHarvestSources() {
         logger.debug("Getting harvest sources from AltInn");
         List<InformationModelHarvestSource> sourceList = new ArrayList<>();
 
