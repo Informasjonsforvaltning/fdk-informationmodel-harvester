@@ -5,13 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.MissingNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.fdk.imcat.dto.InformationModelDto
-import no.fdk.imcat.model.InformationModel
+import no.fdk.imcat.dto.InformationModel
 import no.fdk.imcat.utils.ApiTestContainer
 import no.fdk.imcat.utils.apiGet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -32,7 +30,7 @@ class InformationModelSearch : ApiTestContainer() {
         val response = apiGet("/informationmodels/v2", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
-        val body: PagedResources<InformationModelDto> = mapper.readValue(response["body"] as String)
+        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
         assertEquals(4, body.metadata.totalElements)
     }
 

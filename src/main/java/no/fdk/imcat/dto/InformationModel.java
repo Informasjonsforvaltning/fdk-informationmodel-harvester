@@ -11,11 +11,11 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InformationModelDto {
+public class InformationModel {
     private String id;
     private Publisher publisher;
     private String harvestSourceUri;
-    private HarvestDto harvest;
+    private Harvest harvest;
     private Map<String, String> title;
     private String schema;
 
@@ -24,5 +24,5 @@ public class InformationModelDto {
     private List<Node> dataTypes;
     private List<Node> simpleTypes;
 
-    private ModelDescriptionDto informationModelDescription;
+    private ModelDescription informationModelDescription;
 }

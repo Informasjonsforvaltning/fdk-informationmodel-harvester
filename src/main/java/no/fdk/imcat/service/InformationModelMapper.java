@@ -4,11 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import no.dcat.shared.HarvestMetadata;
-import no.fdk.imcat.dto.HarvestDto;
-import no.fdk.imcat.dto.InformationModelDto;
-import no.fdk.imcat.dto.ModelDescriptionDto;
+import no.fdk.imcat.dto.Harvest;
+import no.fdk.imcat.dto.InformationModel;
+import no.fdk.imcat.dto.ModelDescription;
 import no.fdk.imcat.dto.Node;
-import no.fdk.imcat.model.InformationModel;
 import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InformationModelMapper {
 
-    public InformationModelDto convertModel(InformationModelEnhanced enhancedModel) {
-        InformationModelDto dto = new InformationModelDto();
+    public InformationModel convertModel(InformationModelEnhanced enhancedModel) {
+        InformationModel dto = new InformationModel();
 
         dto.setId(enhancedModel.getId());
         dto.setPublisher(enhancedModel.getPublisher());
@@ -43,7 +42,7 @@ public class InformationModelMapper {
         dto.setDataTypes(types.get("datatype"));
 
         InformationModelDocument document = enhancedModel.getDocument();
-        ModelDescriptionDto description = new ModelDescriptionDto();
+        ModelDescription description = new ModelDescription();
         description.setName(document.getName());
         description.setDescription(document.getDescription());
         description.setThemes(document.getThemes());
@@ -52,8 +51,8 @@ public class InformationModelMapper {
         return dto;
     }
 
-    public InformationModelDto convertModel(InformationModel oldModel) {
-        InformationModelDto dto = new InformationModelDto();
+    public InformationModel convertModel(no.fdk.imcat.model.InformationModel oldModel) {
+        InformationModel dto = new InformationModel();
         dto.setId(oldModel.getId());
         dto.setTitle(convertToDefaultLanguage(oldModel.getTitle()));
         dto.setSchema(oldModel.getSchema());
@@ -67,8 +66,8 @@ public class InformationModelMapper {
         return date != null ? date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : null;
     }
 
-    private HarvestDto convertHarvestMetadata(HarvestMetadata harvestMetadata) {
-        HarvestDto harvestDto = new HarvestDto();
+    private Harvest convertHarvestMetadata(HarvestMetadata harvestMetadata) {
+        Harvest harvestDto = new Harvest();
         harvestDto.setFirstHarvested(toLocalDate(harvestMetadata.getFirstHarvested()));
         harvestDto.setLastHarvested(toLocalDate(harvestMetadata.getLastHarvested()));
         harvestDto.setLastChanged(toLocalDate(harvestMetadata.getLastChanged()));

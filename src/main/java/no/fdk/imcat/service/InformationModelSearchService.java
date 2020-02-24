@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.InformationModelDto;
-import no.fdk.imcat.model.InformationModel;
+import no.fdk.imcat.dto.InformationModel;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.webutils.aggregation.PagedResourceWithAggregations;
 import no.fdk.webutils.aggregation.ResponseUtil;
@@ -45,7 +44,7 @@ public class InformationModelSearchService {
         return Pattern.compile("^\\w+$").matcher(haystack).find();
     }
 
-    public PagedResourceWithAggregations<InformationModelDto> search(
+    public PagedResourceWithAggregations<InformationModel> search(
             String query,
             String orgPath,
             String harvestSourceUri,
@@ -115,12 +114,12 @@ public class InformationModelSearchService {
 
         AggregatedPage<JsonNode> aggregatedPage = elasticsearchTemplate.queryForPage(finalQuery, JsonNode.class);
 
-        List<InformationModelDto> informationModels = aggregatedPage.getContent().stream().map(j -> {
+        List<InformationModel> informationModels = aggregatedPage.getContent().stream().map(j -> {
             try {
                 if (j.has("document")) {
                     return modelMapper.convertModel(objectMapper.treeToValue(j, InformationModelEnhanced.class));
                 }
-                return modelMapper.convertModel(objectMapper.treeToValue(j, InformationModel.class));
+                return modelMapper.convertModel(objectMapper.treeToValue(j, no.fdk.imcat.model.InformationModel.class));
             } catch (JsonProcessingException e) {
                 logger.error("could not deserialize model", e);
             }

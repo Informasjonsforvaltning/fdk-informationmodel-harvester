@@ -1,6 +1,6 @@
 package no.fdk.imcat.service;
 
-import no.fdk.imcat.dto.OrganizationDto;
+import no.fdk.imcat.dto.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,18 +31,18 @@ public class OrganizationCatalogueClient {
         defaultHeaders.setContentType(MediaType.APPLICATION_JSON);
     }
 
-    public OrganizationDto getOrganization(String orgNr) {
+    public Organization getOrganization(String orgNr) {
         String url = format("%s/organizations/%s", this.apiHost, orgNr);
 
         try {
-            ResponseEntity<OrganizationDto> response = restTemplate.exchange(
+            ResponseEntity<Organization> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     new HttpEntity(defaultHeaders),
-                    OrganizationDto.class
+                    Organization.class
             );
 
-            return response.hasBody() ? response.getBody() : new OrganizationDto();
+            return response.hasBody() ? response.getBody() : new Organization();
 
         } catch (HttpClientErrorException e) {
             logger.error(String.format("Error looking up publisher from GET / %s. %s (%d)",
@@ -51,6 +51,6 @@ public class OrganizationCatalogueClient {
             logger.error(e.getMessage());
         }
 
-        return new OrganizationDto();
+        return new Organization();
     }
 }

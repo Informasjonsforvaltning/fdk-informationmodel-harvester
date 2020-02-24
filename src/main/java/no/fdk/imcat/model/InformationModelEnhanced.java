@@ -3,7 +3,7 @@ package no.fdk.imcat.model;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import no.dcat.shared.Publisher;
-import no.fdk.imcat.dto.HarvestDto;
+import no.fdk.imcat.dto.Harvest;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.hateoas.core.Relation;
 
@@ -25,7 +25,7 @@ public class InformationModelEnhanced {
     private String harvestSourceUri;
 
     @ApiModelProperty("Information about when the model was first and last harvested by the system")
-    private HarvestDto harvest;
+    private Harvest harvest;
 
     @ApiModelProperty("The title of the information model")
     private Map<String, String> title;
