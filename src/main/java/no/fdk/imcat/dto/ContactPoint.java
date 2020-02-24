@@ -1,19 +1,18 @@
 package no.fdk.imcat.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import no.dcat.shared.LosTheme;
 
-import java.util.List;
 import java.util.Map;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ModelDescriptionDto {
+@AllArgsConstructor
+public class ContactPoint {
     private Map<String, String> name;
-    private Map<String, String> description;
-    private List<LosTheme> themes;
-
+    private String email;
+    private String phone;
 }

@@ -243,7 +243,7 @@ public class RDFToModelTransformer {
             informationModel.setUniqueUri(informationModelResource.getURI());
             informationModel.setTitle(extractLanguageLiteralFromResource(informationModelResource, DCTerms.title));
 
-            HarvestDto metadata = new HarvestDto();
+            Harvest metadata = new Harvest();
             if (informationModelResource.hasProperty(DCTerms.modified)) {
                 metadata.setLastChanged(LocalDateTime.parse(
                         informationModelResource.getProperty(DCTerms.modified).getLiteral().getString(),
@@ -257,7 +257,7 @@ public class RDFToModelTransformer {
 
             Resource contactPoint = informationModelResource.getProperty(DCAT.contactPoint).getResource();
             if (contactPoint != null) {
-                document.setContactPoint(new ContactPointDto(
+                document.setContactPoint(new ContactPoint(
                         extractLanguageLiteralFromResource(contactPoint, VCARD4.fn),
                         extractContactEmail(contactPoint),
                         extractContactPhone(contactPoint)
@@ -292,7 +292,7 @@ public class RDFToModelTransformer {
 
                 Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getByUniqueUri(record.getUniqueUri());
 
-                HarvestDto harvestTime = new HarvestDto();
+                Harvest harvestTime = new Harvest();
                 harvestTime.setLastChanged(record.getHarvest().getLastChanged());
                 harvestTime.setLastHarvested(LocalDate.now());
                 harvestTime.setFirstHarvested(LocalDate.now());

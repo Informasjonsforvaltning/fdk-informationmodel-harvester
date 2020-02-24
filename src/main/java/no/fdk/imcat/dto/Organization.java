@@ -10,7 +10,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class OrganizationDto {
+public class Organization {
     @JsonProperty("organizationId")
     private String id;
     @JsonProperty("name")

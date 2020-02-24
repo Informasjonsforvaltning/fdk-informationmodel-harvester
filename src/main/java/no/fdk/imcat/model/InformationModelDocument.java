@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import no.dcat.shared.LosTheme;
-import no.fdk.imcat.dto.ContactPointDto;
+import no.fdk.imcat.dto.ContactPoint;
 import no.fdk.imcat.dto.Node;
 
 import java.time.LocalDate;
@@ -28,7 +28,7 @@ public class InformationModelDocument {
     private Map<String, String> title;
     private List<String> keywords;
     private List<LosTheme> themes;
-    private ContactPointDto contactPoint;
+    private ContactPoint contactPoint;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateDeserializer.class)
