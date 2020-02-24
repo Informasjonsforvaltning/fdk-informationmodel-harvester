@@ -65,7 +65,7 @@ public class InformationmodelHarvester {
     private List<InformationModelHarvestSource> getAllHarvestSources() {
         ArrayList<InformationModelHarvestSource> sources = new ArrayList<>();
         sources.addAll(altinnHarvest.getHarvestSources());
-//        sources.addAll(apiRegistrationsHarvest.getHarvestSources());
+        sources.addAll(apiRegistrationsHarvest.getHarvestSources());
         return sources;
     }
 }

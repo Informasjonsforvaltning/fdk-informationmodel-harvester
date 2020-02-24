@@ -5,44 +5,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.oas.models.OpenAPI;
+import lombok.RequiredArgsConstructor;
 import no.fdk.acat.common.model.ApiRegistrationPublic;
 import no.fdk.acat.converters.apispecificationparser.OpenApiV3JsonParser;
 import no.fdk.imcat.model.InformationModelHarvestSource;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.fdk.imcat.service.InformationmodelHarvester.API_TYPE;
-import static no.fdk.imcat.service.InformationmodelHarvester.RETRY_COUNT_API_RETRIEVAL;
 
 /**
  * Harvest our own ApiRegistration system so we can create Information Models from those that have schema
  */
 @Service
+@RequiredArgsConstructor
 public class ApiRegistrationsHarvest {
 
+    private static String INFORMATIONMODEL_ROOT = "https://fellesdatakatalog.brreg.no/informationmodels/";
     private static final Logger logger = LoggerFactory.getLogger(ApiRegistrationsHarvest.class);
-    public static String INFORMATIONMODEL_ROOT = "https://fellesdatakatalog.brreg.no/informationmodels/";
-    private ObjectMapper mapper;
-    private RegistrationApiClient registrationApiClient;
 
-    @Autowired
-    ApiRegistrationsHarvest(RegistrationApiClient client, ObjectMapper mapper) {
-        this.mapper = mapper;
-        this.registrationApiClient = client;
-    }
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final RegistrationApiClient registrationApiClient;
 
-    String getApiSpec(ApiRegistrationPublic apiRegistration) throws IOException {
+    private String getApiSpec(ApiRegistrationPublic apiRegistration) throws IOException {
         String apiSpecUrl = apiRegistration.getApiSpecUrl();
         String apiSpec = apiRegistration.getApiSpec();
 
@@ -54,7 +48,7 @@ public class ApiRegistrationsHarvest {
 
     List<InformationModelHarvestSource> getHarvestSources() {
         List<InformationModelHarvestSource> sourceList = new ArrayList<>();
-        List<ApiRegistrationPublic> apiRegistrations = getApiRegistrations();
+        List<ApiRegistrationPublic> apiRegistrations = registrationApiClient.getPublished();
         for (ApiRegistrationPublic apiRegistration : apiRegistrations) {
             logger.debug("Start importing from ApiRegistration, id={}", apiRegistration.getId());
 
@@ -117,48 +111,6 @@ public class ApiRegistrationsHarvest {
         JSONSchemaRootNode.set("definitions", definitionsNode);
         ObjectWriter writer = mapper.writer();
 
-        String schemaString = writer.writeValueAsString(JSONSchemaRootNode);
-        return schemaString;
+        return writer.writeValueAsString(JSONSchemaRootNode);
     }
-
-    List<ApiRegistrationPublic> getApiRegistrations() {
-        List<ApiRegistrationPublic> result = new ArrayList<>();
-
-        logger.info("Reg api client Root URL is " + registrationApiClient.getApiRootUrl());
-        registrationApiClient.setApiRootUrl("");
-
-        Collection<ApiRegistrationPublic> apiRegistrationsFromRegistrationApi = registrationApiClient.getPublished();
-        if (apiRegistrationsFromRegistrationApi == null) {
-
-            boolean doneOk = false;
-            int failCounter = 1;
-            while (!doneOk) {
-                logger.debug("Got error while trying to get Published API list");
-                try {
-                    Thread.sleep(1000);
-                    apiRegistrationsFromRegistrationApi = registrationApiClient.getPublished();
-                    doneOk = apiRegistrationsFromRegistrationApi != null;
-
-                    if (!doneOk) {
-                        failCounter++;
-                    }
-
-                    if (failCounter > RETRY_COUNT_API_RETRIEVAL) {
-                        logger.error("FatalA: API Harvester failed to retrieve published APIs from subsystem, shutting down harvester!");
-                        throw new RuntimeException("Failed to load API Registrations after waiting for " + failCounter + " secounds. Terminating");
-                    }
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
-
-        logger.info("Loaded {} registrations from registration-api", apiRegistrationsFromRegistrationApi.size());
-        result.addAll(apiRegistrationsFromRegistrationApi);
-
-        logger.info("Total registrations {}", result.size());
-
-        return result;
-    }
-
 }
