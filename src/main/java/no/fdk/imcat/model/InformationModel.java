@@ -11,7 +11,6 @@ import org.springframework.hateoas.core.Relation;
 @Relation(value = "informationmodel", collectionRelation = "informationmodels")
 @Document(indexName = "imcat", type = "informationmodel")
 public class InformationModel {
-
     @ApiModelProperty("The id given by the harvest system")
     private String id;
 
@@ -29,5 +28,4 @@ public class InformationModel {
 
     @ApiModelProperty("The model itself, expressed in JSON-SCHEMA")
     private String schema;
-
 }

@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Prop {
+public class Property {
     private Map<String, String> name;
-    private Map<String, String> restrictions;
+    private Map<String, String> parameters;
 }

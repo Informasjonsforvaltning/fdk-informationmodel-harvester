@@ -3,6 +3,7 @@ package no.fdk.imcat.service;
 import lombok.RequiredArgsConstructor;
 import no.dcat.shared.Publisher;
 import no.fdk.imcat.dto.*;
+import no.fdk.imcat.dto.Property;
 import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.imcat.utils.DCATNOINFO;
@@ -22,7 +23,6 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.io.StringReader;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -42,7 +42,7 @@ public class RDFToModelTransformer {
     private HttpHeaders defaultHeaders = new HttpHeaders();
     private List<Node> nodeList;
 
-    private static Map<String, String> extractLanguageLiteralFromResource(Resource resource, Property property) {
+    private static Map<String, String> extractLanguageLiteralFromResource(Resource resource, org.apache.jena.rdf.model.Property property) {
         Map<String, String> map = new HashMap<>();
 
         StmtIterator iterator = resource.listProperties(property);
@@ -128,7 +128,7 @@ public class RDFToModelTransformer {
         return r.hasProperty(DCATNOINFO.propertyType) ? r.getProperty(DCATNOINFO.propertyType).getLiteral().getString() : null;
     }
 
-    private String getPropertyLiteralValue(Resource r, Property p) {
+    private String getPropertyLiteralValue(Resource r, org.apache.jena.rdf.model.Property p) {
         return r.hasProperty(p) ? r.getProperty(p).getLiteral().getString() : null;
     }
 
@@ -144,7 +144,7 @@ public class RDFToModelTransformer {
 
     private void parseInformationModel(Resource r) {
         // skip if we have already parsed this type
-        if (nodeList.stream().anyMatch(o -> o.getLocalUri().equals(r.getURI()))) {
+        if (nodeList.stream().anyMatch(o -> o.getId().equals(r.getURI()))) {
             return;
         }
 
@@ -155,11 +155,11 @@ public class RDFToModelTransformer {
         }
 
         Node node = new Node();
-        List<Prop> attributes = new ArrayList<>();
-        List<Prop> roles = new ArrayList<>();
-        List<Prop> otherProps = new ArrayList<>();
+        List<Property> attributes = new ArrayList<>();
+        List<Property> roles = new ArrayList<>();
+        List<Property> otherProps = new ArrayList<>();
 
-        node.setLocalUri(r.getURI());
+        node.setId(r.getURI());
         node.setModelElementType(elementType);
 
         node.setName(extractLanguageLiteralFromResource(r, DCATNOINFO.name));
@@ -176,7 +176,7 @@ public class RDFToModelTransformer {
             node.setIsSubclassOf(getSubclassName(r));
         }
 
-        Property propSelector = DCATNOINFO.hasProperty;
+        org.apache.jena.rdf.model.Property propSelector = DCATNOINFO.hasProperty;
         if (elementType.equals("kodeliste")) {
             propSelector = DCATNOINFO.containsCodename;
         }
@@ -186,9 +186,9 @@ public class RDFToModelTransformer {
             // Fill out the properties' metadata
             Resource child = properties.nextStatement().getResource();
 
-            Prop prop = new Prop();
+            Property prop = new Property();
             prop.setName(extractLanguageLiteralFromResource(child, DCATNOINFO.name));
-            prop.setRestrictions(getRestrictions(child));
+            prop.setParameters(getRestrictions(child));
             String propType = getPropertyType(child);
             if (propType != null) {
                 switch (propType) {
@@ -212,7 +212,7 @@ public class RDFToModelTransformer {
         }
 
         node.setAttributes(attributes);
-        node.setOtherProps(otherProps);
+        node.setProperties(otherProps);
         node.setRoles(roles);
         nodeList.add(node);
     }
