@@ -1,9 +1,8 @@
 package no.fdk.imcat.model;
 
 import lombok.RequiredArgsConstructor;
-import no.dcat.shared.HarvestMetadata;
-import no.dcat.shared.HarvestMetadataUtil;
 import no.dcat.shared.Publisher;
+import no.fdk.imcat.dto.Harvest;
 import no.fdk.imcat.service.InformationmodelRepository;
 import no.fdk.imcat.service.OrganizationCatalogueClient;
 import org.slf4j.Logger;
@@ -11,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,7 +21,7 @@ public class InformationModelFactory {
     private final OrganizationCatalogueClient organizationCatalogueClient;
     private final InformationmodelRepository informationmodelRepository;
 
-    public InformationModel createInformationModel(InformationModelHarvestSource source, Date harvestDate) {
+    public InformationModel createInformationModel(InformationModelHarvestSource source) {
 
         Optional<InformationModel> existingModelOptional = informationmodelRepository.getByHarvestSourceUri(source.harvestSourceUri);
 
@@ -35,18 +34,18 @@ public class InformationModelFactory {
         model.setSchema(source.schema);
         model.setPublisher(lookupPublisher(source.publisherOrgNr));
 
-        updateHarvestMetadata(model, harvestDate, existingModelOptional.orElse(null));
+        updateHarvestMetadata(model, existingModelOptional.orElse(null));
 
         return model;
     }
 
-    public InformationModel enrichInformationModelFromAltInn(InformationModel model, Date harvestDate) {
+    public InformationModel enrichInformationModelFromAltInn(InformationModel model) {
         Optional<InformationModel> existingModelOptional = informationmodelRepository.getByHarvestSourceUri(model.getHarvestSourceUri());
 
         String id = existingModelOptional.isPresent() ? existingModelOptional.get().getId() : UUID.randomUUID().toString();
         model.setId(id);
 
-        updateHarvestMetadata(model, harvestDate, existingModelOptional.orElse(null));
+        updateHarvestMetadata(model, existingModelOptional.orElse(null));
         return model;
     }
 
@@ -54,15 +53,24 @@ public class InformationModelFactory {
         return Publisher.from(organizationCatalogueClient.getOrganization(orgNr));
     }
 
-    private void updateHarvestMetadata(InformationModel informationModel, Date harvestDate, InformationModel existingInformationModel) {
-        HarvestMetadata oldHarvest = existingInformationModel != null ? existingInformationModel.getHarvest() : null;
+    private void updateHarvestMetadata(InformationModel informationModel, InformationModel existingInformationModel) {
+        boolean updateExisting = existingInformationModel != null;
 
         // new document is not considered a change
-        boolean hasChanged = existingInformationModel != null && !isEqualContent(informationModel, existingInformationModel);
+        boolean hasChanged = updateExisting && !isEqualContent(informationModel, existingInformationModel);
 
-        HarvestMetadata harvest = HarvestMetadataUtil.createOrUpdate(oldHarvest, harvestDate, hasChanged);
+        Harvest harvestTime = new Harvest();
+        harvestTime.setLastChanged(LocalDateTime.now());
+        harvestTime.setLastHarvested(LocalDateTime.now());
+        harvestTime.setFirstHarvested(LocalDateTime.now());
 
-        informationModel.setHarvest(harvest);
+        // override with existing harvest
+        if (updateExisting) {
+            harvestTime.setLastChanged(hasChanged ? LocalDateTime.now() : existingInformationModel.getHarvest().getLastChanged());
+            harvestTime.setFirstHarvested(existingInformationModel.getHarvest().getFirstHarvested());
+        }
+
+        informationModel.setHarvest(harvestTime);
     }
 
     private boolean isEqualContent(InformationModel first, InformationModel second) {

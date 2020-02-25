@@ -34,14 +34,12 @@ public class InformationmodelHarvester {
 
         logger.debug("Starting harvest of Information Models from our APIs");
         List<InformationModelHarvestSource> modelSources = getAllHarvestSources();
-
-        Date harvestDate = new Date();
         List<String> idsHarvested = new ArrayList<>();
 
         for (InformationModelHarvestSource source : modelSources) {
             if (source.sourceType.equals(API_TYPE)) {
                 try {
-                    InformationModel model = informationModelFactory.createInformationModel(source, harvestDate);
+                    InformationModel model = informationModelFactory.createInformationModel(source);
                     informationmodelRepository.save(model);
                     idsHarvested.add(model.getId());
                 } catch (Exception e) {
@@ -49,7 +47,7 @@ public class InformationmodelHarvester {
                 }
             } else if (source.sourceType.equals(ALTINN_TYPE)) {
                 InformationModel model = altinnHarvest.getByServiceCodeAndEdition(source.serviceCode, source.serviceEditionCode);
-                model = informationModelFactory.enrichInformationModelFromAltInn(model, harvestDate);
+                model = informationModelFactory.enrichInformationModelFromAltInn(model);
 
                 if (model != null) {
                     informationmodelRepository.save(model);
