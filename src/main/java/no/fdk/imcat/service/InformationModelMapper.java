@@ -55,23 +55,11 @@ public class InformationModelMapper {
         Informationmodel dto = new Informationmodel();
         dto.setId(oldModel.getId());
         dto.setTitle(convertToDefaultLanguage(oldModel.getTitle()));
+        dto.setHarvest(oldModel.getHarvest());
         dto.setSchema(oldModel.getSchema());
-        dto.setHarvest(convertHarvestMetadata(oldModel.getHarvest()));
         dto.setPublisher(oldModel.getPublisher());
         dto.setHarvestSourceUri(oldModel.getHarvestSourceUri());
         return dto;
-    }
-
-    private LocalDate toLocalDate(Date date) {
-        return date != null ? date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : null;
-    }
-
-    private Harvest convertHarvestMetadata(HarvestMetadata harvestMetadata) {
-        Harvest harvestDto = new Harvest();
-        harvestDto.setFirstHarvested(toLocalDate(harvestMetadata.getFirstHarvested()));
-        harvestDto.setLastHarvested(toLocalDate(harvestMetadata.getLastHarvested()));
-        harvestDto.setLastChanged(toLocalDate(harvestMetadata.getLastChanged()));
-        return harvestDto;
     }
 
     private Map<String, String> convertToDefaultLanguage(String language) {

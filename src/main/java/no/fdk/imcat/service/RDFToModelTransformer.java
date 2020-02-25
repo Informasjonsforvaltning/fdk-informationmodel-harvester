@@ -243,7 +243,7 @@ public class RDFToModelTransformer {
             if (informationModelResource.hasProperty(DCTerms.modified)) {
                 metadata.setLastChanged(LocalDateTime.parse(
                         informationModelResource.getProperty(DCTerms.modified).getLiteral().getString(),
-                        DateTimeFormatter.ISO_OFFSET_DATE_TIME).toLocalDate());
+                        DateTimeFormatter.ISO_OFFSET_DATE_TIME));
             }
             informationModel.setHarvest(metadata);
 
@@ -290,8 +290,8 @@ public class RDFToModelTransformer {
 
                 Harvest harvestTime = new Harvest();
                 harvestTime.setLastChanged(record.getHarvest().getLastChanged());
-                harvestTime.setLastHarvested(LocalDate.now());
-                harvestTime.setFirstHarvested(LocalDate.now());
+                harvestTime.setLastHarvested(LocalDateTime.now());
+                harvestTime.setFirstHarvested(LocalDateTime.now());
 
                 existing.ifPresent(present -> {
                     harvestTime.setFirstHarvested(present.getHarvest().getFirstHarvested());
