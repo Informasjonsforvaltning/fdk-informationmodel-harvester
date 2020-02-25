@@ -70,10 +70,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InformationModelDocument'
-              examples:
-                example-1:
-                  value:
-                    $ref: '#/components/schemas/InformationModelDocument/x-examples/example-1'
         '404':
           description: Not Found
           content:
@@ -110,42 +106,11 @@ components:
               type: integer
               format: int64
       description: ''
-      example:
-        _embedded:
-          informationmodels:
-            items:
-              - $ref: '#/components/schemas/InformationModelDocument/x-examples/example-1'
-      x-examples:
-        example-1: {}
     Aggregation:
       type: object
     InformationModelDocument:
       type: object
       description: ''
-      x-examples:
-        example-1:
-          id: '123'
-          publisher:
-            $ref: '#/components/schemas/Publisher/x-examples/example-1'
-          harvestSourceUri: harvestSourceUri
-          harvest:
-            $ref: '#/components/schemas/Harvest/x-examples/example-1'
-          title:
-            nb: Oppgave over pass og stell av barn
-          rootObject:
-            $ref: '#/components/schemas/ObjectType/x-examples/example-1'
-          objectTypes:
-            - $ref: '#/components/schemas/ObjectType/x-examples/example-1'
-            - $ref: '#/components/schemas/ObjectType/x-examples/example-2'
-          codeTypes:
-            - $ref: '#/components/schemas/CodeType/x-examples/example-1'
-          dataTypes:
-            - $ref: '#/components/schemas/DataType/x-examples/example-1'
-          simpleTypes:
-            - $ref: '#/components/schemas/SimpleType/x-examples/example-1'
-          informationModelDescription:
-            $ref: '#/components/schemas/ModelDescription/x-examples/example-2'
-          schema: '{"$schema":"http://json-schema.org/draft-06/schema#","$id":"https://fellesdatakatalog.brreg.no/informationmodels/c207ad40-cf59-47e6-b7a8-35d6c4692067/schema","definitions":{"QueryResponse":{"type":"object","properties":{"aggregations":{"$ref":"#/definitions/Aggregation"},"hits":{"type":"array","items":{"$ref":"#/definitions/ConceptDocument"}},"total":{"type":"integer","format":"int64"}}},"Aggregation":{"type":"object"},"ConceptDocument":{"type":"object","properties":{"id":{"type":"string","description":"The id given by the harvest system"},"uri":{"type":"string","description":"The uri of the concept [dct:identifier]"},"identifier":{"type":"string","description":"Identifier"},"definition":{"$ref":"#/definitions/Definition"},"alternativeDefinition":{"$ref":"#/definitions/Definition"},"subject":{"$ref":"#/definitions/Subject"},"prefLabel":{"$ref":"#/definitions/PrefLabel"},"altLabel":{"type":"array","items":{"$ref":"#/definitions/AltLabel"}},"hiddenLabel":{"type":"array","items":{"$ref":"#/definitions/HiddenLabel"}},"contactPoint":{"$ref":"#/definitions/ContactPoint"},"publisher":{"$ref":"#/definitions/Publisher"},"harvestSourceUri":{"type":"string","description":"The source where the record was harvested from"},"harvest":{"$ref":"#/definitions/HarvestMetadata"}}},"Definition":{"type":"object","description":"The definition [skosno:Definisjon]","properties":{"text":{"type":"object","properties":{"nb":{"type":"string","description":"the definition text in Norwegian Bokmål"}}},"remark":{"type":"object","properties":{"nb":{"type":"string","description":"the definition remark in Norwegian Bokmål"}}},"source":{"$ref":"#/definitions/Source"},"targetGroup":{"type":"string","description":"Target group"},"lastUpdated":{"type":"string","description":"Date when the definition was last updated"}}},"Subject":{"type":"object","description":"Subject [dct:subject]"},"PrefLabel":{"type":"object","description":"Preferred label [skosxl:prefLabel]","properties":{"nb":{"type":"string","description":"Preferred label [skosxl:prefLabel] in Norwegian Bokmål"}}},"AltLabel":{"type":"object","description":"Alternative label [skosxl:altLabel]","properties":{"nb":{"type":"string","description":"Preferred label [skosxl:altLabel] in Norwegian Bokmål"}}},"HiddenLabel":{"type":"object","description":"Hidden label [skos:hiddenLabel]","properties":{"nb":{"type":"string","description":"Hidden label [skosxl:altLabel] in Norwegian Bokmål"}}},"ContactPoint":{"type":"object","description":"Hidden label [skos:hiddenLabel]","properties":{"email":{"type":"string"},"telephone":{"type":"string"}}},"Publisher":{"type":"object","description":"The publisher of the concept [dct:publisher]","properties":{"uri":{"type":"string","description":"Link to the organization entry in The Brønnøysund Register Centre"},"id":{"type":"string","description":"Organization number"},"name":{"type":"string","description":"The name of the organization as given in the The Brønnøysund Register Centre"},"orgPath":{"type":"string"},"prefLabel":{"$ref":"#/definitions/PrefLabel"}}},"HarvestMetadata":{"type":"object","description":"Information about when the concept was first and last harvested by the system","properties":{"firstHarvested":{"type":"string"},"lastHarvested":{"type":"string"},"lastChanged":{"type":"string"},"changed":{"type":"array","items":{"type":"string"}}}},"Source":{"type":"object","description":"The source of the definition","properties":{"uri":{"type":"string","description":"The uri to the source"},"prefLabel":{"type":"object","description":"The label of the source","properties":{"nb":{"type":"string","description":"Label of the source in Norwegian Bokmål"}}}}},"ErrorMessage":{"type":"object"}}}'
       properties:
         id:
           type: string
@@ -162,24 +127,22 @@ components:
         schema:
           type: string
           description: 'The model itself, expressed in JSON-SCHEMA'
-        rootObject:
-          $ref: '#/components/schemas/ObjectType'
         objectTypes:
           type: array
           items:
-            $ref: '#/components/schemas/ObjectType'
+            $ref: '#/components/schemas/Node'
         codeTypes:
           type: array
           items:
-            $ref: '#/components/schemas/CodeType'
+            $ref: '#/components/schemas/Node'
         dataTypes:
           type: array
           items:
-            $ref: '#/components/schemas/DataType'
+            $ref: '#/components/schemas/Node'
         simpleTypes:
           type: array
           items:
-            $ref: '#/components/schemas/SimpleType'
+            $ref: '#/components/schemas/Node'
         informationModelDescription:
           $ref: '#/components/schemas/ModelDescription'
     Publisher:
@@ -209,158 +172,56 @@ components:
       description: Information about when the model was first and last harvested by the system
       x-examples:
         example-1:
-          firstHarvested: '2020-01-14T13:05:49.916+0000'
-          lastHarvested: '2020-02-13T05:10:11.242+0000'
+          firstHarvested: '2020-01-14T13:05:49'
+          lastHarvested: '2020-02-13T05:10:11'
       properties:
         firstHarvested:
           type: string
         lastHarvested:
           type: string
-    ObjectType:
+    Node:
       type: object
-      x-examples:
-        example-1:
-          id: '111111'
-          modelDescription:
-            $ref: '#/components/schemas/ModelDescription/x-examples/example-1'
-          attributeList:
-            - $ref: '#/components/schemas/ModelElement/x-examples/example-1'
-            - $ref: '#/components/schemas/ModelElement/x-examples/example-1'
-          roleList:
-            - $ref: '#/components/schemas/ModelElement/x-examples/example-1'
-          extendsFrom:
-            - $ref: '#/components/schemas/ObjectType/x-examples/example-2'
-            - $ref: '#/components/schemas/ObjectType/x-examples/example-2'
-        example-2:
-          id: '111112'
-          modelDescription:
-            $ref: '#/components/schemas/ModelDescription/x-examples/example-1'
-          attributeList:
-            - $ref: '#/components/schemas/ModelElement/x-examples/example-1'
       properties:
         id:
           type: string
-        modelDescription:
-          $ref: '#/components/schemas/ModelDescription'
-        attributeList:
+        name:
+          $ref: '#/components/schemas/TextLanguage'
+        roles:
           type: array
           items:
-            $ref: '#/components/schemas/ModelElement'
-        roleList:
+            $ref: '#/components/schemas/Property'
+        attributes:
           type: array
           items:
-            $ref: '#/components/schemas/ModelElement'
-        extendsFrom:
+            $ref: '#/components/schemas/Property'
+        properties:
           type: array
           items:
-            $ref: '#/components/schemas/ObjectType'
-    CodeType:
-      type: object
-      x-examples:
-        example-1:
-          id: id-codetype
-          modelDescription:
-            $ref: '#/components/schemas/ModelDescription/x-examples/example-1'
-          codeList:
-            - $ref: '#/components/schemas/ModelElement/x-examples/example-1'
-            - $ref: '#/components/schemas/ModelElement/x-examples/example-1'
-          externalCodeList:
-            - 'https://externalcodelist.com'
-            - 'https://externalcodelist2.com'
-      properties:
-        id:
+            $ref: '#/components/schemas/Property'
+        isSubclassOf:
           type: string
-        modelDescription:
-          $ref: '#/components/schemas/ModelDescription'
-        codeList:
-          type: array
-          items:
-            $ref: '#/components/schemas/ModelElement'
-        externalCodeList:
-          type: array
-          items:
-            type: string
-    DataType:
-      type: object
-      x-examples:
-        example-1:
-          id: id-datatype
-          modelDescription:
-            $ref: '#/components/schemas/ModelDescription/x-examples/example-1'
-          attributeList:
-            - $ref: '#/components/schemas/ModelElement/x-examples/example-1'
-          extendsFrom:
-            - $ref: '#/components/schemas/ObjectType/x-examples/example-1'
-      properties:
-        id:
+        modelElementType:
           type: string
-        modelDescription:
-          $ref: '#/components/schemas/ModelDescription'
-        attributeList:
-          type: array
-          items:
-            $ref: '#/components/schemas/ModelElement'
-        extendsFrom:
-          type: array
-          items:
-            $ref: '#/components/schemas/ObjectType'
-    SimpleType:
-      type: object
-      x-examples:
-        example-1:
-          id: id-simpletype
-          modelDescription:
-            $ref: '#/components/schemas/ModelDescription/x-examples/example-1'
-          extendsFrom:
-            $ref: '#/components/schemas/ObjectType/x-examples/example-1'
-          distributionReference:
-            - 'https://distributionReference1.com'
-            - 'https://distributionReference2.com'
-      properties:
-        id:
+        isDescribedByUrl:
           type: string
-        modelDescription:
-          $ref: '#/components/schemas/ModelDescription'
-        extendsFrom:
-          type: array
-          items:
-            $ref: '#/components/schemas/ObjectType'
-        distributionReference:
-          type: array
-          items:
-            type: string
+        typeDefinitionReference:
+          type: string
     ModelDescription:
       type: object
-      x-examples:
-        example-1:
-          name:
-            nb: Leveranse
-          description:
-            $ref: '#/components/schemas/TextLanguage/x-examples/example-1'
-          identifier: identifier
-          belongsToModule: inntekt
-          concept:
-            $ref: '#/components/schemas/Concept/x-examples/example-1'
-        example-2:
-          name:
-            nb: OppgavePassOgStellAvBarn
-          description:
-            nb: Testmodell som demonstrator for utvekslingsmodell
-          identifier: identifier
-          belongsToModule: inntekt
-          concept:
-            $ref: '#/components/schemas/Concept/x-examples/example-1'
       properties:
         name:
           $ref: '#/components/schemas/TextLanguage'
         description:
           $ref: '#/components/schemas/TextLanguage'
-        identifier:
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LosTheme'
+    LosTheme:
+      type: object
+      properties:
+        uri:
           type: string
-        belongsToModule:
-          type: string
-        concept:
-          $ref: '#/components/schemas/Concept'
     TextLanguage:
       description: 'A generic object to hold multilanguage texts, that has language code (according to ISO 639-1) as keys'
       type: object
@@ -376,57 +237,12 @@ components:
           nb: norsk bokmål tekst
           nn: nynorsk tekst
           en: engelsk tekst
-    Concept:
+    Property:
       type: object
-      x-examples:
-        example-1:
-          anbefaltTerm:
-            nb: Anbefalt term
-          definition:
-            nb: Definisjon
-          publisher:
-            $ref: '#/components/schemas/Publisher/x-examples/example-1'
-          conceptReference: 'https://conceptreference.com'
-      properties:
-        anbefaltTerm:
-          $ref: '#/components/schemas/TextLanguage'
-        definition:
-          $ref: '#/components/schemas/TextLanguage'
-        publisher:
-          $ref: '#/components/schemas/Publisher'
-        conceptReference:
-          type: string
-    ModelElement:
-      type: object
-      x-examples:
-        example-1:
-          name:
-            $ref: '#/components/schemas/TextLanguage/x-examples/example-1'
-          referencedObject:
-            $ref: '#/components/schemas/ReferencedObject/x-examples/example-1'
-          range: '0..*'
-          elementDescription:
-            $ref: '#/components/schemas/ModelDescription/x-examples/example-1'
       properties:
         name:
           $ref: '#/components/schemas/TextLanguage'
-        referencedObject:
-          $ref: '#/components/schemas/ReferencedObject'
-        range:
-          type: string
-        elementDescription:
-          $ref: '#/components/schemas/ModelDescription'
-    ReferencedObject:
-      type: object
-      x-examples:
-        example-1:
-          refId: id-simpletype
-          name:
-            nb: Leveranse
-      properties:
-        refId:
-          type: string
-        name:
-          $ref: '#/components/schemas/TextLanguage'
+        parameters:
+          type: object
     ErrorMessage:
       type: object
