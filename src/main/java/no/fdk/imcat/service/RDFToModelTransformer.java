@@ -2,8 +2,8 @@ package no.fdk.imcat.service;
 
 import lombok.RequiredArgsConstructor;
 import no.dcat.shared.Publisher;
-import no.fdk.imcat.dto.*;
 import no.fdk.imcat.dto.Property;
+import no.fdk.imcat.dto.*;
 import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.imcat.utils.DCATNOINFO;
@@ -61,6 +61,11 @@ public class RDFToModelTransformer {
         return !map.isEmpty() ? map : null;
     }
 
+    private static Map<String, List<String>> extractLanguageArrayLiteralFromResource(Resource resource, org.apache.jena.rdf.model.Property property) {
+        return resource.listProperties(property).toList().stream()
+                .collect(Collectors.groupingBy(Statement::getLanguage, Collectors.mapping(Statement::getString, Collectors.toList())));
+    }
+
     @PostConstruct
     private void setDefaultHeaders() {
         this.defaultHeaders.setAccept(singletonList(MediaType.valueOf("text/turtle")));
@@ -110,12 +115,11 @@ public class RDFToModelTransformer {
 
     private Publisher extractPublisher(Resource resource) {
         try {
-            Statement propertyStmt = resource.getProperty(DCTerms.publisher);
-            if (propertyStmt != null) {
-                Resource publisherResource = resource.getModel().getResource(propertyStmt.getObject().asResource().getURI());
-                String orgNr = publisherResource.getProperty(DCTerms.identifier).getLiteral().getString();
-                String name = publisherResource.getProperty(FOAF.name).getLiteral().getString();
-                return new Publisher(orgNr, publisherResource.getURI(), name);
+            if (resource.hasProperty(DCTerms.publisher)) {
+                Statement publisher = resource.getProperty(DCTerms.publisher);
+                String orgNr = publisher.getProperty(DCTerms.identifier).getLiteral().getString();
+                String name = publisher.getProperty(FOAF.name).getLiteral().getString();
+                return new Publisher(orgNr, publisher.getResource().getURI(), name);
             }
         } catch (Exception e) {
             logger.warn("Error when extracting property {} from resource {}", DCTerms.publisher, resource.getURI(), e);
@@ -133,7 +137,21 @@ public class RDFToModelTransformer {
     }
 
     private String getSubclassName(Resource r) {
-        return r.getPropertyResourceValue(DCATNOINFO.isSubclassOf).getProperty(DCATNOINFO.name).getLiteral().getString();
+        return r.hasProperty(DCATNOINFO.isSubclassOf) ? r.getPropertyResourceValue(DCATNOINFO.isSubclassOf).getProperty(DCATNOINFO.name).getLiteral().getString() : null;
+    }
+
+    private String extractVersion(Resource r) {
+        return r.hasProperty(DCATNOINFO.version) ? r.getProperty(DCATNOINFO.version).getString() : null;
+    }
+
+    private LocalDateTime extractDateFromTemporalResource(Resource r, org.apache.jena.rdf.model.Property p) {
+        return r.hasProperty(DCTerms.temporal) ? extractDate(r.getPropertyResourceValue(DCTerms.temporal), p) : null;
+    }
+
+    private LocalDateTime extractDate(Resource r, org.apache.jena.rdf.model.Property p) {
+        return r.hasProperty(p)
+                ? LocalDateTime.parse(r.getProperty(p).getLiteral().getString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                : null;
     }
 
     private Map<String, String> getRestrictions(Resource r) {
@@ -141,6 +159,7 @@ public class RDFToModelTransformer {
         return r.listProperties().filterKeep(isRestriction).toList().stream()
                 .collect(Collectors.toMap(s -> s.getPredicate().getLocalName(), s -> s.getLiteral().getString()));
     }
+
 
     private void parseInformationModel(Resource r) {
         // skip if we have already parsed this type
@@ -161,27 +180,12 @@ public class RDFToModelTransformer {
 
         node.setId(r.getURI());
         node.setModelElementType(elementType);
-
         node.setName(extractLanguageLiteralFromResource(r, DCATNOINFO.name));
+        node.setTypeDefinitionReference(getPropertyLiteralValue(r, DCATNOINFO.typeDefinitionReference));
+        node.setIsDescribedByUri(getPropertyLiteralValue(r, DCATNOINFO.isDescribedBy));
+        node.setIsSubclassOf(getSubclassName(r));
 
-        if (r.hasProperty(DCATNOINFO.typeDefinitionReference)) {
-            node.setTypeDefinitionReference(getPropertyLiteralValue(r, DCATNOINFO.typeDefinitionReference));
-        }
-
-        if (r.hasProperty(DCATNOINFO.isDescribedBy)) {
-            node.setIsDescribedByUri(getPropertyLiteralValue(r, DCATNOINFO.isDescribedBy));
-        }
-
-        if (r.hasProperty(DCATNOINFO.isSubclassOf)) {
-            node.setIsSubclassOf(getSubclassName(r));
-        }
-
-        org.apache.jena.rdf.model.Property propSelector = DCATNOINFO.hasProperty;
-        if (elementType.equals("kodeliste")) {
-            propSelector = DCATNOINFO.containsCodename;
-        }
-
-        StmtIterator properties = r.listProperties(propSelector);
+        StmtIterator properties = r.listProperties(elementType.equals("kodeliste") ? DCATNOINFO.containsCodename : DCATNOINFO.hasProperty);
         while (properties.hasNext()) {
             // Fill out the properties' metadata
             Resource child = properties.nextStatement().getResource();
@@ -217,6 +221,14 @@ public class RDFToModelTransformer {
         nodeList.add(node);
     }
 
+    private String extractLandingPage(Resource r) {
+        if (r.hasProperty(DCAT.landingPage)) {
+            Resource landingPageResource = r.getPropertyResourceValue(DCAT.landingPage);
+            return landingPageResource.isURIResource() ? landingPageResource.getURI() : null;
+        }
+        return null;
+    }
+
     private List<String> extractLosThemeUris(Resource r) {
         return r.listProperties(DCAT.theme).mapWith((theme) -> theme.getResource().getURI()).toList();
     }
@@ -248,6 +260,16 @@ public class RDFToModelTransformer {
             informationModel.setHarvest(metadata);
 
             InformationModelDocument document = new InformationModelDocument();
+            document.setTitle(extractLanguageLiteralFromResource(informationModelResource, DCTerms.title));
+            document.setDescription(extractLanguageLiteralFromResource(informationModelResource, DCATNOINFO.description));
+            document.setName(extractLanguageLiteralFromResource(informationModelResource, DCATNOINFO.name));
+            document.setKeywords(extractLanguageArrayLiteralFromResource(informationModelResource, DCAT.keyword));
+            document.setVersion(extractVersion(informationModelResource));
+            document.setLandingPage(extractLandingPage(informationModelResource));
+            document.setValidFromIncluding(extractDateFromTemporalResource(informationModelResource, DCAT.startDate));
+            document.setValidToIncluding(extractDateFromTemporalResource(informationModelResource, DCAT.endDate));
+            document.setIssued(extractDate(informationModelResource, DCTerms.issued));
+
             List<String> themes = extractLosThemeUris(informationModelResource);
             document.setThemes(!themes.isEmpty() ? referenceDataClient.getLosThemesByUris(themes) : null);
 
@@ -270,38 +292,38 @@ public class RDFToModelTransformer {
             informationModel.setDocument(document);
             modelsList.add(informationModel);
         }
-
         return modelsList;
     }
 
     private void getInformationModelsFromRDF(Model model, String harvestSourceUri) {
         try {
-            Resource catalogResource = model.listResourcesWithProperty(RDF.type, DCAT.Catalog).toList().get(0);
-            List<Statement> catalogRecords = catalogResource.listProperties(DCAT.record).toList();
+            ResIterator catalogResources = model.listResourcesWithProperty(RDF.type, DCAT.Catalog);
+            while (catalogResources.hasNext()) {
+                Resource catalogResource = catalogResources.nextResource();
+                List<Statement> catalogRecords = catalogResource.listProperties(DCAT.record).toList();
+                Publisher publisher = extractPublisher(catalogResource);
 
-            Publisher publisher = extractPublisher(catalogResource);
+                convertRDFRecordsToModels(catalogRecords).forEach(record -> {
+                    record.setId(UUID.randomUUID().toString());
+                    record.setPublisher(publisher != null ? Publisher.from(organizationCatalogueClient.getOrganization(publisher.getId())) : null);
+                    record.setHarvestSourceUri(harvestSourceUri);
 
-            convertRDFRecordsToModels(catalogRecords).forEach(record -> {
-                record.setId(UUID.randomUUID().toString());
-                record.setPublisher(publisher != null ? Publisher.from(organizationCatalogueClient.getOrganization(publisher.getId())) : null);
-                record.setHarvestSourceUri(harvestSourceUri);
+                    Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getByUniqueUri(record.getUniqueUri());
 
-                Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getByUniqueUri(record.getUniqueUri());
+                    Harvest harvestTime = new Harvest();
+                    harvestTime.setLastChanged(record.getHarvest().getLastChanged());
+                    harvestTime.setLastHarvested(LocalDateTime.now());
+                    harvestTime.setFirstHarvested(LocalDateTime.now());
 
-                Harvest harvestTime = new Harvest();
-                harvestTime.setLastChanged(record.getHarvest().getLastChanged());
-                harvestTime.setLastHarvested(LocalDateTime.now());
-                harvestTime.setFirstHarvested(LocalDateTime.now());
+                    existing.ifPresent(present -> {
+                        harvestTime.setFirstHarvested(present.getHarvest().getFirstHarvested());
+                        record.setId(present.getId());
+                    });
 
-                existing.ifPresent(present -> {
-                    harvestTime.setFirstHarvested(present.getHarvest().getFirstHarvested());
-                    record.setId(present.getId());
+                    record.setHarvest(harvestTime);
+                    informationmodelEnhancedRepository.save(record);
                 });
-
-                record.setHarvest(harvestTime);
-                informationmodelEnhancedRepository.save(record);
-            });
-
+            }
         } catch (Exception e) {
             logger.error("Got exception for Elasticsearch: {}", harvestSourceUri, e);
         }

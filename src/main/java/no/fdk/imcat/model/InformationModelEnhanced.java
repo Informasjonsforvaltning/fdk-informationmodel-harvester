@@ -12,6 +12,7 @@ import java.util.Map;
 @Data
 @Relation(value = "informationmodelenhanced", collectionRelation = "informationmodelenhanceds")
 @Document(indexName = "imcatenh", type = "informationmodelenhanced")
+// TODO: replace InformationModel with this
 public class InformationModelEnhanced {
     @ApiModelProperty("The id given by the harvest system")
     private String id;

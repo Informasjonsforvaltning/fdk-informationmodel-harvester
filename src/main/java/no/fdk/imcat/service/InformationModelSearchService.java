@@ -101,6 +101,9 @@ public class InformationModelSearchService {
             }
         }
 
+        // TODO: filter by losTheme
+        // TODO: add search boost
+
         if (returnFields != null && returnFields.length > 0) {
             SourceFilter sourceFilter = new FetchSourceFilter(returnFields, null);
             finalQuery.addSourceFilter(sourceFilter);
