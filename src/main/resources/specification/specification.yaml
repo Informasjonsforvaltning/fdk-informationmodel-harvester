@@ -124,6 +124,20 @@ components:
           $ref: '#/components/schemas/Harvest'
         title:
           $ref: '#/components/schemas/TextLanguage'
+        keywords:
+          $ref: '#/components/schemas/ListLanguage'
+        version:
+          type: string
+        validFromIncluding:
+          type: string
+        validToIncluding:
+          type: string
+        issued:
+          type: string
+        landingPage:
+          type: string
+        contactPoint:
+          $ref: '#/components/schemas/ContactPoint'
         schema:
           type: string
           description: 'The model itself, expressed in JSON-SCHEMA'
@@ -143,8 +157,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Node'
-        informationModelDescription:
-          $ref: '#/components/schemas/ModelDescription'
+        name:
+          $ref: '#/components/schemas/TextLanguage'
+        description:
+          $ref: '#/components/schemas/TextLanguage'
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LosTheme'
     Publisher:
       type: object
       description: The publisher of the information model
@@ -206,17 +226,15 @@ components:
           type: string
         typeDefinitionReference:
           type: string
-    ModelDescription:
+    ContactPoint:
       type: object
       properties:
         name:
           $ref: '#/components/schemas/TextLanguage'
-        description:
-          $ref: '#/components/schemas/TextLanguage'
-        themes:
-          type: array
-          items:
-            $ref: '#/components/schemas/LosTheme'
+        email:
+          type: string
+        phone:
+          type: string
     LosTheme:
       type: object
       properties:
@@ -237,6 +255,22 @@ components:
           nb: norsk bokmål tekst
           nn: nynorsk tekst
           en: engelsk tekst
+    ListLanguage:
+      description: 'A generic object to hold multilanguage lists of texts. Language code (according to ISO 639-1) as keys'
+      type: object
+      properties:
+        nb:
+          type: array
+          items:
+            type: string
+        nn:
+          type: array
+          items:
+            type: string
+        en:
+          type: array
+          items:
+            type: string
     Property:
       type: object
       properties:
