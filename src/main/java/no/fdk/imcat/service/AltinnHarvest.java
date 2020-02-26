@@ -139,7 +139,7 @@ public class AltinnHarvest {
             new ForkJoinPool(10).submit(() -> servicesInAltInn.parallelStream().forEach(service -> {
                 InformationModel model = parseInformationModel(service);
                 everyAltinnInformationModel.put(model.getHarvestSourceUri(), model);
-            })).get();
+            })).join();
         } catch (FileNotFoundException e) {
             logger.error("Schema file is missing", e);
         } catch (Throwable e) {
