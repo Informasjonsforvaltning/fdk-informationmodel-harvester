@@ -4,19 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@ToString(includeFieldNames = false)
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Property {
+public class PropertyType {
     private String id;
     private Map<String, String> name;
-    private Map<String, String> parameters;
-    private String isDescribedBy;
-    private PropertyType type;
 }

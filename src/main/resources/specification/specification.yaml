@@ -274,9 +274,20 @@ components:
     Property:
       type: object
       properties:
+        id:
+          type: string
         name:
           $ref: '#/components/schemas/TextLanguage'
         parameters:
           type: object
+        type:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              $ref: '#/components/schemas/TextLanguage'
+        isDescribedByUrl:
+          type: string
     ErrorMessage:
       type: object
