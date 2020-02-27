@@ -136,6 +136,10 @@ public class RDFToModelTransformer {
         return r.hasProperty(p) ? r.getProperty(p).getLiteral().getString() : null;
     }
 
+    private String getIsDescribedBy(Resource r) {
+        return r.hasProperty(DCATNOINFO.isDescribedBy) ? r.getProperty(DCATNOINFO.isDescribedBy).getString() : null;
+    }
+
     private String getSubclassName(Resource r) {
         return r.hasProperty(DCATNOINFO.isSubclassOf) ? r.getPropertyResourceValue(DCATNOINFO.isSubclassOf).getProperty(DCATNOINFO.name).getLiteral().getString() : null;
     }
@@ -160,6 +164,14 @@ public class RDFToModelTransformer {
                 .collect(Collectors.toMap(s -> s.getPredicate().getLocalName(), s -> s.getLiteral().getString()));
     }
 
+    private PropertyType extractPropertyType(Resource r) {
+        if (r.hasProperty(DCATNOINFO.type)) {
+            Resource propertyTypeResource = r.getPropertyResourceValue(DCATNOINFO.type);
+            return new PropertyType(propertyTypeResource.getURI(), extractLanguageLiteralFromResource(propertyTypeResource, DCATNOINFO.name));
+        }
+
+        return null;
+    }
 
     private void parseInformationModel(Resource r) {
         // skip if we have already parsed this type
@@ -190,20 +202,23 @@ public class RDFToModelTransformer {
             // Fill out the properties' metadata
             Resource child = properties.nextStatement().getResource();
 
-            Property prop = new Property();
-            prop.setName(extractLanguageLiteralFromResource(child, DCATNOINFO.name));
-            prop.setParameters(getRestrictions(child));
+            Property property = new Property();
+            property.setId(child.getURI());
+            property.setName(extractLanguageLiteralFromResource(child, DCATNOINFO.name));
+            property.setParameters(getRestrictions(child));
+            property.setIsDescribedBy(getIsDescribedBy(child));
+            property.setType(extractPropertyType(child));
             String propType = getPropertyType(child);
             if (propType != null) {
                 switch (propType) {
                     case "rolle":
-                        roles.add(prop);
+                        roles.add(property);
                         break;
                     case "attributt":
-                        attributes.add(prop);
+                        attributes.add(property);
                         break;
                     default:
-                        otherProps.add(prop);
+                        otherProps.add(property);
                         break;
                 }
             }
