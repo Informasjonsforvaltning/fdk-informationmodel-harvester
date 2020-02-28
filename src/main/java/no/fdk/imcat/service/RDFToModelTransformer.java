@@ -280,6 +280,7 @@ public class RDFToModelTransformer {
             informationModel.setHarvest(metadata);
 
             InformationModelDocument document = new InformationModelDocument();
+            document.setIdentifier(informationModelResource.getURI());
             document.setTitle(extractLanguageLiteralFromResource(informationModelResource, DCTerms.title));
             document.setDescription(extractLanguageLiteralFromResource(informationModelResource, DCTerms.description));
             document.setModelDescription(extractLanguageLiteralFromResource(informationModelResource, DCATNOINFO.description));

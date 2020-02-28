@@ -15,6 +15,7 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Informationmodel {
     private String id;
+    private String identifier;
     private Map<String, String> title;
     private Map<String, List<String>> keywords;
     private Publisher publisher;
