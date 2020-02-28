@@ -14,7 +14,8 @@ import java.util.Map;
 @ToString(includeFieldNames = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Node {
-    private String id;
+    private String identifier;
+    private String codeListReference;
     private Map<String, String> name;
     private List<Property> roles;
     private List<Property> attributes;

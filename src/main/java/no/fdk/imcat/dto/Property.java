@@ -14,9 +14,9 @@ import java.util.Map;
 @ToString(includeFieldNames = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Property {
-    private String id;
+    private String identifier;
     private Map<String, String> name;
     private Map<String, String> parameters;
-    private String isDescribedBy;
+    private String isDescribedByUri;
     private PropertyType type;
 }

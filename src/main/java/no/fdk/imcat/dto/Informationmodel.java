@@ -37,5 +37,6 @@ public class Informationmodel {
 
     private Map<String, String> name;
     private Map<String, String> description;
+    private Map<String, String> modelDescription;
     private List<LosTheme> themes;
 }
