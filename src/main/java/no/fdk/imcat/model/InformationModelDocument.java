@@ -23,6 +23,7 @@ import java.util.Map;
 public class InformationModelDocument {
     List<Node> types = new ArrayList<>();
 
+    private String identifier;
     private String version;
     private String landingPage;
     private String category;

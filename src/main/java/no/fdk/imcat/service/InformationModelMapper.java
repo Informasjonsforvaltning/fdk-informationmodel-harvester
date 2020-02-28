@@ -25,6 +25,7 @@ public class InformationModelMapper {
                 .stream().collect(Collectors.groupingBy(Node::getModelElementType));
 
         dto.setId(enhancedModel.getId());
+        dto.setIdentifier(document.getIdentifier());
         dto.setPublisher(enhancedModel.getPublisher());
         dto.setHarvestSourceUri(enhancedModel.getHarvestSourceUri());
         dto.setHarvest(enhancedModel.getHarvest());

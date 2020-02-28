@@ -115,6 +115,9 @@ components:
         id:
           type: string
           description: The id given by the harvest system
+        identifier:
+          type: string
+          description: URI resource identifier
         publisher:
           $ref: '#/components/schemas/Publisher'
         harvestSourceUri:
