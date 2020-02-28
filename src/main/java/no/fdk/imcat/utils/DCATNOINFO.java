@@ -31,6 +31,7 @@ public class DCATNOINFO {
      * Defines DCAT-NO-INFO Properties
        ########################################################## */
     public static final Property containsModelElement = m.createProperty(uri + "containsModelElement");
+    public static final Property codeListReference = m.createProperty(uri + "codeListReference");
     public static final Property containsCodename = m.createProperty(uri + "containsCodename");
     public static final Property description = m.createProperty( uri + "description");
     public static final Property name = m.createProperty( uri + "name");
@@ -42,7 +43,6 @@ public class DCATNOINFO {
     public static final Property isDescribedBy = m.createProperty(uri + "isDescribedBy");
     public static final Property typeDefinitionReference = m.createProperty(uri + "typeDefinitionReference");
     public static final Property modelElementType = m.createProperty(uri + "modelElementType");
-
     /**
      * Returns the namespace of the DCAT-NO-INFO schema as a string
      *

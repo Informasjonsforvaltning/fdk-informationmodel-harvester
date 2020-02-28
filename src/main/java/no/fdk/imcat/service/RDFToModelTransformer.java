@@ -129,7 +129,7 @@ public class RDFToModelTransformer {
     }
 
     private String getPropertyType(Resource r) {
-        return r.hasProperty(DCATNOINFO.propertyType) ? r.getProperty(DCATNOINFO.propertyType).getLiteral().getString() : null;
+        return r.hasProperty(DCATNOINFO.propertyType) ? r.getProperty(DCATNOINFO.propertyType).getLiteral().getString() : "";
     }
 
     private String getPropertyLiteralValue(Resource r, org.apache.jena.rdf.model.Property p) {
@@ -175,7 +175,7 @@ public class RDFToModelTransformer {
 
     private void parseInformationModel(Resource r) {
         // skip if we have already parsed this type
-        if (nodeList.stream().anyMatch(o -> o.getId().equals(r.getURI()))) {
+        if (nodeList.stream().anyMatch(o -> o.getIdentifier().equals(r.getURI()))) {
             return;
         }
 
@@ -190,12 +190,13 @@ public class RDFToModelTransformer {
         List<Property> roles = new ArrayList<>();
         List<Property> otherProps = new ArrayList<>();
 
-        node.setId(r.getURI());
+        node.setIdentifier(r.getURI());
         node.setModelElementType(elementType);
         node.setName(extractLanguageLiteralFromResource(r, DCATNOINFO.name));
         node.setTypeDefinitionReference(getPropertyLiteralValue(r, DCATNOINFO.typeDefinitionReference));
         node.setIsDescribedByUri(getPropertyLiteralValue(r, DCATNOINFO.isDescribedBy));
         node.setIsSubclassOf(getSubclassName(r));
+        node.setCodeListReference(getCodeListReference(r));
 
         StmtIterator properties = r.listProperties(elementType.equals("kodeliste") ? DCATNOINFO.containsCodename : DCATNOINFO.hasProperty);
         while (properties.hasNext()) {
@@ -203,25 +204,25 @@ public class RDFToModelTransformer {
             Resource child = properties.nextStatement().getResource();
 
             Property property = new Property();
-            property.setId(child.getURI());
+            property.setIdentifier(child.getURI());
             property.setName(extractLanguageLiteralFromResource(child, DCATNOINFO.name));
             property.setParameters(getRestrictions(child));
-            property.setIsDescribedBy(getIsDescribedBy(child));
+            property.setIsDescribedByUri(getIsDescribedBy(child));
             property.setType(extractPropertyType(child));
+
             String propType = getPropertyType(child);
-            if (propType != null) {
-                switch (propType) {
-                    case "rolle":
-                        roles.add(property);
-                        break;
-                    case "attributt":
-                        attributes.add(property);
-                        break;
-                    default:
-                        otherProps.add(property);
-                        break;
-                }
+            switch (propType) {
+                case "rolle":
+                    roles.add(property);
+                    break;
+                case "attributt":
+                    attributes.add(property);
+                    break;
+                default:
+                    otherProps.add(property);
+                    break;
             }
+
 
             // continue parsing recursively
             if (child.hasProperty(DCATNOINFO.type)) {
@@ -234,6 +235,10 @@ public class RDFToModelTransformer {
         node.setProperties(otherProps);
         node.setRoles(roles);
         nodeList.add(node);
+    }
+
+    private String getCodeListReference(Resource r) {
+        return r.hasProperty(DCATNOINFO.codeListReference) ? r.getProperty(DCATNOINFO.codeListReference).getString() : null;
     }
 
     private String extractLandingPage(Resource r) {
@@ -276,7 +281,8 @@ public class RDFToModelTransformer {
 
             InformationModelDocument document = new InformationModelDocument();
             document.setTitle(extractLanguageLiteralFromResource(informationModelResource, DCTerms.title));
-            document.setDescription(extractLanguageLiteralFromResource(informationModelResource, DCATNOINFO.description));
+            document.setDescription(extractLanguageLiteralFromResource(informationModelResource, DCTerms.description));
+            document.setModelDescription(extractLanguageLiteralFromResource(informationModelResource, DCATNOINFO.description));
             document.setName(extractLanguageLiteralFromResource(informationModelResource, DCATNOINFO.name));
             document.setKeywords(extractLanguageArrayLiteralFromResource(informationModelResource, DCAT.keyword));
             document.setVersion(extractVersion(informationModelResource));

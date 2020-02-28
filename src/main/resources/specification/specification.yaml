@@ -161,6 +161,8 @@ components:
           $ref: '#/components/schemas/TextLanguage'
         description:
           $ref: '#/components/schemas/TextLanguage'
+        modelDescription:
+          $ref: '#/components/schemas/TextLanguage'
         themes:
           type: array
           items:
@@ -202,7 +204,9 @@ components:
     Node:
       type: object
       properties:
-        id:
+        identifier:
+          type: string
+        codeListReference:
           type: string
         name:
           $ref: '#/components/schemas/TextLanguage'
@@ -222,7 +226,7 @@ components:
           type: string
         modelElementType:
           type: string
-        isDescribedByUrl:
+        isDescribedByUri:
           type: string
         typeDefinitionReference:
           type: string
@@ -274,7 +278,7 @@ components:
     Property:
       type: object
       properties:
-        id:
+        identifier:
           type: string
         name:
           $ref: '#/components/schemas/TextLanguage'
@@ -283,11 +287,11 @@ components:
         type:
           type: object
           properties:
-            id:
+            identifier:
               type: string
             name:
               $ref: '#/components/schemas/TextLanguage'
-        isDescribedByUrl:
+        isDescribedByUri:
           type: string
     ErrorMessage:
       type: object

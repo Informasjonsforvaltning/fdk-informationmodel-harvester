@@ -27,6 +27,7 @@ public class InformationModelDocument {
     private String landingPage;
     private String category;
     private Map<String, String> description;
+    private Map<String, String> modelDescription;
     private Map<String, String> name;
     private Map<String, String> title;
     private Map<String, List<String>> keywords;

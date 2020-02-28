@@ -12,6 +12,6 @@ import java.util.Map;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PropertyType {
-    private String id;
+    private String identifier;
     private Map<String, String> name;
 }
