@@ -140,8 +140,12 @@ public class RDFToModelTransformer {
         return r.hasProperty(DCATNOINFO.isDescribedBy) ? r.getProperty(DCATNOINFO.isDescribedBy).getString() : null;
     }
 
-    private String getSubclassName(Resource r) {
-        return r.hasProperty(DCATNOINFO.isSubclassOf) ? r.getPropertyResourceValue(DCATNOINFO.isSubclassOf).getProperty(DCATNOINFO.name).getLiteral().getString() : null;
+    private PropertyType getSubclassOf(Resource r) {
+        if (r.hasProperty(DCATNOINFO.isSubclassOf)) {
+            Resource parentResource = r.getPropertyResourceValue(DCATNOINFO.isSubclassOf);
+            return new PropertyType(parentResource.getURI(), extractLanguageLiteralFromResource(parentResource, DCATNOINFO.name));
+        }
+        return null;
     }
 
     private String extractVersion(Resource r) {
@@ -195,7 +199,7 @@ public class RDFToModelTransformer {
         node.setName(extractLanguageLiteralFromResource(r, DCATNOINFO.name));
         node.setTypeDefinitionReference(getPropertyLiteralValue(r, DCATNOINFO.typeDefinitionReference));
         node.setIsDescribedByUri(getPropertyLiteralValue(r, DCATNOINFO.isDescribedBy));
-        node.setIsSubclassOf(getSubclassName(r));
+        node.setIsSubclassOf(getSubclassOf(r));
         node.setCodeListReference(getCodeListReference(r));
 
         StmtIterator properties = r.listProperties(elementType.equals("kodeliste") ? DCATNOINFO.containsCodename : DCATNOINFO.hasProperty);

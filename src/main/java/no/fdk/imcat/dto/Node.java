@@ -23,5 +23,5 @@ public class Node {
     private String modelElementType;
     private String isDescribedByUri;
     private String typeDefinitionReference;
-    private String isSubclassOf;
+    private PropertyType isSubclassOf;
 }
