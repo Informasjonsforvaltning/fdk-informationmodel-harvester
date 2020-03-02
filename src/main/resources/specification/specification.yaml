@@ -226,7 +226,12 @@ components:
           items:
             $ref: '#/components/schemas/Property'
         isSubclassOf:
-          type: string
+          type: object
+          properties:
+            identifier:
+              type: string
+            name:
+              $ref: '#/components/schemas/TextLanguage'
         modelElementType:
           type: string
         isDescribedByUri:
