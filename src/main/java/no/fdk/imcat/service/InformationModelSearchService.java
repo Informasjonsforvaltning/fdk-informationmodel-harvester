@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.Informationmodel;
+import no.fdk.imcat.dto.InformationModel;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.webutils.aggregation.PagedResourceWithAggregations;
 import no.fdk.webutils.aggregation.ResponseUtil;
@@ -37,6 +37,7 @@ public class InformationModelSearchService {
     private static final Logger logger = LoggerFactory.getLogger(InformationModelSearchService.class);
     private static final String MISSING = "MISSING";
     private final ElasticsearchTemplate elasticsearchTemplate;
+    private final ReferenceDataClient referenceDataClient;
     private final InformationModelMapper modelMapper;
     private final ObjectMapper objectMapper;
 
@@ -44,10 +45,11 @@ public class InformationModelSearchService {
         return Pattern.compile("^\\w+$").matcher(haystack).find();
     }
 
-    public PagedResourceWithAggregations<Informationmodel> search(
+    public PagedResourceWithAggregations<InformationModel> search(
             String query,
             String orgPath,
             String harvestSourceUri,
+            Set<String> losThemes,
             Set<String> aggregations,
             String[] returnFields,
             String sortfield,
@@ -68,17 +70,24 @@ public class InformationModelSearchService {
 
         BoolQueryBuilder composedQuery = QueryBuilders.boolQuery().must(searchQuery);
 
+        if (losThemes != null && !losThemes.isEmpty()) {
+            String[] expandedLosThemes = referenceDataClient.expandLosThemesByPaths(losThemes);
+            logger.debug("Expanded {} themes", expandedLosThemes.length);
+            composedQuery = composedQuery.must(QueryBuilders.termsQuery("document.themes.losPaths", expandedLosThemes));
+        }
+
         if (!orgPath.isEmpty()) {
-            composedQuery.filter(QueryUtil.createTermQuery("publisher.orgPath", orgPath));
+            composedQuery = composedQuery.filter(QueryUtil.createTermQuery("publisher.orgPath", orgPath));
         }
 
         if (!harvestSourceUri.isEmpty()) {
-            composedQuery.filter(QueryUtil.createTermQuery("harvestSourceUri", harvestSourceUri));
+            composedQuery = composedQuery.filter(QueryUtil.createTermQuery("harvestSourceUri", harvestSourceUri));
         }
 
         NativeSearchQuery finalQuery = new NativeSearchQueryBuilder()
                 .withQuery(composedQuery)
-                .withIndices("imcat", "imcatenh").withTypes("informationmodel", "informationmodelenhanced")
+                .withIndices("imcat", "imcatenh")
+                .withTypes("informationmodel", "informationmodelenhanced")
                 .withPageable(pageable)
                 .build();
 
@@ -117,7 +126,7 @@ public class InformationModelSearchService {
 
         AggregatedPage<JsonNode> aggregatedPage = elasticsearchTemplate.queryForPage(finalQuery, JsonNode.class);
 
-        List<Informationmodel> informationModels = aggregatedPage.getContent().stream().map(j -> {
+        List<InformationModel> informationModels = aggregatedPage.getContent().stream().map(j -> {
             try {
                 if (j.has("document")) {
                     return modelMapper.convertModel(objectMapper.treeToValue(j, InformationModelEnhanced.class));
