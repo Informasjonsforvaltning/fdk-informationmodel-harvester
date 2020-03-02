@@ -2,7 +2,7 @@ package no.fdk.imcat.controller;
 
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.Informationmodel;
+import no.fdk.imcat.dto.InformationModel;
 import no.fdk.imcat.service.InformationModelSearchService;
 import no.fdk.webutils.aggregation.PagedResourceWithAggregations;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class InformationModelSearchController {
     private final InformationModelSearchService informationModelSearchService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public PagedResourceWithAggregations<Informationmodel> searchNew(
+    public PagedResourceWithAggregations<InformationModel> searchNew(
             @ApiParam("The query text")
             @RequestParam(value = "q", defaultValue = "", required = false)
                     String query,
@@ -36,6 +36,10 @@ public class InformationModelSearchController {
             @ApiParam("Filters on harvestSourceUri external identifier")
             @RequestParam(value = "harvestSourceUri", defaultValue = "", required = false)
                     String harvestSourceUri,
+
+            @ApiParam("Los theme filter")
+            @RequestParam(value = "losThemes", required = false)
+                    Set<String> losThemes,
 
             @ApiParam("Calculate aggregations")
             @RequestParam(value = "aggregations", required = false)
@@ -56,6 +60,6 @@ public class InformationModelSearchController {
             @PageableDefault()
                     Pageable pageable
     ) {
-        return informationModelSearchService.search(query, orgPath, harvestSourceUri, aggregations, returnFields, sortfield, sortdirection, pageable);
+        return informationModelSearchService.search(query, orgPath, harvestSourceUri, losThemes, aggregations, returnFields, sortfield, sortdirection, pageable);
     }
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.MissingNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.fdk.imcat.dto.Informationmodel
+import no.fdk.imcat.dto.InformationModel
 import no.fdk.imcat.utils.ApiTestContainer
 import no.fdk.imcat.utils.apiGet
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.hateoas.PagedResources
 import org.springframework.http.HttpStatus
+import kotlin.test.assertTrue
 
 private val mapper = jacksonObjectMapper()
         .findAndRegisterModules()
@@ -27,48 +28,52 @@ private val mapper = jacksonObjectMapper()
 class InformationModelSearch : ApiTestContainer() {
 
     @Test
-    fun findAllHarvestedModelsFromV2() {
-        val response = apiGet("/informationmodels/v2", "application/json")
-        assertEquals(HttpStatus.OK.value(), response["status"])
-
-        val body: PagedResources<Informationmodel> = mapper.readValue(response["body"] as String)
-        assertEquals(4, body.metadata.totalElements)
-    }
-
-    @Test
     fun findAllHarvestedModels() {
+        val expected = 2
         val response = apiGet("/informationmodels", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
-        val body: PagedResources<Informationmodel> = mapper.readValue(response["body"] as String)
-        assertEquals(4, body.metadata.totalElements)
+        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
+        val actual = body.metadata.totalElements
+        assertTrue(actual >= expected,
+                String.format("expected total information models (%d) to be greater than or equal to %d", actual, expected))
     }
 
     @Test
     fun searchForOrgPath() {
+        val expected = 2
         val response = apiGet("/informationmodels?orgPath=STAT/87654321/12345678", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
-        val body: PagedResources<Informationmodel> = mapper.readValue(response["body"] as String)
-        assertEquals(3, body.metadata.totalElements)
+        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
+        val actual = body.metadata.totalElements
+        assertTrue(actual >= expected,
+                String.format("expected total information models (%d) to be greater than or equal to %d", actual, expected))
     }
 
     @Test
     fun searchForSpecific() {
-        val response = apiGet("/informationmodels?q=A04", "application/json")
+        val expected = 2
+        val response = apiGet("/informationmodels?q=FK", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
-        val body: PagedResources<Informationmodel> = mapper.readValue(response["body"] as String)
-        assertEquals(1, body.metadata.totalElements)
+        val body: PagedResources<InformationModel> = mapper.readValue(response["body"] as String)
+        val actual = body.metadata.totalElements
+        assertTrue(actual >= expected,
+                String.format("expected total information models (%d) to be greater than or equal to %d", actual, expected))
     }
 
     @Test
     fun genericSearchWithAggregations() {
+        val expected = 2
         val response = apiGet("/informationmodels?aggregations=orgPath,los", "application/json")
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val body: JsonNode = mapper.readValue(response["body"] as String)
-        assertEquals(4, body.at("/page/totalElements").intValue())
+        val actual = body.at("/page/totalElements").intValue()
+        assertTrue(actual >= expected,
+                String.format("expected total information models (%d) to be greater than or equal to %d", actual, expected))
+
         assertFalse(body.at("/aggregations/los") is MissingNode)
         assertFalse(body.at("/aggregations/orgPath") is MissingNode)
     }

@@ -1,7 +1,7 @@
 package no.fdk.imcat.controller;
 
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.Informationmodel;
+import no.fdk.imcat.dto.InformationModel;
 import no.fdk.imcat.model.InformationModelEnhanced;
 import no.fdk.imcat.service.InformationModelMapper;
 import no.fdk.imcat.service.InformationmodelEnhancedRepository;
@@ -26,7 +26,7 @@ public class InformationModelGetController {
     private final InformationModelMapper informationModelMapper;
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public Informationmodel getInformationModelEnhanced(@PathVariable String id) throws NotFoundException {
+    public InformationModel getInformationModelEnhanced(@PathVariable String id) throws NotFoundException {
         Optional<no.fdk.imcat.model.InformationModel> oldModel = informationmodelRepository.findById(id);
         if (oldModel.isPresent()) {
             no.fdk.imcat.model.InformationModel informationModel = oldModel.get();

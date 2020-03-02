@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import no.dcat.shared.LosTheme;
 import no.dcat.shared.Publisher;
+import org.springframework.hateoas.core.Relation;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,8 +13,9 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
+@Relation(collectionRelation = "informationmodels")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Informationmodel {
+public class InformationModel {
     private String id;
     private String identifier;
     private Map<String, String> title;

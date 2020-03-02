@@ -3,7 +3,7 @@ package no.fdk.imcat.service;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.dto.Informationmodel;
+import no.fdk.imcat.dto.InformationModel;
 import no.fdk.imcat.dto.Node;
 import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InformationModelMapper {
 
-    public Informationmodel convertModel(InformationModelEnhanced enhancedModel) {
-        Informationmodel dto = new Informationmodel();
+    public InformationModel convertModel(InformationModelEnhanced enhancedModel) {
+        InformationModel dto = new InformationModel();
         InformationModelDocument document = enhancedModel.getDocument();
         Map<String, List<Node>> types = enhancedModel.getDocument().getTypes()
                 .stream().collect(Collectors.groupingBy(Node::getModelElementType));
@@ -49,8 +49,8 @@ public class InformationModelMapper {
         return dto;
     }
 
-    public Informationmodel convertModel(no.fdk.imcat.model.InformationModel oldModel) {
-        Informationmodel dto = new Informationmodel();
+    public InformationModel convertModel(no.fdk.imcat.model.InformationModel oldModel) {
+        InformationModel dto = new InformationModel();
         dto.setId(oldModel.getId());
         dto.setTitle(convertToDefaultLanguage(oldModel.getTitle()));
         dto.setHarvest(oldModel.getHarvest());
