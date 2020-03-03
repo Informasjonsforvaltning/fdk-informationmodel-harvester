@@ -38,7 +38,7 @@ public class InformationModelSearchController {
                     String harvestSourceUri,
 
             @ApiParam("Los theme filter")
-            @RequestParam(value = "losThemes", required = false)
+            @RequestParam(value = "losTheme", required = false)
                     Set<String> losThemes,
 
             @ApiParam("Calculate aggregations")
