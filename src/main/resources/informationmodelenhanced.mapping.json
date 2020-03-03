@@ -30,6 +30,34 @@
       },
       "document": {
         "properties": {
+          "types": {
+            "properties": {
+              "isDescribedByUri": {
+                "type": "keyword"
+              },
+              "roles": {
+                "properties": {
+                  "isDescribedByUri": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "attributes": {
+                "properties": {
+                  "isDescribedByUri": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "properties": {
+                "properties": {
+                  "isDescribedByUri": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
           "themes": {
             "properties": {
               "losPaths": {
