@@ -57,9 +57,23 @@ public class InformationModelSearchController {
             @RequestParam(value = "sortdirection", defaultValue = "", required = false)
                     String sortdirection,
 
+            @RequestParam(value = "conceptUris", required = false)
+                    Set<String> conceptUris,
+
             @PageableDefault()
                     Pageable pageable
     ) {
-        return informationModelSearchService.search(query, orgPath, harvestSourceUri, losThemes, aggregations, returnFields, sortfield, sortdirection, pageable);
+        return informationModelSearchService.search(
+                query,
+                orgPath,
+                harvestSourceUri,
+                losThemes,
+                aggregations,
+                returnFields,
+                sortfield,
+                sortdirection,
+                conceptUris,
+                pageable
+        );
     }
 }

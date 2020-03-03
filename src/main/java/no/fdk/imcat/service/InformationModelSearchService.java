@@ -54,6 +54,7 @@ public class InformationModelSearchService {
             String[] returnFields,
             String sortfield,
             String sortdirection,
+            Set<String> conceptUris,
             Pageable pageable) {
         logger.debug("GET /informationmodels/v2/?q={}", query);
 
@@ -82,6 +83,18 @@ public class InformationModelSearchService {
 
         if (!harvestSourceUri.isEmpty()) {
             composedQuery = composedQuery.filter(QueryUtil.createTermQuery("harvestSourceUri", harvestSourceUri));
+        }
+
+        if (conceptUris != null && !conceptUris.isEmpty()) {
+            String[] uris = conceptUris.toArray(new String[0]);
+            composedQuery = composedQuery.filter(
+                    QueryBuilders
+                            .boolQuery()
+                            .should(QueryBuilders.termsQuery("document.types.isDescribedByUri", uris))
+                            .should(QueryBuilders.termsQuery("document.types.roles.isDescribedByUri", uris))
+                            .should(QueryBuilders.termsQuery("document.types.attributes.isDescribedByUri", uris))
+                            .should(QueryBuilders.termsQuery("document.types.properties.isDescribedByUri", uris))
+            );
         }
 
         NativeSearchQuery finalQuery = new NativeSearchQueryBuilder()
