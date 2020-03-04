@@ -53,13 +53,20 @@ server:
 #Test-miljø
 spring:
   profiles: test
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: admin
+    password: admin
   data:
     elasticsearch:
-      clusterNodes: ${FDK_ES_CLUSTERNODES:elasticsearch5:9300}
-      clusterName: ${FDK_ES_CLUSTERNAME:elasticsearch}
+      clusterNodes: ELASTICSEARCH55555:9300
+      clusterName: elasticsearchtest
 application:
-  apiRootUrl: ${WIREMOCK_TEST_HOST}/api
-  harvestSourceUri: ${WIREMOCK_TEST_HOST}/api
-  harvestSourceURIBase: ${WIREMOCK_TEST_HOST}/api/v1/schemas
+  referenceDataUrl: http://localhost/api
+  organizationCatalogueUrl: http://localhost/api
+  apiRootUrl: http://localhost/api
+  harvestSourceUri: http://localhost/api
+  harvestSourceURIBase: http://localhost/api/v1/schemas
 server:
   port: 8080
