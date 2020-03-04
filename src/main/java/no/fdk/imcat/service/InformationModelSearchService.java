@@ -54,7 +54,7 @@ public class InformationModelSearchService {
             String[] returnFields,
             String sortfield,
             String sortdirection,
-            Set<String> conceptUris,
+            Set<String> conceptIdentifiers,
             Pageable pageable) {
         logger.debug("GET /informationmodels/v2/?q={}", query);
 
@@ -85,8 +85,8 @@ public class InformationModelSearchService {
             composedQuery = composedQuery.filter(QueryUtil.createTermQuery("harvestSourceUri", harvestSourceUri));
         }
 
-        if (conceptUris != null && !conceptUris.isEmpty()) {
-            String[] uris = conceptUris.toArray(new String[0]);
+        if (conceptIdentifiers != null && !conceptIdentifiers.isEmpty()) {
+            String[] uris = conceptIdentifiers.toArray(new String[0]);
             composedQuery = composedQuery.filter(
                     QueryBuilders
                             .boolQuery()

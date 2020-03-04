@@ -57,8 +57,8 @@ public class InformationModelSearchController {
             @RequestParam(value = "sortdirection", defaultValue = "", required = false)
                     String sortdirection,
 
-            @RequestParam(value = "conceptUris", required = false)
-                    Set<String> conceptUris,
+            @RequestParam(value = "conceptIdentifiers", required = false)
+                    Set<String> conceptIdentifiers,
 
             @PageableDefault()
                     Pageable pageable
@@ -72,7 +72,7 @@ public class InformationModelSearchController {
                 returnFields,
                 sortfield,
                 sortdirection,
-                conceptUris,
+                conceptIdentifiers,
                 pageable
         );
     }
