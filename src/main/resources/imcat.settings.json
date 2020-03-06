@@ -4,6 +4,14 @@
       "path-analyzer": {
         "type": "custom",
         "tokenizer": "path-tokenizer"
+      },
+      "analyzer_keyword": {
+        "type": "custom",
+        "tokenizer": "keyword",
+        "filter": [
+          "asciifolding",
+          "lowercase"
+        ]
       }
     },
     "tokenizer": {

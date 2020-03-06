@@ -60,6 +60,9 @@ public class InformationModelSearchController {
             @RequestParam(value = "conceptIdentifiers", required = false)
                     Set<String> conceptIdentifiers,
 
+            @RequestParam(value = "keywords", required = false)
+                    Set<String> keywords,
+
             @PageableDefault()
                     Pageable pageable
     ) {
@@ -73,6 +76,7 @@ public class InformationModelSearchController {
                 sortfield,
                 sortdirection,
                 conceptIdentifiers,
+                keywords,
                 pageable
         );
     }

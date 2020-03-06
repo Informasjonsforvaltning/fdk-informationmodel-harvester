@@ -58,6 +58,22 @@
               }
             }
           },
+          "keywords": {
+            "properties": {
+              "nb": {
+                "type": "text",
+                "analyzer": "analyzer_keyword"
+              },
+              "nn": {
+                "type": "text",
+                "analyzer": "analyzer_keyword"
+              },
+              "en": {
+                "type": "text",
+                "analyzer": "analyzer_keyword"
+              }
+            }
+          },
           "themes": {
             "properties": {
               "losPaths": {
