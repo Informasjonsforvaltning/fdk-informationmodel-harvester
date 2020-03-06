@@ -55,6 +55,7 @@ public class InformationModelSearchService {
             String sortfield,
             String sortdirection,
             Set<String> conceptIdentifiers,
+            Set<String> keywords,
             Pageable pageable) {
         logger.debug("GET /informationmodels/v2/?q={}", query);
 
@@ -95,6 +96,18 @@ public class InformationModelSearchService {
                             .should(QueryBuilders.termsQuery("document.types.attributes.isDescribedByUri", uris))
                             .should(QueryBuilders.termsQuery("document.types.properties.isDescribedByUri", uris))
             );
+        }
+
+        if (keywords != null && !keywords.isEmpty()) {
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            keywords.forEach(keyword -> {
+                BoolQueryBuilder keywordBoolQueryBuilder = QueryBuilders.boolQuery()
+                        .should(QueryBuilders.matchQuery("document.keywords.nb", keyword))
+                        .should(QueryBuilders.matchQuery("document.keywords.nn", keyword))
+                        .should(QueryBuilders.matchQuery("document.keywords.en", keyword));
+                boolQueryBuilder.filter(keywordBoolQueryBuilder);
+            });
+            composedQuery.filter(boolQueryBuilder);
         }
 
         NativeSearchQuery finalQuery = new NativeSearchQueryBuilder()
