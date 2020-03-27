@@ -106,7 +106,7 @@ public class RDFToModelTransformer {
 
         try {
             final Model model = ModelFactory.createDefaultModel();
-            model.read(new StringReader(informationModelSource), null, "TURTLE");//Base and lang is just untested dummy values
+            model.read(new StringReader(informationModelSource), null, jenaTypeFromAcceptHeader(harvestDataSource.getAcceptHeaderValue()));
             getInformationModelsFromRDF(model, harvestDataSource.getUrl());
         } catch (Exception e) {
             logger.info("Got error while reading model: " + e.getMessage());
@@ -353,5 +353,32 @@ public class RDFToModelTransformer {
         } catch (Exception e) {
             logger.error("Got exception for Elasticsearch: {}", harvestSourceUri, e);
         }
+    }
+
+    private String jenaTypeFromAcceptHeader(String acceptHeader) {
+        String jenaType = "TURTLE";
+
+        switch (acceptHeader) {
+            case "text/turtle":
+                jenaType = "TURTLE";
+                break;
+            case "application/rdf+xml":
+                jenaType = "RDF/XML";
+                break;
+            case "application/rdf+json":
+                jenaType = "RDF/JSON";
+                break;
+            case "application/ld+json":
+                jenaType = "JSON-LD";
+                break;
+            case "application/n-triples":
+                jenaType = "N-TRIPLES";
+                break;
+            case "text/n3":
+                jenaType = "N3";
+                break;
+        }
+
+        return jenaType;
     }
 }
