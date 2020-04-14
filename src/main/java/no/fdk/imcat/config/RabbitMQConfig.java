@@ -31,6 +31,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue sendQueue() {
+        return new Queue("harvester.UpdateSearchTrigger", false);
+    }
+
+    @Bean
     public Jackson2JsonMessageConverter converter() {
         return new Jackson2JsonMessageConverter();
     }
@@ -43,6 +48,11 @@ public class RabbitMQConfig {
     @Bean
     public Binding binding(TopicExchange topicExchange, Queue queue) {
         return BindingBuilder.bind(queue).to(topicExchange).with("informationmodel.*.HarvestTrigger");
+    }
+
+    @Bean
+    public Binding sendBinding(TopicExchange topicExchange, Queue sendQueue) {
+        return BindingBuilder.bind(sendQueue).to(topicExchange).with("harvester.UpdateSearchTrigger");
     }
 
     @Bean
