@@ -12,6 +12,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.AmqpTemplate;
+
 /*
     Fetch information models and insert or update them in the search index.
  */
@@ -29,6 +34,8 @@ public class InformationmodelHarvester {
     private final ApiRegistrationsHarvest apiRegistrationsHarvest;
     private final AltinnHarvest altinnHarvest;
     private final InformationModelFactory informationModelFactory;
+
+    private final AmqpTemplate rabbitTemplate;
 
     public void harvestAll() {
 
@@ -54,10 +61,25 @@ public class InformationmodelHarvester {
                     idsHarvested.add(model.getId());
                 }
             }
+
         }
 
         List<String> idsToDelete = informationmodelRepository.getAllIdsNotHarvested(idsHarvested);
         informationmodelRepository.deleteByIds(idsToDelete);
+        updateSearch();
+    }
+
+    private void updateSearch() {
+        ObjectNode payload = JsonNodeFactory.instance.objectNode();
+
+        payload.put("updatesearch", "informationmodels");
+
+        try {
+            rabbitTemplate.convertAndSend("harvester.UpdateSearchTrigger", payload);
+            logger.info("Successfully sent harvest message for publisher {}", payload);
+        } catch (AmqpException e) {
+            logger.error("Failed to send harvest message for publisher {}", payload, e);
+        }
     }
 
     private List<InformationModelHarvestSource> getAllHarvestSources() {
