@@ -2,6 +2,7 @@ package no.fdk.imcat.model;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import no.dcat.shared.Publisher;
 import no.fdk.imcat.dto.Harvest;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -12,6 +13,7 @@ import java.util.Map;
 @Data
 @Relation(value = "informationmodelenhanced", collectionRelation = "informationmodelenhanceds")
 @Document(indexName = "imcatenh", type = "informationmodelenhanced")
+@EqualsAndHashCode
 // TODO: replace InformationModel with this
 public class InformationModelEnhanced {
     @ApiModelProperty("The id given by the harvest system")
@@ -27,6 +29,7 @@ public class InformationModelEnhanced {
     private String harvestSourceUri;
 
     @ApiModelProperty("Information about when the model was first and last harvested by the system")
+    @EqualsAndHashCode.Exclude
     private Harvest harvest;
 
     @ApiModelProperty("The title of the information model")

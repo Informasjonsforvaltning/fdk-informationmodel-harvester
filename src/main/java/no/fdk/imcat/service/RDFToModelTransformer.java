@@ -266,7 +266,7 @@ public class RDFToModelTransformer {
     }
 
     private List<InformationModelEnhanced> convertRDFRecordsToModels(List<Statement> records) {
-        List<InformationModelEnhanced> modelsList = new ArrayList<>();
+        List<InformationModelEnhanced> informationModels = new ArrayList<>();
 
         for (Statement record : records) {
             Resource informationModelResource = record.getProperty(FOAF.primaryTopic).getResource();
@@ -274,14 +274,7 @@ public class RDFToModelTransformer {
             InformationModelEnhanced informationModel = new InformationModelEnhanced();
             informationModel.setUniqueUri(informationModelResource.getURI());
             informationModel.setTitle(extractLanguageLiteralFromResource(informationModelResource, DCTerms.title));
-
-            Harvest metadata = new Harvest();
-            if (informationModelResource.hasProperty(DCTerms.modified)) {
-                metadata.setLastChanged(LocalDateTime.parse(
-                        informationModelResource.getProperty(DCTerms.modified).getLiteral().getString(),
-                        DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-            }
-            informationModel.setHarvest(metadata);
+            informationModel.setHarvest(new Harvest());
 
             InformationModelDocument document = new InformationModelDocument();
             document.setIdentifier(informationModelResource.getURI());
@@ -295,6 +288,7 @@ public class RDFToModelTransformer {
             document.setValidFromIncluding(extractDateFromTemporalResource(informationModelResource, DCAT.startDate));
             document.setValidToIncluding(extractDateFromTemporalResource(informationModelResource, DCAT.endDate));
             document.setIssued(extractDate(informationModelResource, DCTerms.issued));
+            document.setModified(extractDate(informationModelResource, DCTerms.modified));
 
             List<String> themes = extractLosThemeUris(informationModelResource);
             document.setThemes(!themes.isEmpty() ? referenceDataClient.getLosThemesByUris(themes) : null);
@@ -316,9 +310,10 @@ public class RDFToModelTransformer {
 
             document.addAllTypes(nodeList);
             informationModel.setDocument(document);
-            modelsList.add(informationModel);
+
+            informationModels.add(informationModel);
         }
-        return modelsList;
+        return informationModels;
     }
 
     private void getInformationModelsFromRDF(Model model, String harvestSourceUri) {
@@ -329,25 +324,29 @@ public class RDFToModelTransformer {
                 List<Statement> catalogRecords = catalogResource.listProperties(DCAT.record).toList();
                 Publisher publisher = extractPublisher(catalogResource);
 
-                convertRDFRecordsToModels(catalogRecords).forEach(record -> {
-                    record.setId(UUID.randomUUID().toString());
-                    record.setPublisher(publisher != null ? Publisher.from(organizationCatalogueClient.getOrganization(publisher.getId())) : null);
-                    record.setHarvestSourceUri(harvestSourceUri);
+                convertRDFRecordsToModels(catalogRecords).forEach(informationModel -> {
+                    informationModel.setId(UUID.randomUUID().toString());
+                    informationModel.setPublisher(publisher != null ? Publisher.from(organizationCatalogueClient.getOrganization(publisher.getId())) : null);
+                    informationModel.setHarvestSourceUri(harvestSourceUri);
 
-                    Optional<InformationModelEnhanced> existing = informationmodelEnhancedRepository.getByUniqueUri(record.getUniqueUri());
+                    Optional<InformationModelEnhanced> existingInformationModel = informationmodelEnhancedRepository.getByUniqueUri(informationModel.getUniqueUri());
 
-                    Harvest harvestTime = new Harvest();
-                    harvestTime.setLastChanged(record.getHarvest().getLastChanged());
-                    harvestTime.setLastHarvested(LocalDateTime.now());
-                    harvestTime.setFirstHarvested(LocalDateTime.now());
+                    if (existingInformationModel.isPresent()) {
+                        informationModel.setId(existingInformationModel.get().getId());
 
-                    existing.ifPresent(present -> {
-                        harvestTime.setFirstHarvested(present.getHarvest().getFirstHarvested());
-                        record.setId(present.getId());
-                    });
+                        Harvest existingHarvestData = existingInformationModel.get().getHarvest();
+                        existingHarvestData.setLastHarvested(LocalDateTime.now());
 
-                    record.setHarvest(harvestTime);
-                    informationmodelEnhancedRepository.save(record);
+                        if (!informationModel.equals(existingInformationModel.get())) {
+                            existingHarvestData.setLastChanged(LocalDateTime.now());
+                        }
+
+                        informationModel.setHarvest(existingHarvestData);
+                    } else {
+                        informationModel.setHarvest(createCleanHarvestData());
+                    }
+
+                    informationmodelEnhancedRepository.save(informationModel);
                 });
             }
         } catch (Exception e) {
@@ -380,5 +379,13 @@ public class RDFToModelTransformer {
         }
 
         return jenaType;
+    }
+
+    private Harvest createCleanHarvestData() {
+        return Harvest.builder()
+                .firstHarvested(LocalDateTime.now())
+                .lastHarvested(LocalDateTime.now())
+                .lastChanged(LocalDateTime.now())
+                .build();
     }
 }
