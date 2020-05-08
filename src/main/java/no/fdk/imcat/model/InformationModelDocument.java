@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import no.dcat.shared.LosTheme;
@@ -20,6 +21,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
+@EqualsAndHashCode
 public class InformationModelDocument {
     List<Node> types = new ArrayList<>();
 
@@ -47,6 +49,10 @@ public class InformationModelDocument {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime issued;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime modified;
 
     public void addAllTypes(List<Node> other) {
         types.addAll(other);

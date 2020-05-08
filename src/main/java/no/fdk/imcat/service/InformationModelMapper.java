@@ -38,6 +38,7 @@ public class InformationModelMapper {
         dto.setValidFromIncluding(document.getValidFromIncluding());
         dto.setValidToIncluding(document.getValidToIncluding());
         dto.setIssued(document.getIssued());
+        dto.setModified(document.getModified());
         dto.setLandingPage(document.getLandingPage());
         dto.setCategory(document.getCategory());
         dto.setContactPoint(document.getContactPoint());

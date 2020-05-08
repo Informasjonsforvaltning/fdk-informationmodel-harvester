@@ -26,6 +26,7 @@ public class InformationModel {
     private LocalDateTime validFromIncluding;
     private LocalDateTime validToIncluding;
     private LocalDateTime issued;
+    private LocalDateTime modified;
     private String harvestSourceUri;
     private String landingPage;
     private String category;

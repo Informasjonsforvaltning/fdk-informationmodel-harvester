@@ -1,10 +1,7 @@
 package no.fdk.imcat.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Map;
 
@@ -13,6 +10,7 @@ import java.util.Map;
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode
 public class Property {
     private String identifier;
     private Map<String, String> name;

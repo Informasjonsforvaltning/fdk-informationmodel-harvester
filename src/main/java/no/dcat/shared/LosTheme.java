@@ -3,6 +3,7 @@ package no.dcat.shared;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.net.URI;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode
 public class LosTheme {
     static final String RDFS_URI = "http://www.w3.org/2000/01/rdf-schema#";
     static final String NODE_IS_TEMA_OR_SUBTEMA = "http://psi.norge.no/los/ontologi/tema";

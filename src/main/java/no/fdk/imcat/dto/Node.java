@@ -2,9 +2,9 @@ package no.fdk.imcat.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.data.elasticsearch.annotations.Field;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode
 public class Node {
     private String identifier;
     private String codeListReference;
