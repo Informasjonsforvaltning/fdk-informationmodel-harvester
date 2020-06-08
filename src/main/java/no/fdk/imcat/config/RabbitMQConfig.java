@@ -1,10 +1,6 @@
 package no.fdk.imcat.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import no.fdk.imcat.service.HarvestAdminClient;
-import no.fdk.imcat.service.RDFToModelTransformer;
-import no.fdk.imcat.service.RabbitMQListener;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -15,16 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class RabbitMQConfig {
-
-    private final HarvestAdminClient harvestAdminClient;
-    private final ObjectMapper objectMapper;
-    private final RDFToModelTransformer rdfToModelTransformer;
-
-    @Bean
-    public RabbitMQListener receiver() {
-        return new RabbitMQListener(harvestAdminClient, objectMapper, rdfToModelTransformer);
-    }
-
     @Bean
     public Queue queue() {
         return new AnonymousQueue();

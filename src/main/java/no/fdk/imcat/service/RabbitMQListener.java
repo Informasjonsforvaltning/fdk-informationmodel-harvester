@@ -3,9 +3,13 @@ package no.fdk.imcat.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -27,6 +31,7 @@ public class RabbitMQListener {
     private final HarvestAdminClient harvestAdminClient;
     private final ObjectMapper objectMapper;
     private final RDFToModelTransformer rdfToModelTransformer;
+    private final AmqpTemplate rabbitTemplate;
 
     private Map<String, String> whitelistFields(Map<String, String> params) {
         return params.entrySet()
@@ -57,5 +62,20 @@ public class RabbitMQListener {
                 new TypeReference<Map<String, String>>() {});
 
         harvest(fields);
+        updateSearch();
+    }
+
+    private void updateSearch() {
+        ObjectNode payload = JsonNodeFactory
+                .instance
+                .objectNode()
+                .put("updatesearch", "informationmodels");
+
+        try {
+            rabbitTemplate.convertAndSend("harvester.UpdateSearchTrigger", payload);
+            logger.info("Successfully sent harvest message for publisher {}", payload);
+        } catch (AmqpException e) {
+            logger.error("Failed to send harvest message for publisher {}", payload, e);
+        }
     }
 }
