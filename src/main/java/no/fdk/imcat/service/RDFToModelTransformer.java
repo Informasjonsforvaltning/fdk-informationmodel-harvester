@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 
 @Service
@@ -167,6 +168,23 @@ public class RDFToModelTransformer {
         return r.hasProperty(ADMS.status) ? r.getProperty(ADMS.status).getString() : null;
     }
 
+    private Set<String> extractLanguages(Resource r) {
+        try {
+            return r.hasProperty(DCTerms.language)
+                    ? r.listProperties(DCTerms.language)
+                    .toList()
+                    .stream()
+                    .map(Statement::getResource)
+                    .map(Resource::getURI)
+                    .collect(Collectors.toSet())
+                    : emptySet();
+        } catch (ResourceRequiredException e) {
+            logger.error("Expected dct:language to be a resource, but got {}", e.getMessage(), e);
+        }
+
+        return emptySet();
+    }
+
     private Map<String, String> getRestrictions(Resource r) {
         Predicate<Statement> isRestriction = p -> p.getPredicate().getURI().contains("XMLSchema");
         return r.listProperties().filterKeep(isRestriction).toList().stream()
@@ -294,6 +312,7 @@ public class RDFToModelTransformer {
             document.setKeywords(extractLanguageArrayLiteralFromResource(informationModelResource, DCAT.keyword));
             document.setVersion(extractVersion(informationModelResource));
             document.setStatus(extractStatus(informationModelResource));
+            document.setLanguages(extractLanguages(informationModelResource));
             document.setLandingPage(extractLandingPage(informationModelResource));
             document.setValidFromIncluding(extractDateFromTemporalResource(informationModelResource, DCAT.startDate));
             document.setValidToIncluding(extractDateFromTemporalResource(informationModelResource, DCAT.endDate));

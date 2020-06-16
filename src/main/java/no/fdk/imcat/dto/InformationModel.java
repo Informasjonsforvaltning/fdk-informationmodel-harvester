@@ -10,6 +10,7 @@ import org.springframework.hateoas.core.Relation;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -32,6 +33,7 @@ public class InformationModel {
     private String category;
     private String status;
     private String schema;
+    private Set<String> languages;
 
     private ContactPoint contactPoint;
 

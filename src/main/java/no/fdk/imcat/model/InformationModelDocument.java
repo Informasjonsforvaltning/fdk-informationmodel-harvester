@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -36,6 +37,7 @@ public class InformationModelDocument {
     private Map<String, String> title;
     private Map<String, List<String>> keywords;
     private List<LosTheme> themes;
+    private Set<String> languages;
     private ContactPoint contactPoint;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
