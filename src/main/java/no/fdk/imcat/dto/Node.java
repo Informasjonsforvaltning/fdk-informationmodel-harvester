@@ -18,6 +18,7 @@ public class Node {
     private String identifier;
     private String codeListReference;
     private Map<String, String> name;
+    private Map<String, String> description;
     private List<Property> roles;
     private List<Property> attributes;
     private List<Property> properties;
