@@ -14,6 +14,7 @@ import java.util.Map;
 public class Property {
     private String identifier;
     private Map<String, String> name;
+    private Map<String, String> description;
     private Map<String, String> parameters;
     private String isDescribedByUri;
     private PropertyType type;

@@ -197,6 +197,7 @@ public class RDFToModelTransformer {
         node.setIdentifier(r.getURI());
         node.setModelElementType(elementType);
         node.setName(extractLanguageLiteralFromResource(r, DCATNOINFO.name));
+        node.setDescription(extractLanguageLiteralFromResource(r, DCATNOINFO.description));
         node.setTypeDefinitionReference(getPropertyLiteralValue(r, DCATNOINFO.typeDefinitionReference));
         node.setIsDescribedByUri(getPropertyLiteralValue(r, DCATNOINFO.isDescribedBy));
         node.setIsSubclassOf(getSubclassOf(r));
@@ -210,6 +211,7 @@ public class RDFToModelTransformer {
             Property property = new Property();
             property.setIdentifier(child.getURI());
             property.setName(extractLanguageLiteralFromResource(child, DCATNOINFO.name));
+            property.setDescription(extractLanguageLiteralFromResource(child, DCATNOINFO.description));
             property.setParameters(getRestrictions(child));
             property.setIsDescribedByUri(getIsDescribedBy(child));
             property.setType(extractPropertyType(child));
