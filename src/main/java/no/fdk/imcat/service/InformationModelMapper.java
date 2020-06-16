@@ -42,6 +42,7 @@ public class InformationModelMapper {
         dto.setLandingPage(document.getLandingPage());
         dto.setCategory(document.getCategory());
         dto.setStatus(document.getStatus());
+        dto.setLanguages(document.getLanguages());
         dto.setContactPoint(document.getContactPoint());
         dto.setName(document.getName());
         dto.setDescription(document.getDescription());
