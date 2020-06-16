@@ -206,6 +206,7 @@ public class RDFToModelTransformer {
         node.setTypeDefinitionReference(getPropertyLiteralValue(r, DCATNOINFO.typeDefinitionReference));
         node.setIsDescribedByUri(getPropertyLiteralValue(r, DCATNOINFO.isDescribedBy));
         node.setIsSubclassOf(getSubclassOf(r));
+        node.setBelongsToModule(extractLanguageLiteralFromResource(r, DCATNOINFO.belongsToModule));
         node.setCodeListReference(getCodeListReference(r));
 
         StmtIterator properties = r.listProperties(elementType.equals("kodeliste") ? DCATNOINFO.containsCodename : DCATNOINFO.hasProperty);
@@ -217,6 +218,7 @@ public class RDFToModelTransformer {
             property.setIdentifier(child.getURI());
             property.setName(extractLanguageLiteralFromResource(child, DCATNOINFO.name));
             property.setDescription(extractLanguageLiteralFromResource(child, DCATNOINFO.description));
+            property.setBelongsToModule(extractLanguageLiteralFromResource(child, DCATNOINFO.belongsToModule));
             property.setParameters(getRestrictions(child));
             property.setIsDescribedByUri(getIsDescribedBy(child));
             property.setType(extractPropertyType(child));

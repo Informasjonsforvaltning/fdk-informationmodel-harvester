@@ -43,6 +43,7 @@ public class DCATNOINFO {
     public static final Property isDescribedBy = m.createProperty(uri + "isDescribedBy");
     public static final Property typeDefinitionReference = m.createProperty(uri + "typeDefinitionReference");
     public static final Property modelElementType = m.createProperty(uri + "modelElementType");
+    public static final Property belongsToModule = m.createProperty(uri + "belongsToModule");
     /**
      * Returns the namespace of the DCAT-NO-INFO schema as a string
      *
