@@ -29,6 +29,7 @@ public class InformationModelDocument {
     private String version;
     private String landingPage;
     private String category;
+    private String status;
     private Map<String, String> description;
     private Map<String, String> modelDescription;
     private Map<String, String> name;

@@ -30,6 +30,7 @@ public class InformationModel {
     private String harvestSourceUri;
     private String landingPage;
     private String category;
+    private String status;
     private String schema;
 
     private ContactPoint contactPoint;

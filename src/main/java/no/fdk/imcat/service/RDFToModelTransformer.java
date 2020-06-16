@@ -6,6 +6,7 @@ import no.fdk.imcat.dto.Property;
 import no.fdk.imcat.dto.*;
 import no.fdk.imcat.model.InformationModelDocument;
 import no.fdk.imcat.model.InformationModelEnhanced;
+import no.fdk.imcat.utils.ADMS;
 import no.fdk.imcat.utils.DCATNOINFO;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.sparql.vocabulary.FOAF;
@@ -162,6 +163,10 @@ public class RDFToModelTransformer {
                 : null;
     }
 
+    private String extractStatus(Resource r) {
+        return r.hasProperty(ADMS.status) ? r.getProperty(ADMS.status).getString() : null;
+    }
+
     private Map<String, String> getRestrictions(Resource r) {
         Predicate<Statement> isRestriction = p -> p.getPredicate().getURI().contains("XMLSchema");
         return r.listProperties().filterKeep(isRestriction).toList().stream()
@@ -286,6 +291,7 @@ public class RDFToModelTransformer {
             document.setName(extractLanguageLiteralFromResource(informationModelResource, DCATNOINFO.name));
             document.setKeywords(extractLanguageArrayLiteralFromResource(informationModelResource, DCAT.keyword));
             document.setVersion(extractVersion(informationModelResource));
+            document.setStatus(extractStatus(informationModelResource));
             document.setLandingPage(extractLandingPage(informationModelResource));
             document.setValidFromIncluding(extractDateFromTemporalResource(informationModelResource, DCAT.startDate));
             document.setValidToIncluding(extractDateFromTemporalResource(informationModelResource, DCAT.endDate));
