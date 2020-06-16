@@ -16,6 +16,7 @@ public class Property {
     private Map<String, String> name;
     private Map<String, String> description;
     private Map<String, String> parameters;
+    private Map<String, String> belongsToModule;
     private String isDescribedByUri;
     private PropertyType type;
 }

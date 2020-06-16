@@ -25,5 +25,6 @@ public class Node {
     private String modelElementType;
     private String isDescribedByUri;
     private String typeDefinitionReference;
+    private Map<String, String> belongsToModule;
     private PropertyType isSubclassOf;
 }
