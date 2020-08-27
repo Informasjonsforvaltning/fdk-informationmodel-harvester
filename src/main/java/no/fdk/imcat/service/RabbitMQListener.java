@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class RabbitMQListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RabbitMQListener.class);
+    private static final String HARVEST_ALL = "all";
     private static List<String> ALLOWED_FIELDS = Arrays.asList("publisherId", "dataType");
     private final HarvestAdminClient harvestAdminClient;
     private final ObjectMapper objectMapper;
@@ -69,10 +70,10 @@ public class RabbitMQListener {
         ObjectNode payload = JsonNodeFactory
                 .instance
                 .objectNode()
-                .put("updatesearch", "informationmodels");
+                .put("identifier", HARVEST_ALL);
 
         try {
-            rabbitTemplate.convertAndSend("harvester.UpdateSearchTrigger", payload);
+            rabbitTemplate.convertAndSend("harvests", "informationmodels.harvester.UpdateSearchTrigger", payload);
             logger.info("Successfully sent harvest message for publisher {}", payload);
         } catch (AmqpException e) {
             logger.error("Failed to send harvest message for publisher {}", payload, e);
