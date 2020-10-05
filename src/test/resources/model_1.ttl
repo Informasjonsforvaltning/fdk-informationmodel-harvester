@@ -1,0 +1,272 @@
+@prefix digdir: <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#> .
+@prefix adms:  <http://www.w3.org/ns/adms#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat:  <http://www.w3.org/ns/dcat#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix locn: <http://www.w3.org/ns/locn#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix modelldcatno: <https://data.norge.no/vocabulary/modelldcatno#> .
+
+digdir:AdresseModell  a              modelldcatno:InformationModel , owl:NamedIndividual ;
+        modelldcatno:containsModelElement
+                digdir:Adresse , digdir:GeografiskAdresse , digdir:OffisiellAdresse , digdir:Postboksadresse , digdir:Matrikkeladresse , digdir:Vegadresse , digdir:Kommunenummer , digdir:Poststed , digdir:Punkt , digdir:Matrikkelnummer , digdir:Adressenummer ;
+        dct:identifier          "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#AdresseModell"^^xsd:string ;
+        dct:publisher          digdir:Utgiver ;
+        dct:description         "Overordnet informasjonsmodell for Adresse. Formål: Felles forståelse av adressebegrep og standardiserte informasjonsstrukturer for konsistent bruk og representasjon av adresser."@nb ;
+        dct:title               "Felles informasjonsmodell for Adresse"@nb ;
+        modelldcatno:version    "1.0"^^xsd:string ;
+        dct:issued              "2016-09-28T00:00:00+01:00"^^xsd:dateTime ;
+        dct:language            <http://publications.europa.eu/resource/authority/language/NOB> ;
+        owl:versionInfo         "1.0"^^xsd:string ;
+        adms:status             "Fullført"^^xsd:string ;
+        dcat:contactPoint       digdir:KontaktOss ;
+        dcat:keyword            "Adresse"@nb ;
+        foaf:homepage           <https://www.difi.no/fagomrader-og-tjenester/digitalisering-og-samordning/nasjonal-arkitektur/informasjonsforvaltning/adresse-felles-informasjonsmodell> ;
+        dct:spatial             <http://publications.europa.eu/resource/authority/country/NOR> ;
+        dcat:theme              <https://psi.norge.no/los/tema/eiendom> .
+
+digdir:Utgiver  a       owl:NamedIndividual , foaf:Agent ;
+        dct:identifier  "991825827"^^xsd:string ;
+        dct:type        "Organisasjonsledd"@nb ;
+        foaf:name       "Digitaliseringsdirektoratet"@nb .
+
+digdir:KontaktOss  a        vcard:Kind , owl:NamedIndividual ;
+        vcard:fn            "Digitalisation department"@en , "Avdeling for digitalisering"@nn , "Avdeling for digitalisering"@nb ;
+        vcard:hasEmail      <mailto:informasjonsforvaltning@digdir.no> ;
+        vcard:hasTelephone  <tel:12345678> .
+
+digdir:Adresse  a                   modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title                      "Adresse"@nb ;
+        modelldcatno:belongsToModule   "Adresse"@nb .
+
+digdir:GeografiskAdresse  a         modelldcatno:ObjectType , owl:NamedIndividual ;
+        modelldcatno:hasProperty       digdir:geografiskAdresseSpesialiserer ;
+        dct:title                      "GeografiskAdresse"@nb ;
+        modelldcatno:belongsToModule   "Adresse"@nb .
+
+digdir:OffisiellAdresse  a         modelldcatno:ObjectType , owl:NamedIndividual ;
+        modelldcatno:hasProperty       digdir:adresseId , digdir:representasjonspunkt , digdir:offisiellAdresseSpesialiserer ;
+        dct:title                      "OffisiellAdresse"@nb ;
+        modelldcatno:belongsToModule   "Adresse"@nb .
+
+digdir:Postboksadresse  a           modelldcatno:ObjectType , owl:NamedIndividual ;
+        modelldcatno:hasProperty       digdir:postboksnummer , digdir:postboksanleggsNavn , digdir:poststedPostboksadresse , digdir:postboksadresseSpesialiserer ;
+        dct:title                      "Postboksadresse"@nb ;
+        modelldcatno:belongsToModule   "Adresse"@nb .
+
+digdir:Matrikkeladresse  a          modelldcatno:ObjectType , owl:NamedIndividual ;
+        modelldcatno:hasProperty       digdir:bruksenhetsnummer , digdir:adressetilleggsnavn , digdir:matrikkelnummer , digdir:undernummer , digdir:matrikkeladresseSpesialiserer ;
+        dct:title                      "Matrikkeladresse"@nb ;
+        modelldcatno:belongsToModule   "Adresse"@nb .
+
+digdir:Vegadresse  a                modelldcatno:ObjectType , owl:NamedIndividual ;
+        modelldcatno:hasProperty       digdir:bruksenhetsnummer , digdir:adressenavn , digdir:adressenummer , digdir:poststedVegadresse , digdir:adressekode , digdir:adressetilleggsnavn , digdir:kommunenummer , digdir:vegadresseSpesialiserer ;
+        dct:title                      "Vegadresse"@nb ;
+        modelldcatno:belongsToModule   "Adresse"@nb .
+
+digdir:Punkt  a                     owl:NamedIndividual , modelldcatno:DataType ;
+        modelldcatno:hasProperty       digdir:koordinat , digdir:referansesystem ;
+        dct:title                      "Punkt"@nb .
+
+digdir:Poststed  a                  owl:NamedIndividual , modelldcatno:DataType ;
+        modelldcatno:hasProperty       digdir:poststedsnavn , digdir:postnummer ;
+        dct:title                      "Poststed"@nb .
+
+digdir:Adressenummer  a             owl:NamedIndividual , modelldcatno:DataType ;
+        modelldcatno:hasProperty       digdir:nummer , digdir:bokstav ;
+        dct:title                      "Adressenummer"@nb .
+
+digdir:Matrikkelnummer  a           owl:NamedIndividual , modelldcatno:DataType ;
+        modelldcatno:hasProperty       digdir:kommunenummer , digdir:gårdsnummer , digdir:bruksnummer , digdir:festenummer , digdir:seksjonsnummer ;
+        dct:title                      "Matrikkelnummer"@nb .
+
+digdir:Tekst  a                      modelldcatno:SimpleType , owl:NamedIndividual ;
+        dct:title                      "Tekst"@nb ;
+        modelldcatno:typeDefinitionReference      "http://www.w3.org/2001/XMLSchema#string"^^xsd:anyURI ;
+        xsd:maxLength                "100"^^xsd:nonNegativeInteger .
+
+digdir:Heltall  a                   modelldcatno:SimpleType , owl:NamedIndividual ;
+        dct:title                     "Heltall"@nb ;
+        modelldcatno:typeDefinitionReference      "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"^^xsd:anyURI .
+
+digdir:Kommunenummer  a             modelldcatno:CodeList , owl:NamedIndividual ;
+        modelldcatno:codeListReference "https://www.ssb.no/klass/klassifikasjoner/131"^^xsd:anyURI ;
+        dct:title              "Kommunenummer"@nb .
+
+digdir:adresseId  a     modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "adresseId"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:representasjonspunkt
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "representasjonspunkt"@nb ;
+        modelldcatno:hasDataType          digdir:Punkt ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:postboksnummer  a         modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "postboksnummer"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:postboksanleggsNavn
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "postboksanleggsNavn"@nb ;
+        modelldcatno:hasSimpletype         digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:poststedPostboksadresse  a              modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "poststed"@nb ;
+        modelldcatno:hasDataType          digdir:Poststed ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:adressetilleggsnavn  a   modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "adressetilleggsnavn"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:matrikkelnummer  a       modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "matrikkelnummer"@nb ;
+        modelldcatno:hasDataType          digdir:Matrikkelnummer ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:undernummer  a           modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "undernummer"@nb ;
+        modelldcatno:hasSimpletype         digdir:Heltall ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:bruksenhetsnummer
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "bruksenhetsnummer"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:adressenavn
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "adressenavn"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:adressenummer
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "adressenummer"@nb ;
+        modelldcatno:hasDataType          digdir:Adressenummer ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:poststedVegadresse
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "poststed"@nb ;
+        modelldcatno:hasDataType          digdir:Poststed ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger ;
+        xsd:minOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:adressekode
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "adressekode"@nb ;
+        modelldcatno:hasSimpletype       digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:adressetilleggsnavn
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "adressetilleggsnavn"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:kommunenummer
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        modelldcatno:subject "https://fellesdatakatalog.digdir.no/api/concepts/a5ff31be-0c3f-4534-bf12-bd8ddd373d61"^^xsd:anyURI ;
+        dct:title          "kommunenummer"@nb ;
+        modelldcatno:hasValueFrom          digdir:Kommunenummer ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:poststedsnavn  a         modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "poststedsnavn"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:postnummer  a            modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "postnummer"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:koordinat  a             modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "koordinat"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger ;
+        xsd:minOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:referansesystem  a       modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "referansesystem"@nb ;
+        modelldcatno:hasSimpletype          digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger ;
+        xsd:minOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:nummer
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "nummer"@nb ;
+        modelldcatno:hasSimpletype         digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger ;
+        xsd:minOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:bokstav
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "bokstav"@nb ;
+        modelldcatno:hasSimpletype         digdir:Tekst ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:gårdsnummer
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "gårdsnummer"@nb ;
+        modelldcatno:hasSimpletype          digdir:Heltall ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:bruksnummer
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "bruksnummer"@nb ;
+        modelldcatno:hasSimpletype          digdir:Heltall ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:festenummer
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "festenummer"@nb ;
+        modelldcatno:hasSimpletype          digdir:Heltall ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:seksjonsnummer
+        a                        modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title          "seksjonsnummer"@nb ;
+        modelldcatno:hasSimpletype          digdir:Heltall ;
+        xsd:maxOccurs            "1"^^xsd:nonNegativeInteger .
+
+digdir:geografiskAdresseSpesialiserer a       owl:NamedIndividual , modelldcatno:Specialization ;
+        dct:title  "geografiskAdresseSpesialiserer"^^xsd:string ;
+        modelldcatno:hasGeneralConcept digdir:Adresse .
+
+digdir:offisiellAdresseSpesialiserer a       owl:NamedIndividual , modelldcatno:Specialization ;
+        dct:title  "offisiellAdresseSpesialiserer"^^xsd:string ;
+        modelldcatno:hasGeneralConcept digdir:GeografiskAdresse .
+
+digdir:postboksadresseSpesialiserer a       owl:NamedIndividual , modelldcatno:Specialization ;
+      dct:title  "postboksadresseSpesialiserer"^^xsd:string ;
+      modelldcatno:hasGeneralConcept digdir:GeografiskAdresse .
+
+digdir:matrikkeladresseSpesialiserer a       owl:NamedIndividual , modelldcatno:Specialization ;
+      dct:title  "matrikkeladresseSpesialiserer"^^xsd:string ;
+      modelldcatno:hasGeneralConcept digdir:GeografiskAdresse .
+
+digdir:vegadresseSpesialiserer a       owl:NamedIndividual , modelldcatno:Specialization ;
+      dct:title  "vegadresseSpesialiserer"^^xsd:string ;
+      modelldcatno:hasGeneralConcept digdir:GeografiskAdresse .
+
+<http://localhost:5000/informationmodels/1f44a866-2cbd-3b80-bf72-cccb99965e25>
+        a                  dcat:CatalogRecord ;
+        dct:identifier     "1f44a866-2cbd-3b80-bf72-cccb99965e25" ;
+        dct:isPartOf       <http://localhost:5000/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb> ;
+        dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
+        dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
+        foaf:primaryTopic  digdir:AdresseModell .

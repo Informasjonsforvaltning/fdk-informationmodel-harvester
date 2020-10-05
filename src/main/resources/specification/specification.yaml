@@ -1,61 +1,62 @@
 openapi: 3.0.2
 info:
-  description: Provides a basic search api against the National Information Model Directory of Norway
-  version: '0.1'
-  title: National Information Model Directory Search API
-  termsOfService: 'https://fellesdatakatalog.brreg.no/about'
+  title: FDK information model harvester
+  description: Tilgjengeliggjør informasjonsmodeller fra en katalog ihht DCAT-AP-NO
+  version: '1.0'
   contact:
-    name: Brønnøysundregistrene
-    url: 'https://fellesdatakatalog.brreg.no'
-    email: fellesdatakatalog@brreg.no
+    name: Digitaliseringsdirektoratet
+    url: 'https://fellesdatakatalog.digdir.no'
+    email: fellesdatakatalog@digdir.no
   license:
     name: License of API
     url: 'http://data.norge.no/nlod/no/2.0'
-externalDocs:
-  description: Dokumentasjon på Informasjonsforvaltning GitHub
-  url: https://informasjonsforvaltning.github.io/felles-datakatalog/informasjonsmodell-katalog/api/
-servers:
-  - url: 'https://fellesdatakatalog.brreg.no/api/informationmodels'
-    description: The production Information Model server
 tags:
-  - name: informationmodel
-    description: Information Model operations
+  - name: dcat-ap-no-catalogs
+    description: DCAT-AP-NO catalogs
+  - name: dcat-ap-no-informationmodels
+    description: DCAT-AP-NO informationmodels
+servers:
+  - url: 'https://informationmodels.fellesdatakatalog.digdir.no'
+    description: Produksjonsmiljø
+  - url: 'https://informationmodels.staging.fellesdatakatalog.digdir.no'
+    description: Testmiljø
+  - url: 'https://informationmodels.demo.fellesdatakatalog.digdir.no'
+    description: Demomiljø
 paths:
-  /:
+  /catalogs:
     get:
       tags:
-        - informationmodel
-      summary: Query the information model catalog for information model document
-      description: So far only simple queries is supported
-      operationId: searchUsingGET
-      parameters:
-        - name: q
-          in: query
-          description: the word to search for in our information model collection
-          required: false
-          schema:
-            type: string
-        - name: aggregations
-          in: query
-          description: If you want aggregations, provide a comma-separated list of filters.
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
+        - dcat-ap-no-catalogs
+      description: Returns a collection of catalogs
+      operationId: getCatalogs
       responses:
         '200':
           description: OK
           content:
-            application/json:
+            text/turtle:
               schema:
-                $ref: "#/components/schemas/QueryResponse"
-  /{id}:
+                type: string
+            text/n3:
+              schema:
+                type: string
+            application/rdf+json:
+              schema:
+                type: string
+            application/ld+json:
+              schema:
+                type: string
+            application/rdf+xml:
+              schema:
+                type: string
+            application/n-triples:
+              schema:
+                type: string
+  '/catalogs/{id}':
     get:
       tags:
-        - informationmodel
-      summary: Get a specific information model
-      operationId: getInformationModelDocumentUsingGET
+        - dcat-ap-no-catalogs
+      description: Returns a catalog
+      operationId: getCatalogById
       parameters:
         - name: id
           in: path
@@ -67,239 +68,60 @@ paths:
         '200':
           description: OK
           content:
-            application/json:
+            text/turtle:
               schema:
-                $ref: '#/components/schemas/InformationModelDocument'
+                type: string
+            text/n3:
+              schema:
+                type: string
+            application/rdf+json:
+              schema:
+                type: string
+            application/ld+json:
+              schema:
+                type: string
+            application/rdf+xml:
+              schema:
+                type: string
+            application/n-triples:
+              schema:
+                type: string
         '404':
-          description: Not Found
+          description: Dataset catalog with requested id does not exist
+  '/informationmodels/{id}':
+    get:
+      tags:
+        - dcat-ap-no-informationmodels
+      description: Returnerer en informasjonsmodell
+      operationId: getInformationModelById
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
           content:
-            application/json:
+            text/turtle:
               schema:
-                $ref: '#/components/schemas/ErrorMessage'
-components:
-  schemas:
-    QueryResponse:
-      type: object
-      properties:
-        aggregations:
-          $ref: '#/components/schemas/Aggregation'
-        _embedded:
-          type: object
-          properties:
-            informationmodels:
-              type: array
-              items:
-                $ref: '#/components/schemas/InformationModelDocument'
-        page:
-          type: object
-          properties:
-            size:
-              type: integer
-              format: int64
-            totalElements:
-              type: integer
-              format: int64
-            totalPages:
-              type: integer
-              format: int64
-            number:
-              type: integer
-              format: int64
-      description: ''
-    Aggregation:
-      type: object
-    InformationModelDocument:
-      type: object
-      description: ''
-      properties:
-        id:
-          type: string
-          description: The id given by the harvest system
-        identifier:
-          type: string
-          description: URI resource identifier
-        publisher:
-          $ref: '#/components/schemas/Publisher'
-        harvestSourceUri:
-          type: string
-          description: The source where the record was harvested from
-        harvest:
-          $ref: '#/components/schemas/Harvest'
-        title:
-          $ref: '#/components/schemas/TextLanguage'
-        keywords:
-          $ref: '#/components/schemas/ListLanguage'
-        version:
-          type: string
-        validFromIncluding:
-          type: string
-        validToIncluding:
-          type: string
-        issued:
-          type: string
-        landingPage:
-          type: string
-        contactPoint:
-          $ref: '#/components/schemas/ContactPoint'
-        schema:
-          type: string
-          description: 'The model itself, expressed in JSON-SCHEMA'
-        objectTypes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Node'
-        codeTypes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Node'
-        dataTypes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Node'
-        simpleTypes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Node'
-        name:
-          $ref: '#/components/schemas/TextLanguage'
-        description:
-          $ref: '#/components/schemas/TextLanguage'
-        modelDescription:
-          $ref: '#/components/schemas/TextLanguage'
-        themes:
-          type: array
-          items:
-            $ref: '#/components/schemas/LosTheme'
-    Publisher:
-      type: object
-      description: The publisher of the information model
-      properties:
-        uri:
-          type: string
-        id:
-          type: string
-        name:
-          type: string
-        orgPath:
-          type: string
-        prefLabel:
-          $ref: '#/components/schemas/TextLanguage'
-      x-examples:
-        example-1:
-          uri: 'http://data.brreg.no/enhetsregisteret/enhet/974760673'
-          id: '974760673'
-          name: REGISTERENHETEN I BRØNNØYSUND
-          orgPath: /STAT/912660680/974760673
-          prefLabel:
-            nb: Brønnøysundregistrene
-    Harvest:
-      type: object
-      description: Information about when the model was first and last harvested by the system
-      x-examples:
-        example-1:
-          firstHarvested: '2020-01-14T13:05:49'
-          lastHarvested: '2020-02-13T05:10:11'
-      properties:
-        firstHarvested:
-          type: string
-        lastHarvested:
-          type: string
-    Node:
-      type: object
-      properties:
-        identifier:
-          type: string
-        codeListReference:
-          type: string
-        name:
-          $ref: '#/components/schemas/TextLanguage'
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Property'
-        attributes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Property'
-        properties:
-          type: array
-          items:
-            $ref: '#/components/schemas/Property'
-        isSubclassOf:
-          type: object
-          properties:
-            identifier:
-              type: string
-            name:
-              $ref: '#/components/schemas/TextLanguage'
-        modelElementType:
-          type: string
-        isDescribedByUri:
-          type: string
-        typeDefinitionReference:
-          type: string
-    ContactPoint:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/TextLanguage'
-        email:
-          type: string
-        phone:
-          type: string
-    LosTheme:
-      type: object
-      properties:
-        uri:
-          type: string
-    TextLanguage:
-      description: 'A generic object to hold multilanguage texts, that has language code (according to ISO 639-1) as keys'
-      type: object
-      properties:
-        nb:
-          type: string
-        nn:
-          type: string
-        en:
-          type: string
-      x-examples:
-        example-1:
-          nb: norsk bokmål tekst
-          nn: nynorsk tekst
-          en: engelsk tekst
-    ListLanguage:
-      description: 'A generic object to hold multilanguage lists of texts. Language code (according to ISO 639-1) as keys'
-      type: object
-      properties:
-        nb:
-          type: array
-          items:
-            type: string
-        nn:
-          type: array
-          items:
-            type: string
-        en:
-          type: array
-          items:
-            type: string
-    Property:
-      type: object
-      properties:
-        identifier:
-          type: string
-        name:
-          $ref: '#/components/schemas/TextLanguage'
-        parameters:
-          type: object
-        type:
-          type: object
-          properties:
-            identifier:
-              type: string
-            name:
-              $ref: '#/components/schemas/TextLanguage'
-        isDescribedByUri:
-          type: string
-    ErrorMessage:
-      type: object
+                type: string
+            text/n3:
+              schema:
+                type: string
+            application/rdf+json:
+              schema:
+                type: string
+            application/ld+json:
+              schema:
+                type: string
+            application/rdf+xml:
+              schema:
+                type: string
+            application/n-triples:
+              schema:
+                type: string
+        '404':
+          description: Information model with requested id does not exist

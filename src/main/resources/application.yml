@@ -1,68 +1,52 @@
+logging:
+  level.root: WARN
+  level.no: ${LOG_LEVEL:DEBUG}
+  level.org.springframework: WARN
+  level.org.springframework.web: WARN
+  level.org.apache.jena.riot: ERROR
+server:
+  port: 8080
+fuseki:
+  unionGraphUri: ${FDK_FUSEKI_SERVICE_URI:http://fdk-fuseki-service:8080/fuseki}/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
+application:
+  informationModelUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/informationmodels
+  catalogUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/catalogs
+  harvestAdminRootUrl: ${HARVEST_ADMIN_ROOT_URL:http://fdk-harvest-admin:8080/api}
 spring:
-  jackson:
-    default-property-inclusion: non_null
-  data:
-    elasticsearch:
-      clusterNodes: ${FDK_ES_CLUSTERNODES:elasticsearch5:9300}
-      clusterName: ${FDK_ES_CLUSTERNAME:elasticsearch}
   rabbitmq:
     host: rabbitmq
     port: 5672
     username: ${RABBIT_USERNAME}
     password: ${RABBIT_PASSWORD}
-    template:
-      routing-key: 'harvester.UpdateSearchTrigger'
-      exchange: 'updates'
-logging:
-  level.root: WARN
-  level.no.fdk.imcat: DEBUG
-  level.no.fdk.imcat.service: DEBUG
-  level.org.springframework: WARN
-  level.org.springframework.web: WARN
-  level.org.springframework.data.elasticsearch: ${LOG_LEVEL:INFO}
-application:
-  apiRootUrl: http://fdk-nginx-search:8080/api
-  referenceDataUrl: ${FDK_REFERENCE_DATA_URL}
-  organizationCatalogueUrl: ${FDK_ORGANIZATION_CATALOGUE_URL}
-  harvestSourceUri: https://fellesdatakatalog.brreg.no/api
-  harvestSourceURIBase: ${FDK_ALTINN_MODELS_URL:https://fdk-dev-altinn.appspot.com/api/v1/schemas}
-  harvestAdminRootUrl: ${HARVEST_ADMIN_ROOT_URL:http://localhost:8135/api}
-  # harvest every sixth hour, 10 minutes after apicatalogs update
-  harvestCron: 0 10 */6 * * *
-
-
+  data.mongodb.uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/informationModelHarvester?authSource=admin&authMechanism=SCRAM-SHA-1
 
 ---
-#Utv-miljø lokalt på egen PC
 spring:
-  profiles: develop, unit-integration
-  data:
-    elasticsearch:
-      clusterNodes: localhost:9300
-      clusterName: elasticsearch
+  profiles: develop
   rabbitmq:
     host: 127.0.0.1
     port: 5672
     username: admin
     password: admin
+  data.mongodb.uri: mongodb://admin:admin@localhost:27017/informationModelHarvester?authSource=admin&authMechanism=SCRAM-SHA-1
+fuseki:
+  unionGraphUri: http://localhost:3030/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
 application:
-  apiRootUrl: http://localhost:8080/api
-  referenceDataUrl: ${FDK_REFERENCE_DATA_URL:https://fellesdatakatalog.brreg.no/reference-data}
-  organizationCatalogueUrl: ${FDK_ORGANIZATION_CATALOGUE_URL:https://organization-catalogue.fellesdatakatalog.brreg.no}
-server:
-  port: 8109
+  informationModelUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/informationmodels
+  catalogUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/catalogs
+  harvestAdminRootUrl: https://admin-api.staging.fellesdatakatalog.digdir.no/api
 
 ---
-#Test-miljø
 spring:
-  profiles: test
-  data:
-    elasticsearch:
-      clusterNodes: ${FDK_ES_CLUSTERNODES:elasticsearch5:9300}
-      clusterName: ${FDK_ES_CLUSTERNAME:elasticsearch}
+  profiles: contract-test
+  rabbitmq:
+    host: localhost
+    port: 5000
+    username: admin
+    password: admin
 application:
-  apiRootUrl: ${WIREMOCK_TEST_HOST}/api
-  harvestSourceUri: ${WIREMOCK_TEST_HOST}/api
-  harvestSourceURIBase: ${WIREMOCK_TEST_HOST}/api/v1/schemas
-server:
-  port: 8080
+  informationModelUri: http://localhost:5000/informationmodels
+  catalogUri: http://localhost:5000/catalogs
+  harvestAdminRootUrl: http://localhost:5000/api
+fuseki.unionGraphUri: http://localhost:5000/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
+server.port: 5555
