@@ -1,0 +1,10 @@
+digdir:AdresseModell  a              modelldcatno:InformationModel , owl:NamedIndividual ;
+        dct:identifier          "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#AdresseModell"^^xsd:string ;
+        dct:publisher          digdir:Utgiver .
+
+digdir:Katalog1  a        owl:NamedIndividual , dcat:Catalog ;
+        dct:description         "Katalog med oversikt over Digitaliseringsdirektoratets modeller"@nb ;
+        dct:identifier          "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog1"^^xsd:string ;
+        dct:publisher           digdir:Utgiver ;
+        dct:title               "Digitaliseringsdirektoratets modellkatalog 1"@nb ;
+        modelldcatno:model      digdir:AdresseModell .
