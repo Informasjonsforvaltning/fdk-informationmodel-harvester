@@ -67,6 +67,37 @@ class HarvesterTest {
     }
 
     @Test
+    fun sourceWithCodeListIsParsedCorrectly() {
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE_2))
+            .thenReturn(responseReader.readFile("harvest_response_2.ttl"))
+
+        whenever(valuesMock.catalogUri)
+            .thenReturn("http://localhost:5000/catalogs")
+        whenever(valuesMock.informationModelUri)
+            .thenReturn("http://localhost:5000/informationmodels")
+
+        harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE_2, TEST_HARVEST_DATE)
+
+        argumentCaptor<MiscellaneousTurtle>().apply {
+            verify(miscRepository, times(1)).save(capture())
+            if (HARVEST_DBO_2 != firstValue) firstValue.printTurtleDiff(HARVEST_DBO_2)
+            assertEquals(HARVEST_DBO_2, firstValue)
+        }
+
+        argumentCaptor<List<CatalogDBO>>().apply {
+            verify(catalogRepository, times(1)).saveAll(capture())
+            assertEquals(1, firstValue.size)
+            if (CATALOG_DBO_2 != firstValue.first()) firstValue.first().printTurtleDiff(CATALOG_DBO_2)
+            assertEquals(CATALOG_DBO_2, firstValue.first())
+        }
+
+        argumentCaptor<List<InformationModelDBO>>().apply {
+            verify(modelRepository, times(1)).saveAll(capture())
+            assertEquals(2, firstValue.size)
+        }
+    }
+
+    @Test
     fun harvestDataSourceNotPersistedWhenNoChangesFromDB() {
         whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
             .thenReturn(responseReader.readFile("harvest_response_0.ttl"))
@@ -125,12 +156,14 @@ class HarvesterTest {
 
         argumentCaptor<MiscellaneousTurtle>().apply {
             verify(miscRepository, times(1)).save(capture())
+            if (HARVEST_DBO_0 != firstValue) firstValue.printTurtleDiff(HARVEST_DBO_0)
             assertEquals(HARVEST_DBO_0, firstValue)
         }
 
         argumentCaptor<List<CatalogDBO>>().apply {
             verify(catalogRepository, times(1)).saveAll(capture())
             assertEquals(1, firstValue.size)
+            if (expectedCatalogDBO != firstValue.first()) firstValue.first().printTurtleDiff(expectedCatalogDBO)
             assertEquals(expectedCatalogDBO, firstValue.first())
         }
 
