@@ -5,9 +5,11 @@ import no.fdk.fdk_informationmodel_harvester.model.InformationModelDBO
 import no.fdk.fdk_informationmodel_harvester.rdf.*
 import no.fdk.fdk_informationmodel_harvester.service.ungzip
 import org.apache.jena.rdf.model.Model
+import org.apache.jena.rdf.model.Property
 import org.apache.jena.rdf.model.Resource
 import org.apache.jena.vocabulary.DCAT
 import org.apache.jena.vocabulary.RDF
+import org.apache.jena.vocabulary.SKOS
 import java.util.*
 
 
@@ -60,6 +62,22 @@ fun Resource.extractInformationModel(): InformationModelRDFModel {
     return InformationModelRDFModel(resource = this, harvested = infoModel)
 }
 
+private fun Model.addCodeElementsAssociatedWithCodeList(resource: Resource): Model {
+    resource.model
+        .listResourcesWithProperty(RDF.type, ModellDCATAPNO.CodeElement)
+        .toList()
+        .filter { it.hasProperty(SKOS.inScheme, resource) }
+        .forEach { codeElement ->
+            add(codeElement.listProperties())
+
+            codeElement.listProperties().toList()
+                .filter { it.isResourceProperty() }
+                .forEach { add(it.resource.listProperties()) }
+        }
+
+    return this
+}
+
 private fun Model.recursiveAddNonInformationModelResource(resource: Resource, recursiveCount: Int): Model {
     val newCount = recursiveCount - 1
     val types = resource.listProperties(RDF.type)
@@ -75,6 +93,8 @@ private fun Model.recursiveAddNonInformationModelResource(resource: Resource, re
                 .filter { it.isResourceProperty() }
                 .forEach { recursiveAddNonInformationModelResource(it.resource, newCount) }
         }
+
+        if (types.contains(ModellDCATAPNO.CodeList)) addCodeElementsAssociatedWithCodeList(resource)
     }
 
     return this

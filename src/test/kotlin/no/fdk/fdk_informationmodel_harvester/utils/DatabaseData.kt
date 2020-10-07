@@ -46,6 +46,15 @@ val INFO_MODEL_DBO_1 = InformationModelDBO(
     turtleInformationModel = gzip(responseReader.readFile("model_1.ttl"))
 )
 
+val CATALOG_DBO_2 = CatalogDBO(
+    uri = "${DIGDIR_PREFIX_2}Katalog2",
+    fdkId = CATALOG_ID_2,
+    issued = TEST_HARVEST_DATE.timeInMillis,
+    modified = TEST_HARVEST_DATE.timeInMillis,
+    turtleHarvested = gzip(responseReader.readFile("harvest_response_2.ttl")),
+    turtleCatalog = gzip(responseReader.readFile("catalog_2.ttl"))
+)
+
 val UNION_DATA = MiscellaneousTurtle(
     id = UNION_ID,
     isHarvestedSource = false,
@@ -62,6 +71,12 @@ val HARVEST_DBO_1 = MiscellaneousTurtle(
     id = "$WIREMOCK_TEST_URI/harvest1",
     isHarvestedSource = true,
     turtle = gzip(responseReader.readFile("harvest_response_1.ttl"))
+)
+
+val HARVEST_DBO_2 = MiscellaneousTurtle(
+    id = "$WIREMOCK_TEST_URI/harvest2",
+    isHarvestedSource = true,
+    turtle = gzip(responseReader.readFile("harvest_response_2.ttl"))
 )
 
 fun miscDBPopulation(): List<Document> =

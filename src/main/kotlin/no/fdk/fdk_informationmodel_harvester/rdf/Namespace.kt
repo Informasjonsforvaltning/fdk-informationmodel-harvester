@@ -8,6 +8,8 @@ class ModellDCATAPNO {
         private val m = ModelFactory.createDefaultModel()
         val uri = "https://data.norge.no/vocabulary/modelldcatno#"
         val InformationModel: Property = m.createProperty( "${uri}InformationModel")
+        val CodeList: Property = m.createProperty("${uri}CodeList")
+        val CodeElement: Property = m.createProperty("${uri}CodeElement")
         val model: Property = m.createProperty( "${uri}model")
     }
 }
