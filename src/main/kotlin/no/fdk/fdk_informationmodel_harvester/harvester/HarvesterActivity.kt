@@ -6,6 +6,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
 import no.fdk.fdk_informationmodel_harvester.adapter.HarvestAdminAdapter
 import no.fdk.fdk_informationmodel_harvester.rabbit.RabbitMQPublisher
+import no.fdk.fdk_informationmodel_harvester.service.UpdateService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -18,7 +19,8 @@ private const val HARVEST_ALL_ID = "all"
 class HarvesterActivity(
     private val harvestAdminAdapter: HarvestAdminAdapter,
     private val harvester: InformationModelHarvester,
-    private val publisher: RabbitMQPublisher
+    private val publisher: RabbitMQPublisher,
+    private val updateService: UpdateService
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
     @PostConstruct
@@ -44,7 +46,7 @@ class HarvesterActivity(
 
         val onHarvestCompletion = launch {
             harvest.join()
-            harvester.updateUnionModel()
+            updateService.updateUnionModel()
 
             if (params == null || params.isEmpty()) LOGGER.debug("completed harvest of all information models")
             else LOGGER.debug("completed harvest with parameters $params")

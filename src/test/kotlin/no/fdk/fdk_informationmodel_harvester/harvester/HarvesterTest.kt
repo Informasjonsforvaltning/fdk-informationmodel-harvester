@@ -1,7 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.harvester
 
 import com.nhaarman.mockitokotlin2.*
-import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.adapter.InformationModelAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.model.CatalogDBO
@@ -24,10 +23,9 @@ class HarvesterTest {
     private val miscRepository: MiscellaneousRepository = mock()
     private val valuesMock: ApplicationProperties = mock()
     private val adapter: InformationModelAdapter = mock()
-    private val fusekiAdapter: FusekiAdapter = mock()
 
     private val harvester = InformationModelHarvester(
-        adapter, fusekiAdapter, catalogRepository,
+        adapter, catalogRepository,
         modelRepository, miscRepository, valuesMock
     )
 

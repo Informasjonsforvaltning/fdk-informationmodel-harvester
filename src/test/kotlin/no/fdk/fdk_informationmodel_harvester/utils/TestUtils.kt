@@ -12,6 +12,7 @@ import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.service.ungzip
 import no.fdk.fdk_informationmodel_harvester.utils.ApiTestContext.Companion.mongoContainer
+import org.apache.jena.rdf.model.Model
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.pojo.PojoCodecProvider
 import org.slf4j.LoggerFactory
@@ -27,6 +28,36 @@ fun apiGet(endpoint: String, acceptHeader: String?): Map<String,Any> {
     return try {
         val connection = URL("$API_TEST_URI$endpoint").openConnection() as HttpURLConnection
         if(acceptHeader != null) connection.setRequestProperty("Accept", acceptHeader)
+        connection.connect()
+
+        if(isOK(connection.responseCode)) {
+            val responseBody = connection.inputStream.bufferedReader().use(BufferedReader::readText)
+            mapOf(
+                "body"   to responseBody,
+                "header" to connection.headerFields.toString(),
+                "status" to connection.responseCode)
+        } else {
+            mapOf(
+                "status" to connection.responseCode,
+                "header" to " ",
+                "body"   to " "
+            )
+        }
+    } catch (e: Exception) {
+        mapOf(
+            "status" to e.toString(),
+            "header" to " ",
+            "body"   to " "
+        )
+    }
+}
+
+fun apiPost(endpoint: String, headers: Map<String, String>): Map<String,Any> {
+
+    return try {
+        val connection = URL("$API_TEST_URI$endpoint").openConnection() as HttpURLConnection
+        headers.forEach { (key, value) -> connection.setRequestProperty(key, value) }
+        connection.requestMethod = "POST"
         connection.connect()
 
         if(isOK(connection.responseCode)) {
@@ -95,32 +126,31 @@ fun CatalogDBO.printTurtleDiff(expected: CatalogDBO) {
     val actualModel = parseRDFResponse(ungzip(turtleCatalog), JenaType.TURTLE, null)
     val expectedModel = parseRDFResponse(ungzip(expected.turtleCatalog), JenaType.TURTLE, null)
 
-    val actualDiff = actualModel!!.difference(expectedModel).createRDFResponse(JenaType.TURTLE)
-    val expectedDiff = expectedModel!!.difference(actualModel).createRDFResponse(JenaType.TURTLE)
-
-    if (actualDiff.isNotEmpty()) {
-        logger.error("non expected catalog nodes:")
-        logger.error(actualDiff)
-    }
-    if (expectedDiff.isNotEmpty()) {
-        logger.error("missing catalog nodes:")
-        logger.error(expectedDiff)
-    }
+    checkIfIsomorphicAndPrintDiff(actualModel!!, expectedModel!!, "CatalogDBO")
 }
 
 fun InformationModelDBO.printTurtleDiff(expected: InformationModelDBO) {
     val actualModel = parseRDFResponse(ungzip(turtleInformationModel), JenaType.TURTLE, null)
     val expectedModel = parseRDFResponse(ungzip(expected.turtleInformationModel), JenaType.TURTLE, null)
 
-    val actualDiff = actualModel!!.difference(expectedModel).createRDFResponse(JenaType.TURTLE)
-    val expectedDiff = expectedModel!!.difference(actualModel).createRDFResponse(JenaType.TURTLE)
+    checkIfIsomorphicAndPrintDiff(actualModel!!, expectedModel!!, "InformationModelDBO")
+}
 
-    if (actualDiff.isNotEmpty()) {
-        logger.error("non expected info model nodes:")
-        logger.error(actualDiff)
+fun checkIfIsomorphicAndPrintDiff(actual: Model, expected: Model, name: String): Boolean {
+    val isIsomorphic = actual.isIsomorphicWith(expected)
+
+    if (!isIsomorphic) {
+        val missing = actual.difference(expected).createRDFResponse(JenaType.TURTLE)
+        val nonExpected = expected.difference(actual).createRDFResponse(JenaType.TURTLE)
+
+        if (missing.isNotEmpty()) {
+            logger.error("missing nodes in $name:")
+            logger.error(missing)
+        }
+        if (nonExpected.isNotEmpty()) {
+            logger.error("non expected nodes in $name:")
+            logger.error(nonExpected)
+        }
     }
-    if (expectedDiff.isNotEmpty()) {
-        logger.error("missing info model nodes:")
-        logger.error(expectedDiff)
-    }
+    return isIsomorphic
 }

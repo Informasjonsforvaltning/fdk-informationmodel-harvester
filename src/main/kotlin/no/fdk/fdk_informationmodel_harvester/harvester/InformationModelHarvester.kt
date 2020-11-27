@@ -1,6 +1,5 @@
 package no.fdk.fdk_informationmodel_harvester.harvester
 
-import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.adapter.InformationModelAdapter
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
@@ -26,30 +25,11 @@ private val LOGGER = LoggerFactory.getLogger(InformationModelHarvester::class.ja
 @Service
 class InformationModelHarvester(
     private val adapter: InformationModelAdapter,
-    private val fusekiAdapter: FusekiAdapter,
     private val catalogRepository: CatalogRepository,
     private val informationModelRepository: InformationModelRepository,
     private val miscRepository: MiscellaneousRepository,
     private val applicationProperties: ApplicationProperties
 ) {
-
-    fun updateUnionModel() {
-        var unionModel = ModelFactory.createDefaultModel()
-
-        catalogRepository.findAll()
-            .map { parseRDFResponse(ungzip(it.turtleCatalog), JenaType.TURTLE, null) }
-            .forEach { unionModel = unionModel.union(it) }
-
-        fusekiAdapter.storeUnionModel(unionModel)
-
-        miscRepository.save(
-            MiscellaneousTurtle(
-                id = UNION_ID,
-                isHarvestedSource = false,
-                turtle = gzip(unionModel.createRDFResponse(JenaType.TURTLE))
-            )
-        )
-    }
 
     fun harvestInformationModelCatalog(source: HarvestDataSource, harvestDate: Calendar) =
         if (source.url != null) {
