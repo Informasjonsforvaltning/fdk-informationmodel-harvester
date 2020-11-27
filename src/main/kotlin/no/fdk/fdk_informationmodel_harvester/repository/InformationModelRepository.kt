@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface InformationModelRepository : MongoRepository<InformationModelDBO, String> {
     fun findOneByFdkId(fdkId: String): InformationModelDBO?
+    fun findAllByIsPartOf(isPartOf: String): List<InformationModelDBO>
 }

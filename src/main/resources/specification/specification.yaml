@@ -125,3 +125,14 @@ paths:
                 type: string
         '404':
           description: Information model with requested id does not exist
+  '/update/meta':
+    get:
+      tags:
+        - dcat-ap-no-informationmodels
+      description: Updates stored rdf data for information models and catalogs with current meta data
+      operationId: updateMetaData
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Forbidden

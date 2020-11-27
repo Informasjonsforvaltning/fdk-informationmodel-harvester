@@ -12,6 +12,7 @@ application:
   informationModelUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/informationmodels
   catalogUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/catalogs
   harvestAdminRootUrl: ${HARVEST_ADMIN_ROOT_URL:http://fdk-harvest-admin:8080/api}
+  fdkApiKey: ${FDK_INFORMATIONMODEL_HARVESTER_API_KEY}
 spring:
   rabbitmq:
     host: rabbitmq
@@ -35,18 +36,20 @@ application:
   informationModelUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/informationmodels
   catalogUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/catalogs
   harvestAdminRootUrl: https://admin-api.staging.fellesdatakatalog.digdir.no/api
+  fdkApiKey: fdk-api-key
 
 ---
 spring:
   profiles: contract-test
   rabbitmq:
     host: localhost
-    port: 5000
+    port: 5001
     username: admin
     password: admin
 application:
   informationModelUri: http://localhost:5000/informationmodels
   catalogUri: http://localhost:5000/catalogs
   harvestAdminRootUrl: http://localhost:5000/api
+  fdkApiKey: fdk-api-key
 fuseki.unionGraphUri: http://localhost:5000/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
 server.port: 5555
