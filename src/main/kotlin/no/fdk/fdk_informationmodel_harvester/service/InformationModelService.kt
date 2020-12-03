@@ -1,5 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.service
 
+import no.fdk.fdk_informationmodel_harvester.model.NO_FDK_UNION_ID
 import no.fdk.fdk_informationmodel_harvester.model.UNION_ID
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
 import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
@@ -21,27 +22,34 @@ class InformationModelService(
     fun countMetaData(): Long =
         catalogRepository.count()
 
-    fun getAll(returnType: JenaType): String =
-        miscellaneousRepository.findByIdOrNull(UNION_ID)
+    fun getAll(returnType: JenaType, includeFDKCatalogRecords: Boolean): String {
+        val id = if (includeFDKCatalogRecords) UNION_ID else NO_FDK_UNION_ID
+
+        return miscellaneousRepository.findByIdOrNull(id)
             ?.let { ungzip(it.turtle) }
             ?.let {
                 if (returnType == JenaType.TURTLE) it
                 else parseRDFResponse(it, JenaType.TURTLE, null)?.createRDFResponse(returnType)
             }
             ?: ModelFactory.createDefaultModel().createRDFResponse(returnType)
+    }
 
-    fun getInformationModelById(id: String, returnType: JenaType): String? =
+    fun getInformationModelById(id: String, returnType: JenaType, includeFDKCatalogRecords: Boolean): String? =
         infoRepository.findOneByFdkId(id)
-            ?.let { ungzip(it.turtleInformationModel) }
             ?.let {
+                if (includeFDKCatalogRecords) ungzip(it.turtleInformationModel)
+                else ungzip(it.turtleHarvested)
+            } ?.let {
                 if (returnType == JenaType.TURTLE) it
                 else parseRDFResponse(it, JenaType.TURTLE, null)?.createRDFResponse(returnType)
             }
 
-    fun getCatalogById(id: String, returnType: JenaType): String? =
+    fun getCatalogById(id: String, returnType: JenaType, includeFDKCatalogRecords: Boolean): String? =
         catalogRepository.findOneByFdkId(id)
-            ?.let { ungzip(it.turtleCatalog) }
             ?.let {
+                if (includeFDKCatalogRecords) ungzip(it.turtleCatalog)
+                else ungzip(it.turtleHarvested)
+            } ?.let {
                 if (returnType == JenaType.TURTLE) it
                 else parseRDFResponse(it, JenaType.TURTLE, null)?.createRDFResponse(returnType)
             }

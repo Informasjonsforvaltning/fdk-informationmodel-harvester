@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
 private val LOGGER = LoggerFactory.getLogger(InformationModelController::class.java)
@@ -21,13 +18,17 @@ private val LOGGER = LoggerFactory.getLogger(InformationModelController::class.j
 open class InformationModelController(private val informationModelService: InformationModelService) {
 
     @GetMapping(value = ["/{id}"])
-    fun getInformationModelById(httpServletRequest: HttpServletRequest, @PathVariable id: String): ResponseEntity<String> {
+    fun getInformationModelById(
+        httpServletRequest: HttpServletRequest,
+        @PathVariable id: String,
+        @RequestParam(value = "catalogrecords", required = false) catalogrecords: Boolean = false
+    ): ResponseEntity<String> {
         LOGGER.info("get InformationModel with id $id")
         val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
 
         return if (returnType == JenaType.NOT_JENA) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
         else {
-            informationModelService.getInformationModelById(id, returnType ?: JenaType.TURTLE)
+            informationModelService.getInformationModelById(id, returnType ?: JenaType.TURTLE, catalogrecords)
                 ?.let { ResponseEntity(it, HttpStatus.OK) }
                 ?: ResponseEntity(HttpStatus.NOT_FOUND)
         }

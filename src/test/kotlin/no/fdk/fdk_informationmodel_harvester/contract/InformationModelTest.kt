@@ -21,10 +21,21 @@ class InformationModelTest: ApiTestContext() {
 
     @Test
     fun findSpecific() {
-        val response = apiGet("/informationmodels/$INFO_MODEL_ID_0", "application/rdf+json")
+        val response = apiGet("/informationmodels/$INFO_MODEL_ID_0?catalogrecords=true", "application/rdf+json")
         Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
 
         val expected = responseReader.parseFile("model_0.ttl", "TURTLE")
+        val responseModel = responseReader.parseResponse(response["body"] as String, "RDF/JSON")
+
+        assertTrue(expected.isIsomorphicWith(responseModel))
+    }
+
+    @Test
+    fun findSpecificExcludeRecords() {
+        val response = apiGet("/informationmodels/$INFO_MODEL_ID_0", "application/rdf+json")
+        Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
+
+        val expected = responseReader.parseFile("no_meta_model_0.ttl", "TURTLE")
         val responseModel = responseReader.parseResponse(response["body"] as String, "RDF/JSON")
 
         assertTrue(expected.isIsomorphicWith(responseModel))
