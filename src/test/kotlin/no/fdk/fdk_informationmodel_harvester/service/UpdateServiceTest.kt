@@ -4,15 +4,14 @@ import com.nhaarman.mockitokotlin2.*
 import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.configuration.FusekiProperties
-import no.fdk.fdk_informationmodel_harvester.model.CatalogDBO
-import no.fdk.fdk_informationmodel_harvester.model.InformationModelDBO
-import no.fdk.fdk_informationmodel_harvester.model.MiscellaneousTurtle
-import no.fdk.fdk_informationmodel_harvester.model.UNION_ID
+import no.fdk.fdk_informationmodel_harvester.model.*
 import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
+import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
 import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
 import no.fdk.fdk_informationmodel_harvester.repository.MiscellaneousRepository
 import no.fdk.fdk_informationmodel_harvester.utils.*
+import org.apache.jena.rdf.model.Model
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -100,5 +99,43 @@ class UpdateServiceTest {
             }
         }
 
+    }
+
+    @Nested
+    internal inner class UpdateUnionModel {
+
+        @Test
+        fun updateUnionModel() {
+            whenever(catalogRepository.findAll())
+                .thenReturn(listOf(CATALOG_DBO_0, CATALOG_DBO_1))
+
+            updateService.updateUnionModel()
+
+            val expectedWithRecords = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
+            val expectedNoRecords = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
+
+            val expectedMiscList = listOf(
+                MiscellaneousTurtle(
+                    id = UNION_ID,
+                    isHarvestedSource = false,
+                    turtle = gzip(expectedWithRecords.createRDFResponse(JenaType.TURTLE))
+                ),
+                MiscellaneousTurtle(
+                    id = NO_FDK_UNION_ID,
+                    isHarvestedSource = false,
+                    turtle = gzip(expectedNoRecords.createRDFResponse(JenaType.TURTLE))
+                )
+            )
+
+            argumentCaptor<Model>().apply {
+                verify(fusekiAdapter, times(1)).storeUnionModel(capture())
+                assertTrue(firstValue.isIsomorphicWith(expectedWithRecords))
+            }
+
+            argumentCaptor<List<MiscellaneousTurtle>>().apply {
+                verify(miscRepository, times(1)).saveAll(capture())
+                assertEquals(expectedMiscList, firstValue)
+            }
+        }
     }
 }

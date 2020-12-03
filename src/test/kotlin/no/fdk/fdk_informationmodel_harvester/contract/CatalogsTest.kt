@@ -21,10 +21,21 @@ class CatalogsTest: ApiTestContext() {
 
     @Test
     fun findSpecific() {
-        val response = apiGet("/catalogs/$CATALOG_ID_0", "application/rdf+xml")
+        val response = apiGet("/catalogs/$CATALOG_ID_0?catalogrecords=true", "application/rdf+xml")
         Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
 
         val expected = responseReader.parseFile("catalog_0.ttl", "TURTLE")
+        val responseModel = responseReader.parseResponse(response["body"] as String, "RDFXML")
+
+        assertTrue(expected.isIsomorphicWith(responseModel))
+    }
+
+    @Test
+    fun findSpecificExcludeRecords() {
+        val response = apiGet("/catalogs/$CATALOG_ID_0", "application/rdf+xml")
+        Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
+
+        val expected = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
         val responseModel = responseReader.parseResponse(response["body"] as String, "RDFXML")
 
         assertTrue(expected.isIsomorphicWith(responseModel))
@@ -38,10 +49,20 @@ class CatalogsTest: ApiTestContext() {
 
     @Test
     fun findAll() {
-        val response = apiGet("/catalogs", "text/turtle")
+        val response = apiGet("/catalogs?catalogrecords=true", "text/turtle")
         Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
 
         val expected = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
+        val responseModel = responseReader.parseResponse(response["body"] as String, "TURTLE")
+        assertTrue(expected.isIsomorphicWith(responseModel))
+    }
+
+    @Test
+    fun findAllExcludeRecords() {
+        val response = apiGet("/catalogs", "text/turtle")
+        Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
+
+        val expected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
         val responseModel = responseReader.parseResponse(response["body"] as String, "TURTLE")
         assertTrue(expected.isIsomorphicWith(responseModel))
     }

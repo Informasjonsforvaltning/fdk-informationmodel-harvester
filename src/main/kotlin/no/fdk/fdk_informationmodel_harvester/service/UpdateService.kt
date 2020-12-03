@@ -3,10 +3,7 @@ package no.fdk.fdk_informationmodel_harvester.service
 import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.harvester.calendarFromTimestamp
-import no.fdk.fdk_informationmodel_harvester.model.CatalogDBO
-import no.fdk.fdk_informationmodel_harvester.model.InformationModelDBO
-import no.fdk.fdk_informationmodel_harvester.model.MiscellaneousTurtle
-import no.fdk.fdk_informationmodel_harvester.model.UNION_ID
+import no.fdk.fdk_informationmodel_harvester.model.*
 import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
 import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
@@ -32,18 +29,31 @@ class UpdateService (
 
     fun updateUnionModel() {
         var unionModel = ModelFactory.createDefaultModel()
+        var unionModelExcludedFDKMetaData = ModelFactory.createDefaultModel()
 
         catalogRepository.findAll()
-            .map { parseRDFResponse(ungzip(it.turtleCatalog), JenaType.TURTLE, null) }
-            .forEach { unionModel = unionModel.union(it) }
+            .forEach {
+                val metaModel = parseRDFResponse(ungzip(it.turtleCatalog), JenaType.TURTLE, null)
+                val noMetaModel = parseRDFResponse(ungzip(it.turtleHarvested), JenaType.TURTLE, null)
+
+                unionModel = unionModel.union(metaModel)
+                unionModelExcludedFDKMetaData = unionModelExcludedFDKMetaData.union(noMetaModel)
+            }
 
         fusekiAdapter.storeUnionModel(unionModel)
 
-        miscRepository.save(
-            MiscellaneousTurtle(
-                id = UNION_ID,
-                isHarvestedSource = false,
-                turtle = gzip(unionModel.createRDFResponse(JenaType.TURTLE))
+        miscRepository.saveAll(
+            listOf(
+                MiscellaneousTurtle(
+                    id = UNION_ID,
+                    isHarvestedSource = false,
+                    turtle = gzip(unionModel.createRDFResponse(JenaType.TURTLE))
+                ),
+                MiscellaneousTurtle(
+                    id = NO_FDK_UNION_ID,
+                    isHarvestedSource = false,
+                    turtle = gzip(unionModelExcludedFDKMetaData.createRDFResponse(JenaType.TURTLE))
+                )
             )
         )
     }

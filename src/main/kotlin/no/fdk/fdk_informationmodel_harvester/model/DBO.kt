@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 
 const val UNION_ID = "information-model-catalogs-union-graph"
+const val NO_FDK_UNION_ID = "information-model-catalogs-union-graph-exclude-fdk-catalog-records"
 
 @Document(collection = "informationmodel")
 data class InformationModelDBO (

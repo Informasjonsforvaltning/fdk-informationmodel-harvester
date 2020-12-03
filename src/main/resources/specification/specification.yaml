@@ -29,6 +29,14 @@ paths:
         - dcat-ap-no-catalogs
       description: Returns a collection of catalogs
       operationId: getCatalogs
+      parameters:
+        - name: catalogrecords
+          in: query
+          description: Include FDK catalog records
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: OK
@@ -64,6 +72,13 @@ paths:
           required: true
           schema:
             type: string
+        - name: catalogrecords
+          in: query
+          description: Include FDK catalog records
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: OK
@@ -101,6 +116,13 @@ paths:
           required: true
           schema:
             type: string
+        - name: catalogrecords
+          in: query
+          description: Include FDK catalog records
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: OK

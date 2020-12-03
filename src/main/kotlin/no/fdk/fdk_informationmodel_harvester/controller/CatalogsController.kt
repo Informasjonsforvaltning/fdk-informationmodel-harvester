@@ -7,10 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
 private val LOGGER = LoggerFactory.getLogger(CatalogsController::class.java)
@@ -21,24 +18,31 @@ private val LOGGER = LoggerFactory.getLogger(CatalogsController::class.java)
 open class CatalogsController(private val informationModelService: InformationModelService) {
 
     @GetMapping(value = ["/{id}"])
-    fun getCatalogById(httpServletRequest: HttpServletRequest, @PathVariable id: String): ResponseEntity<String> {
+    fun getCatalogById(
+        httpServletRequest: HttpServletRequest,
+        @PathVariable id: String,
+        @RequestParam(value = "catalogrecords", required = false) catalogrecords: Boolean = false
+    ): ResponseEntity<String> {
         LOGGER.info("get InformationModel catalog with id $id")
         val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
 
         return if (returnType == JenaType.NOT_JENA) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
         else {
-            informationModelService.getCatalogById(id, returnType ?: JenaType.TURTLE)
+            informationModelService.getCatalogById(id, returnType ?: JenaType.TURTLE, catalogrecords)
                 ?.let { ResponseEntity(it, HttpStatus.OK) }
                 ?: ResponseEntity(HttpStatus.NOT_FOUND)
         }
     }
 
     @GetMapping()
-    fun getCatalogs(httpServletRequest: HttpServletRequest): ResponseEntity<String> {
+    fun getCatalogs(
+        httpServletRequest: HttpServletRequest,
+        @RequestParam(value = "catalogrecords", required = false) catalogrecords: Boolean = false
+    ): ResponseEntity<String> {
         LOGGER.info("get all InformationModel catalogs")
         val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
 
         return if (returnType == JenaType.NOT_JENA) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
-        else ResponseEntity(informationModelService.getAll(returnType ?: JenaType.TURTLE), HttpStatus.OK)
+        else ResponseEntity(informationModelService.getAll(returnType ?: JenaType.TURTLE, catalogrecords), HttpStatus.OK)
     }
 }
