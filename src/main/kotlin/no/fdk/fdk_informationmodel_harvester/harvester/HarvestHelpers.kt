@@ -4,6 +4,8 @@ import no.fdk.fdk_informationmodel_harvester.model.CatalogDBO
 import no.fdk.fdk_informationmodel_harvester.model.InformationModelDBO
 import no.fdk.fdk_informationmodel_harvester.rdf.*
 import no.fdk.fdk_informationmodel_harvester.service.ungzip
+import org.apache.jena.query.QueryExecutionFactory
+import org.apache.jena.query.QueryFactory
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.Property
 import org.apache.jena.rdf.model.Resource
@@ -78,27 +80,29 @@ private fun Model.addCodeElementsAssociatedWithCodeList(resource: Resource): Mod
     return this
 }
 
-private fun Model.recursiveAddNonInformationModelResource(resource: Resource, recursiveCount: Int): Model {
-    val newCount = recursiveCount - 1
-    val types = resource.listProperties(RDF.type)
-        .toList()
-        .map { it.`object` }
+private fun Model.recursiveAddNonInformationModelResource(resource: Resource, recursiveCount: Int): Model =
+    if (containsTriple("<${resource.uri}>", "a", "?o")) this
+    else {
+        val newCount = recursiveCount - 1
+        val types = resource.listProperties(RDF.type)
+            .toList()
+            .map { it.`object` }
 
-    if (!types.contains(ModellDCATAPNO.InformationModel)) {
+        if (!types.contains(ModellDCATAPNO.InformationModel)) {
 
-        add(resource.listProperties())
+            add(resource.listProperties())
 
-        if (newCount > 0) {
-            resource.listProperties().toList()
-                .filter { it.isResourceProperty() }
-                .forEach { recursiveAddNonInformationModelResource(it.resource, newCount) }
+            if (newCount > 0) {
+                resource.listProperties().toList()
+                    .filter { it.isResourceProperty() }
+                    .forEach { recursiveAddNonInformationModelResource(it.resource, newCount) }
+            }
+
+            if (types.contains(ModellDCATAPNO.CodeList)) addCodeElementsAssociatedWithCodeList(resource)
         }
 
-        if (types.contains(ModellDCATAPNO.CodeList)) addCodeElementsAssociatedWithCodeList(resource)
+        this
     }
-
-    return this
-}
 
 fun calendarFromTimestamp(timestamp: Long): Calendar {
     val calendar = Calendar.getInstance()
@@ -117,3 +121,10 @@ data class InformationModelRDFModel (
     val resource: Resource,
     val harvested: Model
 )
+
+private fun Model.containsTriple(subj: String, pred: String, obj: String): Boolean {
+    val askQuery = "ASK { $subj $pred $obj }"
+
+    val query = QueryFactory.create(askQuery)
+    return QueryExecutionFactory.create(query, this).execAsk()
+}
