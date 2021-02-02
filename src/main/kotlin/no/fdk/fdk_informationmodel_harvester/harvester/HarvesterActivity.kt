@@ -46,6 +46,7 @@ class HarvesterActivity(
 
         val onHarvestCompletion = launch {
             harvest.join()
+            LOGGER.debug("Updating union model")
             updateService.updateUnionModel()
 
             if (params == null || params.isEmpty()) LOGGER.debug("completed harvest of all information models")
