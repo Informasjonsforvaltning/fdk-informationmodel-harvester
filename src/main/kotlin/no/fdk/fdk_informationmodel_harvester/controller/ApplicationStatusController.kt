@@ -1,6 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.controller
 
-import no.fdk.fdk_informationmodel_harvester.service.InformationModelService
+import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin
-class ApplicationStatusController(private val informationModelService: InformationModelService) {
+class ApplicationStatusController(private val catalogRepository: CatalogRepository) {
 
     @GetMapping("/ping")
     fun ping(): ResponseEntity<Void> =
@@ -22,7 +22,7 @@ class ApplicationStatusController(private val informationModelService: Informati
     @GetMapping("/count")
     fun count(): ResponseEntity<Long> {
         try {
-            return ResponseEntity.ok(informationModelService.countMetaData())
+            return ResponseEntity.ok(catalogRepository.count())
         } catch (e: Exception) {
             e.printStackTrace()
         }

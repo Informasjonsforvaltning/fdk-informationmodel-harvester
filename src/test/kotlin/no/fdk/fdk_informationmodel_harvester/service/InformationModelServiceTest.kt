@@ -2,27 +2,18 @@ package no.fdk.fdk_informationmodel_harvester.service
 
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import no.fdk.fdk_informationmodel_harvester.model.MiscellaneousTurtle
-import no.fdk.fdk_informationmodel_harvester.model.NO_FDK_UNION_ID
-import no.fdk.fdk_informationmodel_harvester.model.UNION_ID
 import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
-import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
-import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
-import no.fdk.fdk_informationmodel_harvester.repository.MiscellaneousRepository
 import no.fdk.fdk_informationmodel_harvester.utils.*
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import java.util.*
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 @Tag("unit")
 class InformationModelServiceTest {
-    private val catalogRepository: CatalogRepository = mock()
-    private val modelRepository: InformationModelRepository = mock()
-    private val miscRepository: MiscellaneousRepository = mock()
-    private val modelService = InformationModelService(catalogRepository, modelRepository, miscRepository)
+    private val turtleService: TurtleService = mock()
+    private val modelService = InformationModelService(turtleService)
 
     private val responseReader = TestResponseReader()
 
@@ -31,10 +22,10 @@ class InformationModelServiceTest {
 
         @Test
         fun responseIsometricWithEmptyModelForEmptyDB() {
-            whenever(miscRepository.findById(UNION_ID))
-                .thenReturn(Optional.empty())
-            whenever(miscRepository.findById(NO_FDK_UNION_ID))
-                .thenReturn(Optional.empty())
+            whenever(turtleService.findUnionModel(withRecords = true))
+                .thenReturn(null)
+            whenever(turtleService.findUnionModel(withRecords = false))
+                .thenReturn(null)
 
             val expected = responseReader.parseResponse("", "TURTLE")
 
@@ -47,14 +38,8 @@ class InformationModelServiceTest {
 
         @Test
         fun getAllHandlesTurtleAndOtherRDF() {
-            val allCatalogs = MiscellaneousTurtle(
-                id = UNION_ID,
-                isHarvestedSource = false,
-                turtle = gzip(javaClass.classLoader.getResource("all_catalogs.ttl")!!.readText())
-            )
-
-            whenever(miscRepository.findById(UNION_ID))
-                .thenReturn(Optional.of(allCatalogs))
+            whenever(turtleService.findUnionModel(true))
+                .thenReturn(javaClass.classLoader.getResource("all_catalogs.ttl")!!.readText())
 
             val expected = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
 
@@ -69,14 +54,8 @@ class InformationModelServiceTest {
 
         @Test
         fun getAllHarvestedHandlesTurtleAndOtherRDF() {
-            val allCatalogs = MiscellaneousTurtle(
-                id = NO_FDK_UNION_ID,
-                isHarvestedSource = false,
-                turtle = gzip(javaClass.classLoader.getResource("no_meta_all_catalogs.ttl")!!.readText())
-            )
-
-            whenever(miscRepository.findById(NO_FDK_UNION_ID))
-                .thenReturn(Optional.of(allCatalogs))
+            whenever(turtleService.findUnionModel(false))
+                .thenReturn(javaClass.classLoader.getResource("no_meta_all_catalogs.ttl")!!.readText())
 
             val expected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
 
@@ -96,7 +75,7 @@ class InformationModelServiceTest {
 
         @Test
         fun responseIsNullWhenNoCatalogIsFound() {
-            whenever(catalogRepository.findOneByFdkId("123"))
+            whenever(turtleService.findInformationModel("123", true))
                 .thenReturn(null)
 
             val response = modelService.getCatalogById("123", JenaType.TURTLE, true)
@@ -106,8 +85,10 @@ class InformationModelServiceTest {
 
         @Test
         fun responseIsIsomorphicWithExpectedModel() {
-            whenever(catalogRepository.findOneByFdkId(CATALOG_ID_0))
-                .thenReturn(CATALOG_DBO_0)
+            whenever(turtleService.findCatalog(CATALOG_ID_0, withRecords = true))
+                .thenReturn(javaClass.classLoader.getResource("catalog_0.ttl")!!.readText())
+            whenever(turtleService.findCatalog(CATALOG_ID_0, withRecords = false))
+                .thenReturn(javaClass.classLoader.getResource("no_meta_catalog_0.ttl")!!.readText())
 
             val responseTurtle = modelService.getCatalogById(CATALOG_ID_0, JenaType.TURTLE, true)
             val responseJsonRDF = modelService.getCatalogById(CATALOG_ID_0, JenaType.RDF_JSON, false)
@@ -126,7 +107,7 @@ class InformationModelServiceTest {
 
         @Test
         fun responseIsNullWhenNoModelIsFound() {
-            whenever(modelRepository.findOneByFdkId("123"))
+            whenever(turtleService.findInformationModel("123", true))
                 .thenReturn(null)
 
             val response = modelService.getInformationModelById("123", JenaType.TURTLE, true)
@@ -136,8 +117,10 @@ class InformationModelServiceTest {
 
         @Test
         fun responseIsIsomorphicWithExpectedModel() {
-            whenever(modelRepository.findOneByFdkId(INFO_MODEL_ID_0))
-                .thenReturn(INFO_MODEL_DBO_0)
+            whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, true))
+                .thenReturn(javaClass.classLoader.getResource("model_0.ttl")!!.readText())
+            whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, false))
+                .thenReturn(javaClass.classLoader.getResource("no_meta_model_0.ttl")!!.readText())
 
             val responseTurtle = modelService.getInformationModelById(INFO_MODEL_ID_0, JenaType.TURTLE, false)
             val responseRDFXML = modelService.getInformationModelById(INFO_MODEL_ID_0, JenaType.RDF_XML, true)

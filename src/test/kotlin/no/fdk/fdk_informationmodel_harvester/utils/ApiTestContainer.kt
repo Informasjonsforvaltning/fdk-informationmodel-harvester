@@ -1,18 +1,26 @@
 package no.fdk.fdk_informationmodel_harvester.utils
 
+import org.junit.jupiter.api.BeforeAll
 import org.slf4j.LoggerFactory
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.wait.strategy.HttpWaitStrategy
 import org.testcontainers.containers.wait.strategy.Wait
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.time.Duration
 
 abstract class ApiTestContext {
+
+    @BeforeAll
+    fun waitForHarvest() {
+        var apiReady = harvestCompleted()
+        while (!apiReady) {
+            Thread.sleep(1000)
+            apiReady = harvestCompleted()
+        }
+    }
 
     internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
         override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
@@ -37,8 +45,6 @@ abstract class ApiTestContext {
                 .waitingFor(Wait.forListeningPort())
 
             mongoContainer.start()
-
-            populateDB()
 
             try {
                 val con = URL("http://localhost:5000/ping").openConnection() as HttpURLConnection

@@ -2,13 +2,10 @@ package no.fdk.fdk_informationmodel_harvester.harvester
 
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.adapter.InformationModelAdapter
-import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
-import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
-import no.fdk.fdk_informationmodel_harvester.repository.MiscellaneousRepository
-import no.fdk.fdk_informationmodel_harvester.service.gzip
-import no.fdk.fdk_informationmodel_harvester.service.ungzip
 import no.fdk.fdk_informationmodel_harvester.model.*
 import no.fdk.fdk_informationmodel_harvester.rdf.*
+import no.fdk.fdk_informationmodel_harvester.repository.*
+import no.fdk.fdk_informationmodel_harvester.service.TurtleService
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.ModelFactory
 import org.apache.jena.sparql.vocabulary.FOAF
@@ -27,7 +24,7 @@ class InformationModelHarvester(
     private val adapter: InformationModelAdapter,
     private val catalogRepository: CatalogRepository,
     private val informationModelRepository: InformationModelRepository,
-    private val miscRepository: MiscellaneousRepository,
+    private val turtleService: TurtleService,
     private val applicationProperties: ApplicationProperties
 ) {
 
@@ -52,21 +49,14 @@ class InformationModelHarvester(
 
     private fun checkHarvestedContainsChanges(harvested: Model, sourceURL: String, harvestDate: Calendar) {
         val dbId = createIdFromUri(sourceURL)
-        val dbData = miscRepository
-            .findByIdOrNull(sourceURL)
-            ?.let { parseRDFResponse(ungzip(it.turtle), JenaType.TURTLE, null) }
+        val dbData = turtleService.findOne(sourceURL)
+            ?.let { parseRDFResponse(it, JenaType.TURTLE, null) }
 
         if (dbData != null && harvested.isIsomorphicWith(dbData)) {
             LOGGER.info("No changes from last harvest of $sourceURL")
         } else {
             LOGGER.info("Changes detected, saving data from $sourceURL on graph $dbId, and updating FDK meta data")
-            miscRepository.save(
-                MiscellaneousTurtle(
-                    id = sourceURL,
-                    isHarvestedSource = true,
-                    turtle = gzip(harvested.createRDFResponse(JenaType.TURTLE))
-                )
-            )
+            turtleService.saveOne(filename = sourceURL, turtle = harvested.createRDFResponse(JenaType.TURTLE))
 
             val catalogs = splitCatalogsFromRDF(harvested)
 
@@ -76,96 +66,122 @@ class InformationModelHarvester(
     }
 
     private fun updateDB(catalogs: List<CatalogAndInfoModels>, harvestDate: Calendar) {
-        val catalogsToSave = mutableListOf<CatalogDBO>()
-        val modelsToSave = mutableListOf<InformationModelDBO>()
-
         catalogs
             .map { Pair(it, catalogRepository.findByIdOrNull(it.resource.uri)) }
-            .filter { it.first.harvestDiff(it.second) }
+            .filter { it.first.catalogHasChanges(it.second?.fdkId) }
             .forEach {
-                val catalogURI = it.first.resource.uri
+                val updatedCatalogMeta = it.first.mapToCatalogMeta(harvestDate, it.second)
+                catalogRepository.save(updatedCatalogMeta)
 
-                val fdkId = it.second?.fdkId ?: createIdFromUri(catalogURI)
-                val fdkUri = "${applicationProperties.catalogUri}/$fdkId"
+                turtleService.saveCatalog(
+                    fdkId = updatedCatalogMeta.fdkId,
+                    turtle = it.first.harvestedCatalog.createRDFResponse(JenaType.TURTLE),
+                    withRecords = false
+                )
 
-                val issued = it.second?.issued
-                    ?.let { timestamp -> calendarFromTimestamp(timestamp) }
-                    ?: harvestDate
+                val fdkUri = "${applicationProperties.catalogUri}/${updatedCatalogMeta.fdkId}"
+
+                it.first.models.forEach { infoModel ->
+                    infoModel.updateDBOs(harvestDate, fdkUri)
+                }
 
                 var catalogModel = it.first.harvestedCatalogWithoutInfoModels
-
                 catalogModel.createResource(fdkUri)
                     .addProperty(RDF.type, DCAT.CatalogRecord)
-                    .addProperty(DCTerms.identifier, fdkId)
-                    .addProperty(FOAF.primaryTopic, catalogModel.createResource(catalogURI))
-                    .addProperty(DCTerms.issued, catalogModel.createTypedLiteral(issued))
+                    .addProperty(DCTerms.identifier, updatedCatalogMeta.fdkId)
+                    .addProperty(FOAF.primaryTopic, catalogModel.createResource(updatedCatalogMeta.uri))
+                    .addProperty(DCTerms.issued, catalogModel.createTypedLiteral(calendarFromTimestamp(updatedCatalogMeta.issued)))
                     .addProperty(DCTerms.modified, catalogModel.createTypedLiteral(harvestDate))
 
-                val modelsWithChanges = it.first.models
-                    .map { infoModel ->
-                        val dbInfoModel = informationModelRepository.findByIdOrNull(infoModel.resource.uri)
-                        if (dbInfoModel == null || infoModel.harvestDiff(dbInfoModel)) {
-                            Pair(infoModel.mapToUpdatedDBO(harvestDate, fdkUri, dbInfoModel), true)
-                        } else {
-                            Pair(dbInfoModel, false)
-                        }
-                    }
+                informationModelRepository.findAllByIsPartOf(fdkUri)
+                    .mapNotNull { infoMeta -> turtleService.findInformationModel(infoMeta.fdkId, withRecords = true) }
+                    .map { infoModelTurtle -> parseRDFResponse(infoModelTurtle, JenaType.TURTLE, null) }
+                    .forEach { infoModel -> catalogModel = catalogModel.union(infoModel) }
 
-                modelsWithChanges
-                    .map { pair -> pair.first }
-                    .map { dataset -> parseRDFResponse(ungzip(dataset.turtleInformationModel), JenaType.TURTLE, null) }
-                    .forEach { model -> catalogModel = catalogModel.union(model) }
-
-                modelsWithChanges
-                    .filter { dsWithChanged -> dsWithChanged.second }
-                    .forEach { pair -> modelsToSave.add(pair.first) }
-
-                catalogsToSave.add(
-                    CatalogDBO(
-                        uri = catalogURI,
-                        fdkId = fdkId,
-                        issued = issued.timeInMillis,
-                        modified = harvestDate.timeInMillis,
-                        turtleHarvested = gzip(it.first.harvestedCatalog.createRDFResponse(JenaType.TURTLE)),
-                        turtleCatalog = gzip(catalogModel.createRDFResponse(JenaType.TURTLE))
-                    )
+                turtleService.saveCatalog(
+                    fdkId = updatedCatalogMeta.fdkId,
+                    turtle = catalogModel.createRDFResponse(JenaType.TURTLE),
+                    withRecords = true
                 )
             }
-
-        catalogRepository.saveAll(catalogsToSave)
-        informationModelRepository.saveAll(modelsToSave)
     }
 
-    private fun InformationModelRDFModel.mapToUpdatedDBO(
+    private fun InformationModelRDFModel.updateDBOs(
         harvestDate: Calendar,
-        catalogURI: String,
-        dbService: InformationModelDBO?
-    ): InformationModelDBO {
-        val fdkId = dbService?.fdkId ?: createIdFromUri(resource.uri)
-        val fdkUri = "${applicationProperties.informationModelUri}/$fdkId"
+        fdkCatalogURI: String
+    ) {
+        val dbMeta = informationModelRepository.findByIdOrNull(resource.uri)
+        if (modelHasChanges(dbMeta?.fdkId)) {
+            val modelMeta = mapToDBOMeta(harvestDate, fdkCatalogURI, dbMeta)
+            informationModelRepository.save(modelMeta)
 
-        val metaModel = ModelFactory.createDefaultModel()
+            turtleService.saveInformationModel(
+                fdkId = modelMeta.fdkId,
+                turtle = harvested.createRDFResponse(JenaType.TURTLE),
+                withRecords = false
+            )
 
-        val issued: Calendar = dbService?.issued
+            val fdkUri = "${applicationProperties.informationModelUri}/${modelMeta.fdkId}"
+            val metaModel = ModelFactory.createDefaultModel()
+
+            metaModel.createResource(fdkUri)
+                .addProperty(RDF.type, DCAT.CatalogRecord)
+                .addProperty(DCTerms.identifier, modelMeta.fdkId)
+                .addProperty(FOAF.primaryTopic, metaModel.createResource(resource.uri))
+                .addProperty(DCTerms.isPartOf, metaModel.createResource(modelMeta.isPartOf))
+                .addProperty(DCTerms.issued, metaModel.createTypedLiteral(calendarFromTimestamp(modelMeta.issued)))
+                .addProperty(DCTerms.modified, metaModel.createTypedLiteral(harvestDate))
+
+            turtleService.saveInformationModel(
+                fdkId = modelMeta.fdkId,
+                turtle = metaModel.union(harvested).createRDFResponse(JenaType.TURTLE),
+                withRecords = true
+            )
+        }
+    }
+
+    private fun CatalogAndInfoModels.mapToCatalogMeta(
+        harvestDate: Calendar,
+        dbMeta: CatalogMeta?
+    ): CatalogMeta {
+        val catalogURI = resource.uri
+        val fdkId = dbMeta?.fdkId ?: createIdFromUri(catalogURI)
+        val issued = dbMeta?.issued
             ?.let { timestamp -> calendarFromTimestamp(timestamp) }
             ?: harvestDate
 
-        metaModel.createResource(fdkUri)
-            .addProperty(RDF.type, DCAT.CatalogRecord)
-            .addProperty(DCTerms.identifier, fdkId)
-            .addProperty(FOAF.primaryTopic, metaModel.createResource(resource.uri))
-            .addProperty(DCTerms.isPartOf, metaModel.createResource(catalogURI))
-            .addProperty(DCTerms.issued, metaModel.createTypedLiteral(issued))
-            .addProperty(DCTerms.modified, metaModel.createTypedLiteral(harvestDate))
-
-        return InformationModelDBO(
-            uri = resource.uri,
+        return CatalogMeta(
+            uri = catalogURI,
             fdkId = fdkId,
-            isPartOf = catalogURI,
             issued = issued.timeInMillis,
-            modified = harvestDate.timeInMillis,
-            turtleHarvested = gzip(harvested.createRDFResponse(JenaType.TURTLE)),
-            turtleInformationModel = gzip(metaModel.union(harvested).createRDFResponse(JenaType.TURTLE))
+            modified = harvestDate.timeInMillis
         )
     }
+
+    private fun InformationModelRDFModel.mapToDBOMeta(
+        harvestDate: Calendar,
+        fdkCatalogURI: String,
+        dbMeta: InformationModelMeta?
+    ): InformationModelMeta {
+        val fdkId = dbMeta?.fdkId ?: createIdFromUri(resource.uri)
+        val issued: Calendar = dbMeta?.issued
+            ?.let { timestamp -> calendarFromTimestamp(timestamp) }
+            ?: harvestDate
+
+        return InformationModelMeta(
+            uri = resource.uri,
+            fdkId = fdkId,
+            isPartOf = fdkCatalogURI,
+            issued = issued.timeInMillis,
+            modified = harvestDate.timeInMillis
+        )
+    }
+
+    private fun CatalogAndInfoModels.catalogHasChanges(fdkId: String?): Boolean =
+        if (fdkId == null) true
+        else harvestDiff(turtleService.findCatalog(fdkId, withRecords = false))
+
+    private fun InformationModelRDFModel.modelHasChanges(fdkId: String?): Boolean =
+        if (fdkId == null) true
+        else harvestDiff(turtleService.findInformationModel(fdkId, withRecords = false))
 }
