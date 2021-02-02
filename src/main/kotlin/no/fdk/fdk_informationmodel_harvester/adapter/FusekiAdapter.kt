@@ -18,6 +18,7 @@ class FusekiAdapter(private val fusekiProperties: FusekiProperties) {
 
     fun storeUnionModel(model: Model) =
         try {
+            LOGGER.debug("Updating fuseki graph")
             with(URL(fusekiProperties.unionGraphUri).openConnection() as HttpURLConnection) {
                 setRequestProperty("Content-type", "application/rdf+xml")
                 requestMethod = "PUT"
@@ -29,7 +30,7 @@ class FusekiAdapter(private val fusekiProperties: FusekiProperties) {
                 }
 
                 if (HttpStatus.valueOf(responseCode).is2xxSuccessful) {
-                    LOGGER.info("Save to fuseki completed, status: $responseCode")
+                    LOGGER.debug("Save to fuseki completed, status: $responseCode")
                 } else {
                     LOGGER.error("Save to fuseki failed, status: $responseCode")
                 }
