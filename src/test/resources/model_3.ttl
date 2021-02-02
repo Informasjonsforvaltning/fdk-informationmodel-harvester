@@ -1,0 +1,90 @@
+@prefix ex-code: <http://example.com/code#> .
+@prefix ex-note: <http://example.com/test_note#> .
+@prefix adms:  <http://www.w3.org/ns/adms#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix ex-specialization: <http://example.com/test_specialization#> .
+@prefix ex-abstrakt: <http://example.com/test_abstraksjon#> .
+@prefix ex-bidir: <http://example.com/test#> .
+@prefix xkos:  <https://rdf-vocabulary.ddialliance.org/xkos/> .
+@prefix ex-mch: <http://example.com/test_mch#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix ex-sch: <http://example.com/test_sch#> .
+@prefix ex-composition: <http://example.com/test_compesition#> .
+@prefix modelldcatno: <https://data.norge.no/vocabulary/modelldcatno#> .
+@prefix ex-rel: <http://example.com/test_realization#> .
+@prefix ex-valgfri: <http://example.com/test_valgfri#> .
+@prefix ex-collection: <http://example.com/test_collection#> .
+@prefix dcat:  <http://www.w3.org/ns/dcat#> .
+@prefix locn:  <http://www.w3.org/ns/locn#> .
+@prefix digs:  <https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+ex-abstrakt:EBU_EditorialObject
+        a                modelldcatno:ObjectType , <http://www.ebu.ch/metadata/ontologies/ebucore/ebucore#EditorialObject> , owl:NamedIndividual ;
+        dct:description  "Klasse, som er et modellelement, men og viser at den er hentet fra en annen ontologi"@nb ;
+        dct:title        "Editorial Object"@en .
+
+digs:Utgiver  a         foaf:Agent , owl:NamedIndividual ;
+        dct:identifier  "991825827" ;
+        dct:type        "Organisasjonsledd"@nb ;
+        foaf:name       "Digitaliseringsdirektoratet"@nb .
+
+<http://localhost:5000/informationmodels/bcbe6738-85f6-388c-afcc-ef1fafd7cc45>
+        a                  dcat:CatalogRecord ;
+        dct:identifier     "bcbe6738-85f6-388c-afcc-ef1fafd7cc45" ;
+        dct:isPartOf       <http://localhost:5000/catalogs/f25c939d-0722-3aa3-82b1-eaa457086444> ;
+        dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
+        dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
+        foaf:primaryTopic  digs:Diversemodell .
+
+digs:Diversemodell  a      owl:NamedIndividual , modelldcatno:InformationModel ;
+        dct:description    "Modell med diverse i. Inneholder modellelementer som AltMuligModell skal peke til."@nb ;
+        dct:hasFormat      digs:AlternativModellformat ;
+        dct:identifier     "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell" ;
+        dct:isPartOf       <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Altmuligmodell> ;
+        dct:isReplacedBy   <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Altmuligmodell> ;
+        dct:issued         "2016-09-28T00:00:00+01:00"^^xsd:dateTime ;
+        dct:language       <http://publications.europa.eu/resource/authority/language/NOB> ;
+        dct:license        <http://creativecommons.org/licenses/by/4.0/deed.no> ;
+        dct:modified       "2017-09-28T00:00:00+01:00"^^xsd:dateTime ;
+        dct:publisher      digs:Utgiver ;
+        dct:spatial        <http://publications.europa.eu/resource/authority/country/NOR> ;
+        dct:temporal       digs:Tidsintervall ;
+        dct:title          "Diversemodell"@nb ;
+        dct:type           "Fellesmodell"@nb ;
+        owl:versionInfo    "1.0" ;
+        adms:status        <http://purl.org/adms/status/Completed> ;
+        adms:versionNotes  "Lagt til objekttypen Timeline"@nb ;
+        dcat:contactPoint  digs:KontaktOss ;
+        dcat:keyword       "Adresse"@nb ;
+        dcat:theme         <https://psi.norge.no/los/tema/eiendom> ;
+        foaf:homepage      <https://www.difi.no/fagomrader-og-tjenester/digitalisering-og-samordning/nasjonal-arkitektur/informasjonsforvaltning/adresse-felles-informasjonsmodell> ;
+        modelldcatno:containsModelElement
+                ex-rel:abstrakt , ex-abstrakt:timeline , ex-abstrakt:EBU_EditorialObject ;
+        modelldcatno:informationModelIdentifier
+                "https://www.digdir.no/diversemodell" .
+
+digs:AlternativModellformat
+        a           foaf:Document , <https://informasjonsforvaltning.github.io/modelldcat-ap-no/images/ModellDCAT-ap-no.png> , owl:NamedIndividual ;
+        dct:format  <http://publications.europa.eu/resource/authority/file-type/PNG> ;
+        dct:title   "Forenklet modell for ModellDCAT-AP-NO"@nb .
+
+ex-rel:abstrakt  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Abstrakt"@nb .
+
+digs:Tidsintervall  a   dct:PeriodOfTime , owl:NamedIndividual ;
+        dcat:endDate    "2030-02-11T00:00:00+01:00"^^xsd:dateTime ;
+        dcat:startDate  "2016-02-11T00:00:00+01:00"^^xsd:dateTime .
+
+ex-abstrakt:timeline  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description  "Objekt som samler ulike eventer som egene objekter"@nb ;
+        dct:title        "Timeline"@nb .
+
+digs:KontaktOss  a          owl:NamedIndividual , vcard:Kind ;
+        vcard:fn            "Avdeling for digitalisering"@nb , "Avdeling for digitalisering"@nn , "Digitalisation department"@en ;
+        vcard:hasEmail      <mailto:informasjonsforvaltning@digdir.no> ;
+        vcard:hasTelephone  <tel:12345678> .

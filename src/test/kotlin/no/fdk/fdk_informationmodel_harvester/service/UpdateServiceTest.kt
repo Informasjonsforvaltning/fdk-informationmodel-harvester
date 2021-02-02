@@ -3,31 +3,27 @@ package no.fdk.fdk_informationmodel_harvester.service
 import com.nhaarman.mockitokotlin2.*
 import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
-import no.fdk.fdk_informationmodel_harvester.configuration.FusekiProperties
-import no.fdk.fdk_informationmodel_harvester.model.*
 import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
-import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
+import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
 import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
-import no.fdk.fdk_informationmodel_harvester.repository.MiscellaneousRepository
 import no.fdk.fdk_informationmodel_harvester.utils.*
 import org.apache.jena.rdf.model.Model
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @Tag("unit")
 class UpdateServiceTest {
     private val catalogRepository: CatalogRepository = mock()
     private val modelRepository: InformationModelRepository = mock()
-    private val miscRepository: MiscellaneousRepository = mock()
     private val valuesMock: ApplicationProperties = mock()
     private val fusekiAdapter: FusekiAdapter = mock()
+    private val turtleService: TurtleService = mock()
     private val updateService = UpdateService(
-        valuesMock, fusekiAdapter, catalogRepository, modelRepository, miscRepository)
+        valuesMock, fusekiAdapter, catalogRepository, modelRepository, turtleService)
 
     private val responseReader = TestResponseReader()
 
@@ -35,13 +31,22 @@ class UpdateServiceTest {
     internal inner class UpdateMetaData {
 
         @Test
-        fun noDiffInMetaDataLeavesTurtleUnchanged() {
+        fun catalogRecordsIsRecreatedFromMetaDBO() {
             whenever(catalogRepository.findAll())
                 .thenReturn(listOf(CATALOG_DBO_0, CATALOG_DBO_1))
             whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/${CATALOG_DBO_0.fdkId}"))
                 .thenReturn(listOf(INFO_MODEL_DBO_0))
             whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/${CATALOG_DBO_1.fdkId}"))
                 .thenReturn(listOf(INFO_MODEL_DBO_1))
+            whenever(turtleService.findCatalog(CATALOG_ID_0, false))
+                .thenReturn(responseReader.readFile("harvest_response_0.ttl"))
+            whenever(turtleService.findCatalog(CATALOG_ID_1, false))
+                .thenReturn(responseReader.readFile("harvest_response_1.ttl"))
+            whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, false))
+                .thenReturn(responseReader.readFile("no_meta_model_0.ttl"))
+            whenever(turtleService.findInformationModel(INFO_MODEL_ID_1, false))
+                .thenReturn(responseReader.readFile("no_meta_model_1.ttl"))
+
 
             whenever(valuesMock.catalogUri)
                 .thenReturn("http://localhost:5000/catalogs")
@@ -50,52 +55,25 @@ class UpdateServiceTest {
 
             updateService.updateMetaData()
 
-            argumentCaptor<List<CatalogDBO>>().apply {
-                verify(catalogRepository, times(1)).saveAll(capture())
-                if (CATALOG_DBO_0 != firstValue.first()) firstValue.first().printTurtleDiff(CATALOG_DBO_0)
-                if (CATALOG_DBO_1 != firstValue[1]) firstValue[1].printTurtleDiff(CATALOG_DBO_0)
-                assertEquals(listOf(CATALOG_DBO_0, CATALOG_DBO_1), firstValue)
+            val expectedCatalog0 = responseReader.parseFile("catalog_0.ttl", "TURTLE")
+            val expectedInfoModel0 = responseReader.parseFile("model_0.ttl", "TURTLE")
+            val expectedCatalog1 = responseReader.parseFile("catalog_1.ttl", "TURTLE")
+            val expectedInfoModel1 = responseReader.parseFile("model_1.ttl", "TURTLE")
+
+            argumentCaptor<String, String, Boolean>().apply {
+                verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
+                assertEquals(listOf(CATALOG_ID_0, CATALOG_ID_1), first.allValues)
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, JenaType.TURTLE, null)!!, expectedCatalog0, "diffInMetaDataUpdatesTurtle-catalog0"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, JenaType.TURTLE, null)!!, expectedCatalog1, "diffInMetaDataUpdatesTurtle-catalog1"))
+                assertEquals(listOf(true, true), third.allValues)
             }
 
-            argumentCaptor<List<InformationModelDBO>>().apply {
-                verify(modelRepository, times(1)).saveAll(capture())
-                if (INFO_MODEL_DBO_0 != firstValue.first()) firstValue.first().printTurtleDiff(INFO_MODEL_DBO_0)
-                if (INFO_MODEL_DBO_1 != firstValue[1]) firstValue[1].printTurtleDiff(INFO_MODEL_DBO_1)
-                assertEquals(listOf(INFO_MODEL_DBO_0, INFO_MODEL_DBO_1), firstValue)
-            }
-        }
-
-        @Test
-        fun diffInMetaDataUpdatesTurtle() {
-            val catalogWrongMeta = gzip(responseReader.readFile("catalog_1_wrong_meta.ttl"))
-            val modelWrongMeta = gzip(responseReader.readFile("model_1_wrong_meta.ttl"))
-
-            whenever(catalogRepository.findAll())
-                .thenReturn(listOf(CATALOG_DBO_0, CATALOG_DBO_1.copy(turtleCatalog = catalogWrongMeta)))
-            whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/${CATALOG_DBO_0.fdkId}"))
-                .thenReturn(listOf(INFO_MODEL_DBO_0))
-            whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/${CATALOG_DBO_1.fdkId}"))
-                .thenReturn(listOf(INFO_MODEL_DBO_1.copy(turtleInformationModel = modelWrongMeta)))
-
-            whenever(valuesMock.catalogUri)
-                .thenReturn("http://localhost:5000/catalogs")
-            whenever(valuesMock.informationModelUri)
-                .thenReturn("http://localhost:5000/informationmodels")
-
-            updateService.updateMetaData()
-
-            argumentCaptor<List<CatalogDBO>>().apply {
-                verify(catalogRepository, times(1)).saveAll(capture())
-                if (CATALOG_DBO_0 != firstValue.first()) firstValue.first().printTurtleDiff(CATALOG_DBO_0)
-                if (CATALOG_DBO_1 != firstValue[1]) firstValue[1].printTurtleDiff(CATALOG_DBO_0)
-                assertEquals(listOf(CATALOG_DBO_0, CATALOG_DBO_1), firstValue)
-            }
-
-            argumentCaptor<List<InformationModelDBO>>().apply {
-                verify(modelRepository, times(1)).saveAll(capture())
-                if (INFO_MODEL_DBO_0 != firstValue.first()) firstValue.first().printTurtleDiff(INFO_MODEL_DBO_0)
-                if (INFO_MODEL_DBO_1 != firstValue[1]) firstValue[1].printTurtleDiff(INFO_MODEL_DBO_1)
-                assertEquals(listOf(INFO_MODEL_DBO_0, INFO_MODEL_DBO_1), firstValue)
+            argumentCaptor<String, String, Boolean>().apply {
+                verify(turtleService, times(2)).saveInformationModel(first.capture(), second.capture(), third.capture())
+                assertEquals(listOf(INFO_MODEL_ID_0, INFO_MODEL_ID_1), first.allValues)
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, JenaType.TURTLE, null)!!, expectedInfoModel0, "diffInMetaDataUpdatesTurtle-model0"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, JenaType.TURTLE, null)!!, expectedInfoModel1, "diffInMetaDataUpdatesTurtle-model1"))
+                assertEquals(listOf(true, true), third.allValues)
             }
         }
 
@@ -108,33 +86,31 @@ class UpdateServiceTest {
         fun updateUnionModel() {
             whenever(catalogRepository.findAll())
                 .thenReturn(listOf(CATALOG_DBO_0, CATALOG_DBO_1))
+            whenever(turtleService.findCatalog(CATALOG_ID_0, false))
+                .thenReturn(responseReader.readFile("harvest_response_0.ttl"))
+            whenever(turtleService.findCatalog(CATALOG_ID_0, true))
+                .thenReturn(responseReader.readFile("catalog_0.ttl"))
+            whenever(turtleService.findCatalog(CATALOG_ID_1, true))
+                .thenReturn(responseReader.readFile("catalog_1.ttl"))
+            whenever(turtleService.findCatalog(CATALOG_ID_1, false))
+                .thenReturn(responseReader.readFile("harvest_response_1.ttl"))
 
             updateService.updateUnionModel()
 
             val expectedWithRecords = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
             val expectedNoRecords = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
 
-            val expectedMiscList = listOf(
-                MiscellaneousTurtle(
-                    id = UNION_ID,
-                    isHarvestedSource = false,
-                    turtle = gzip(expectedWithRecords.createRDFResponse(JenaType.TURTLE))
-                ),
-                MiscellaneousTurtle(
-                    id = NO_FDK_UNION_ID,
-                    isHarvestedSource = false,
-                    turtle = gzip(expectedNoRecords.createRDFResponse(JenaType.TURTLE))
-                )
-            )
-
             argumentCaptor<Model>().apply {
                 verify(fusekiAdapter, times(1)).storeUnionModel(capture())
-                assertTrue(firstValue.isIsomorphicWith(expectedWithRecords))
+
+                assertTrue(checkIfIsomorphicAndPrintDiff(firstValue, expectedWithRecords, "updateUnionModel-fuseki"))
             }
 
-            argumentCaptor<List<MiscellaneousTurtle>>().apply {
-                verify(miscRepository, times(1)).saveAll(capture())
-                assertEquals(expectedMiscList, firstValue)
+            argumentCaptor<String, Boolean>().apply {
+                verify(turtleService, times(2)).saveUnionModel(first.capture(), second.capture())
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.firstValue, JenaType.TURTLE, null)!!, expectedWithRecords, "updateUnionModel-withRecords"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.secondValue, JenaType.TURTLE, null)!!, expectedNoRecords, "updateUnionModel-noRecords"))
+                assertEquals(listOf(true, false), second.allValues)
             }
         }
     }

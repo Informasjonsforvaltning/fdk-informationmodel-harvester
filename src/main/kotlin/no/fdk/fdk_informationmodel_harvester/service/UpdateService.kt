@@ -7,9 +7,7 @@ import no.fdk.fdk_informationmodel_harvester.model.*
 import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
 import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
-import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
-import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
-import no.fdk.fdk_informationmodel_harvester.repository.MiscellaneousRepository
+import no.fdk.fdk_informationmodel_harvester.repository.*
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.ModelFactory
 import org.apache.jena.sparql.vocabulary.FOAF
@@ -24,44 +22,31 @@ class UpdateService (
     private val fusekiAdapter: FusekiAdapter,
     private val catalogRepository: CatalogRepository,
     private val infoRepository: InformationModelRepository,
-    private val miscRepository: MiscellaneousRepository
+    private val turtleService: TurtleService
 ) {
 
     fun updateUnionModel() {
-        var unionModel = ModelFactory.createDefaultModel()
-        var unionModelExcludedFDKMetaData = ModelFactory.createDefaultModel()
+        var unionWithRecords = ModelFactory.createDefaultModel()
+        var unionNoRecords = ModelFactory.createDefaultModel()
 
         catalogRepository.findAll()
             .forEach {
-                val metaModel = parseRDFResponse(ungzip(it.turtleCatalog), JenaType.TURTLE, null)
-                val noMetaModel = parseRDFResponse(ungzip(it.turtleHarvested), JenaType.TURTLE, null)
+                turtleService.findCatalog(it.fdkId, withRecords = true)
+                    ?.let { turtle -> parseRDFResponse(turtle, JenaType.TURTLE, null) }
+                    ?.run { unionWithRecords = unionWithRecords.union(this) }
 
-                unionModel = unionModel.union(metaModel)
-                unionModelExcludedFDKMetaData = unionModelExcludedFDKMetaData.union(noMetaModel)
+                turtleService.findCatalog(it.fdkId, withRecords = false)
+                    ?.let { turtle -> parseRDFResponse(turtle, JenaType.TURTLE, null) }
+                    ?.run { unionNoRecords = unionNoRecords.union(this) }
             }
 
-        fusekiAdapter.storeUnionModel(unionModel)
+        fusekiAdapter.storeUnionModel(unionWithRecords)
 
-        miscRepository.saveAll(
-            listOf(
-                MiscellaneousTurtle(
-                    id = UNION_ID,
-                    isHarvestedSource = false,
-                    turtle = gzip(unionModel.createRDFResponse(JenaType.TURTLE))
-                ),
-                MiscellaneousTurtle(
-                    id = NO_FDK_UNION_ID,
-                    isHarvestedSource = false,
-                    turtle = gzip(unionModelExcludedFDKMetaData.createRDFResponse(JenaType.TURTLE))
-                )
-            )
-        )
+        turtleService.saveUnionModel(unionWithRecords.createRDFResponse(JenaType.TURTLE), withRecords = true)
+        turtleService.saveUnionModel(unionNoRecords.createRDFResponse(JenaType.TURTLE), withRecords = false)
     }
 
     fun updateMetaData() {
-        val catalogsToSave = mutableListOf<CatalogDBO>()
-        val infoModelsToSave = mutableListOf<InformationModelDBO>()
-
         catalogRepository.findAll()
             .forEach { catalog ->
                 val fdkURI = "${applicationProperties.catalogUri}/${catalog.fdkId}"
@@ -72,24 +57,22 @@ class UpdateService (
                         val infoModelMeta = infoModel.createMetaModel()
                         catalogMeta = catalogMeta.union(infoModelMeta)
 
-                        val infoModelHarvested = parseRDFResponse(ungzip(infoModel.turtleHarvested), JenaType.TURTLE, null)
-                        val infoModelTurtle = infoModelMeta.union(infoModelHarvested).createRDFResponse(JenaType.TURTLE)
-
-                        infoModelsToSave.add(infoModel.copy(turtleInformationModel = gzip(infoModelTurtle)))
+                        turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
+                            ?.let { infoNoRecords -> parseRDFResponse(infoNoRecords, JenaType.TURTLE, null) }
+                            ?.let { infoModelNoRecords -> infoModelMeta.union(infoModelNoRecords).createRDFResponse(JenaType.TURTLE) }
+                            ?.run { turtleService.saveInformationModel(fdkId = infoModel.fdkId, turtle = this, withRecords = true) }
                     }
 
-                val catalogHarvested = parseRDFResponse(ungzip(catalog.turtleHarvested), JenaType.TURTLE, null)
-                val catalogTurtle = catalogMeta.union(catalogHarvested).createRDFResponse(JenaType.TURTLE)
-
-                catalogsToSave.add(catalog.copy(turtleCatalog = gzip(catalogTurtle)))
+                turtleService.findCatalog(catalog.fdkId, withRecords = false)
+                    ?.let { catalogNoRecords -> parseRDFResponse(catalogNoRecords, JenaType.TURTLE, null) }
+                    ?.let { catalogModelNoRecords -> catalogMeta.union(catalogModelNoRecords).createRDFResponse(JenaType.TURTLE) }
+                    ?.run { turtleService.saveCatalog(fdkId = catalog.fdkId, turtle = this, withRecords = true) }
             }
 
-        infoRepository.saveAll(infoModelsToSave)
-        catalogRepository.saveAll(catalogsToSave)
         updateUnionModel()
     }
 
-    private fun CatalogDBO.createMetaModel(): Model {
+    private fun CatalogMeta.createMetaModel(): Model {
         val fdkUri = "${applicationProperties.catalogUri}/$fdkId"
 
         val metaModel = ModelFactory.createDefaultModel()
@@ -104,7 +87,7 @@ class UpdateService (
         return metaModel
     }
 
-    private fun InformationModelDBO.createMetaModel(): Model {
+    private fun InformationModelMeta.createMetaModel(): Model {
         val fdkUri = "${applicationProperties.informationModelUri}/$fdkId"
 
         val metaModel = ModelFactory.createDefaultModel()

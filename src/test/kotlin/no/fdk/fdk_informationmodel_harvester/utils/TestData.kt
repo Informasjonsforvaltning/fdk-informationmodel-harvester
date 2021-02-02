@@ -4,7 +4,6 @@ import no.fdk.fdk_informationmodel_harvester.model.HarvestDataSource
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap
 import java.util.*
 
-const val API_PORT = 8080
 const val API_TEST_PORT = 5555
 const val LOCAL_SERVER_PORT = 5000
 
@@ -35,6 +34,13 @@ val NEW_TEST_HARVEST_DATE: Calendar = Calendar.Builder().setTimeZone(TimeZone.ge
 
 val TEST_HARVEST_SOURCE = HarvestDataSource(
     url = "$WIREMOCK_TEST_URI/harvest",
+    acceptHeaderValue = "text/turtle",
+    dataType = "informationmodel",
+    dataSourceType = "DCAT-AP-NO"
+)
+
+val TEST_HARVEST_SOURCE_1 = HarvestDataSource(
+    url = "$WIREMOCK_TEST_URI/harvest1",
     acceptHeaderValue = "text/turtle",
     dataType = "informationmodel",
     dataSourceType = "DCAT-AP-NO"

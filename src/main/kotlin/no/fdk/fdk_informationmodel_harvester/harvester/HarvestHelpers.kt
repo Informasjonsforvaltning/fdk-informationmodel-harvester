@@ -1,13 +1,9 @@
 package no.fdk.fdk_informationmodel_harvester.harvester
 
-import no.fdk.fdk_informationmodel_harvester.model.CatalogDBO
-import no.fdk.fdk_informationmodel_harvester.model.InformationModelDBO
 import no.fdk.fdk_informationmodel_harvester.rdf.*
-import no.fdk.fdk_informationmodel_harvester.service.ungzip
 import org.apache.jena.query.QueryExecutionFactory
 import org.apache.jena.query.QueryFactory
 import org.apache.jena.rdf.model.Model
-import org.apache.jena.rdf.model.Property
 import org.apache.jena.rdf.model.Resource
 import org.apache.jena.vocabulary.DCAT
 import org.apache.jena.vocabulary.RDF
@@ -15,12 +11,13 @@ import org.apache.jena.vocabulary.SKOS
 import java.util.*
 
 
-fun CatalogAndInfoModels.harvestDiff(dbo: CatalogDBO?): Boolean =
-    if (dbo == null) true
-    else !harvestedCatalog.isIsomorphicWith(parseRDFResponse(ungzip(dbo.turtleHarvested), JenaType.TURTLE, null))
+fun CatalogAndInfoModels.harvestDiff(dboNoRecords: String?): Boolean =
+    if (dboNoRecords == null) true
+    else !harvestedCatalog.isIsomorphicWith(parseRDFResponse(dboNoRecords, JenaType.TURTLE, null))
 
-fun InformationModelRDFModel.harvestDiff(dbo: InformationModelDBO): Boolean =
-    !harvested.isIsomorphicWith(parseRDFResponse(ungzip(dbo.turtleHarvested), JenaType.TURTLE, null))
+fun InformationModelRDFModel.harvestDiff(dboNoRecords: String?): Boolean =
+    if (dboNoRecords == null) true
+    else !harvested.isIsomorphicWith(parseRDFResponse(dboNoRecords, JenaType.TURTLE, null))
 
 fun splitCatalogsFromRDF(harvested: Model): List<CatalogAndInfoModels> =
     harvested.listResourcesWithProperty(RDF.type, DCAT.Catalog)

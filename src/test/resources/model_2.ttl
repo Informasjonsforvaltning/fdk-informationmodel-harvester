@@ -1,0 +1,364 @@
+@prefix ex-code: <http://example.com/code#> .
+@prefix ex-note: <http://example.com/test_note#> .
+@prefix adms:  <http://www.w3.org/ns/adms#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix ex-specialization: <http://example.com/test_specialization#> .
+@prefix ex-abstrakt: <http://example.com/test_abstraksjon#> .
+@prefix ex-bidir: <http://example.com/test#> .
+@prefix xkos:  <https://rdf-vocabulary.ddialliance.org/xkos/> .
+@prefix ex-mch: <http://example.com/test_mch#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix ex-sch: <http://example.com/test_sch#> .
+@prefix ex-composition: <http://example.com/test_compesition#> .
+@prefix modelldcatno: <https://data.norge.no/vocabulary/modelldcatno#> .
+@prefix ex-rel: <http://example.com/test_realization#> .
+@prefix ex-valgfri: <http://example.com/test_valgfri#> .
+@prefix ex-collection: <http://example.com/test_collection#> .
+@prefix dcat:  <http://www.w3.org/ns/dcat#> .
+@prefix locn:  <http://www.w3.org/ns/locn#> .
+@prefix digs:  <https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+ex-mch:kanInneholde  a        modelldcatno:Choice , owl:NamedIndividual ;
+        dct:description       "Instans av samme valgklasse, men her med annen subproperty av hasType og kardinalitet, dvs, hvor mange valg kan man gjøre."@nb ;
+        xsd:maxOccurs         "3"^^xsd:int ;
+        xsd:minOccurs         "1"^^xsd:int ;
+        modelldcatno:hasSome  ex-mch:tannkrem , ex-mch:sjokolade , ex-mch:karamell , ex-mch:drops .
+
+ex-mch:godteri  a                   owl:NamedIndividual , modelldcatno:Role ;
+        dct:title                   "godterieksempel"@nb ;
+        xsd:maxOccurs               "1"^^xsd:nonNegativeInteger ;
+        modelldcatno:hasObjectType  ex-mch:godtepose .
+
+ex-sch:Hund  a     modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Hund"@nb .
+
+ex-valgfri:oppgave  a             modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description           "En oppgave over utgifter til barnepass"@nb ;
+        dct:title                 "Oppgave"@nb ;
+        modelldcatno:hasProperty  ex-valgfri:altTo , ex-valgfri:altEn .
+
+ex-code:kodeHamar  a        modelldcatno:CodeElement , owl:NamedIndividual ;
+        skos:altLabel       "Alle tiders by"@nb ;
+        skos:definition     "By ved Mjøsa"@nb , "Lillehammer er en by og kommune i Gudbrandsdalen i Innlandet, ved nordenden av Mjøsa."@nb ;
+        skos:example        "Hamar er en by som ligger ved Mjøsa"@nb ;
+        skos:inScheme       ex-code:kodeliste ;
+        skos:notation       "0403" ;
+        skos:prefLabel      "Hamar"@nb ;
+        skos:topConceptOf   ex-code:kodeliste ;
+        xkos:exclusionNote  "Inkluderer ikke omlandet til Hamar"@nb .
+
+ex-valgfri:utgifterBarnepass
+        a                           modelldcatno:Role , owl:NamedIndividual ;
+        dct:title                   "barnepasseksempel"@nb ;
+        xsd:maxOccurs               "10"^^xsd:int ;
+        xsd:minOccurs               "0"^^xsd:int ;
+        modelldcatno:hasObjectType  ex-valgfri:oppgave .
+
+ex-collection:Frukt  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Frukt"@nb .
+
+ex-composition:nyre  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Nyre"@nb .
+
+<http://localhost:5000/informationmodels/0bf6b09f-e1c0-3415-bba0-7ff2edada89d>
+        a                  dcat:CatalogRecord ;
+        dct:identifier     "0bf6b09f-e1c0-3415-bba0-7ff2edada89d" ;
+        dct:isPartOf       <http://localhost:5000/catalogs/f25c939d-0722-3aa3-82b1-eaa457086444> ;
+        dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
+        dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
+        foaf:primaryTopic  digs:AltMuligModell .
+
+ex-sch:Katt  a     modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Katt"@nb .
+
+ex-note:lapp  a                    modelldcatno:Note , owl:NamedIndividual ;
+        dct:title                  "Bemerk!"@nb ;
+        modelldcatno:notification  "Dette er teksten på lappen"@nb .
+
+ex-abstrakt::TekstType
+        a          modelldcatno:SimpleType , owl:NamedIndividual ;
+        dct:title  "Timeline"@nb .
+
+ex-note:oppslagstavle
+        a                         modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description           "En klasse med en note" ;
+        dct:title                 "Oppslagstavle"@nb ;
+        modelldcatno:hasProperty  ex-note:lapp , ex-note:farge .
+
+ex-collection:fruktkurveksempel
+        a                           modelldcatno:Role , owl:NamedIndividual ;
+        dct:title                   "fruktkurveksempel"@nb ;
+        xsd:maxOccurs               "1"^^xsd:int ;
+        xsd:minOccurs               "0"^^xsd:int ;
+        modelldcatno:hasObjectType  ex-collection:Fruktkurv .
+
+ex-collection:Fruktkurv
+        a                         modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description           "Eksempel som viser et medlem av forhold"@nb ;
+        dct:title                 "Fruktkurv"@nb ;
+        modelldcatno:hasProperty  ex-collection:innhold .
+
+ex-bidir:debitor  a               modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title                 "Debitor"@nb ;
+        modelldcatno:hasProperty  ex-bidir:ba .
+
+ex-sch:Kanin  a    modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Kanin"@nb .
+
+ex-mch:sjokolade  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Sjokolade"@nb .
+
+ex-note:groenn  a  modelldcatno:SimpleType , owl:NamedIndividual ;
+        dct:title  "Grønn"@nb .
+
+ex-sch:hustandEierKjaeledyr
+        a                           owl:NamedIndividual , modelldcatno:Role ;
+        dct:title                   "hustandEierKjæledyr"@nb ;
+        xsd:maxOccurs               "1"^^xsd:nonNegativeInteger ;
+        modelldcatno:hasObjectType  ex-sch:husStand .
+
+ex-bidir:kreditor  a              modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description           "Denne grafen viser to enveis forenklede relasjoner, satt sammen, for å beskrive en tovegsrelasjon."@nb ;
+        dct:title                 "Kreditor"@nb ;
+        modelldcatno:hasProperty  ex-bidir:kanKlageTil , ex-bidir:pengerTilGode .
+
+digs:Utgiver  a         foaf:Agent , owl:NamedIndividual ;
+        dct:identifier  "991825827" ;
+        dct:type        "Organisasjonsledd"@nb ;
+        foaf:name       "Digitaliseringsdirektoratet"@nb .
+
+ex-specialization:Katt
+        a                         modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title                 "Katt"@nb ;
+        modelldcatno:hasProperty  ex-specialization:katteorden .
+
+ex-mch:tannkrem  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Tannkrem"@nb .
+
+ex-sch:kjeledyr  a            modelldcatno:Choice , owl:NamedIndividual ;
+        dct:description       "Tittel på denne vil kunne tolkes som en rolle"@nb ;
+        dct:title             "kjæledyr"@nb ;
+        xsd:maxOccurs         "1"^^xsd:int ;
+        xsd:minOccurs         "1"^^xsd:int ;
+        modelldcatno:hasSome  ex-sch:Katt , ex-sch:Kanin , ex-sch:Hund .
+
+ex-abstrakt:abstraksjonseksempel
+        a                           modelldcatno:Role , owl:NamedIndividual ;
+        dct:title                   "abstraksjonseksempel"@nb ;
+        xsd:maxOccurs               "1"^^xsd:int ;
+        xsd:minOccurs               "0"^^xsd:int ;
+        modelldcatno:hasObjectType  ex-abstrakt:Program .
+
+ex-rel:realiserer  a              modelldcatno:Realization , owl:NamedIndividual ;
+        modelldcatno:hasSupplier  ex-rel:abstrakt .
+
+ex-code:kommuneliste  a            modelldcatno:Attribute , owl:NamedIndividual ;
+        dct:title                  "kommunelisteeksempel"@nb ;
+        xsd:maxOccurs              "1"^^xsd:nonNegativeInteger ;
+        modelldcatno:hasValueFrom  ex-code:kodeliste .
+
+ex-rel:konkret  a                 modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title                 "Konkret"@nb ;
+        modelldcatno:hasProperty  ex-rel:realiserer .
+
+ex-abstrakt:timeline  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description  "Objekt som samler ulike eventer som egene objekter"@nb ;
+        dct:title        "Timeline"@nb .
+
+ex-bidir:forliksraadet
+        a          modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Forliksrådet"@nb .
+
+ex-composition:innvoll
+        a                      modelldcatno:Composition , owl:NamedIndividual ;
+        dct:title              "innvoll"@nb ;
+        modelldcatno:contains  ex-composition:nyre .
+
+ex-valgfri:Oppgavegiver
+        a          modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Oppgavegiver"@nb .
+
+ex-abstrakt:basedOn  a                modelldcatno:Abstraction , owl:NamedIndividual ;
+        dct:description               "Dette er kunn en abstraksjon, ergo, en abstraksjon mellom de to klassene"@nb ;
+        dct:title                     "basert på"@nb ;
+        modelldcatno:isAbstractionOf  ex-abstrakt:EBU_EditorialObject .
+
+ex-composition:griseeksempel
+        a                           modelldcatno:Role , owl:NamedIndividual ;
+        dct:title                   "griseeksempel"@nb ;
+        xsd:maxOccurs               "1"^^xsd:int ;
+        xsd:minOccurs               "0"^^xsd:int ;
+        modelldcatno:hasObjectType  ex-composition:gris .
+
+ex-sch:husStand  a                modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description           "En hustand kan velge en type kjeledyr. Dette er en konstruksjon lik xsd:choice i sin enkle form"@nb ;
+        dct:title                 "Husstand"@nb ;
+        modelldcatno:hasProperty  ex-sch:kjeledyr .
+
+ex-note:farge  a                    modelldcatno:Note , modelldcatno:Attribute , owl:NamedIndividual ;
+        modelldcatno:hasSimpleType  ex-note:groenn ;
+        modelldcatno:notification   "Fargen gjelder rammen (en note tekst)"@nb .
+
+digs:KontaktOss  a          owl:NamedIndividual , vcard:Kind ;
+        vcard:fn            "Avdeling for digitalisering"@nb , "Avdeling for digitalisering"@nn , "Digitalisation department"@en ;
+        vcard:hasEmail      <mailto:informasjonsforvaltning@digdir.no> ;
+        vcard:hasTelephone  <tel:12345678> .
+
+ex-specialization:Pattedyr
+        a          modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Pattedyr"@nb .
+
+ex-code:kodeLillehammer
+        a                   owl:NamedIndividual , modelldcatno:CodeElement ;
+        skos:definition     "Lillehammer er en by og kommune i Gudbrandsdalen i Innlandet, ved nordenden av Mjøsa."@nb ;
+        skos:example        "Lillehammer arrangerte OL i 1994"@nb ;
+        skos:hiddenLabel    "LillyHammer"@nb ;
+        skos:inScheme       ex-code:kodeliste ;
+        skos:notation       "3405" ;
+        skos:note           "Ikke alle er enig om at Lillehammer er en Mjøsby"@nb ;
+        skos:prefLabel      "Lillehammer"@nb ;
+        skos:scopeNote      "Kan benyttes om selve kommunen og om byen Lillehammer" ;
+        xkos:inclusionNote  "Inkluderer hele kommunen" ;
+        xkos:previous       ex-code:kodeHamar .
+
+ex-rel:abstrakt  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Abstrakt"@nb .
+
+ex-abstrakt:EBU_EditorialObject
+        a                modelldcatno:ObjectType , <http://www.ebu.ch/metadata/ontologies/ebucore/ebucore#EditorialObject> , owl:NamedIndividual ;
+        dct:description  "Klasse, som er et modellelement, men og viser at den er hentet fra en annen ontologi"@nb ;
+        dct:title        "Editorial Object"@en .
+
+ex-mch:karamell  a  modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Karamell"@nb .
+
+ex-code:kodeliste  a  modelldcatno:CodeList , owl:NamedIndividual ;
+        dct:title  "Kommunenummerlisten"@nb .
+
+ex-composition:gris  a            modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title                 "Gris"@nb ;
+        modelldcatno:hasProperty  ex-composition:kroppsdel , ex-composition:innvoll .
+
+ex-specialization:katteeksempel
+        a                           modelldcatno:Role , owl:NamedIndividual ;
+        dct:title                   "katteeksempel"@nb ;
+        xsd:maxOccurs               "1"^^xsd:int ;
+        xsd:minOccurs               "0"^^xsd:int ;
+        modelldcatno:hasObjectType  ex-specialization:Katt .
+
+ex-valgfri:altEn  a           modelldcatno:Choice , owl:NamedIndividual ;
+        dct:title             "egenfastsatt"@nb ;
+        modelldcatno:hasType  ex-valgfri:Oppgavegiver .
+
+ex-mch:drops  a    modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Drops"@nb .
+
+ex-valgfri:altTo  a           modelldcatno:Choice , owl:NamedIndividual ;
+        dct:title             "barnehagefastsatt"@nb ;
+        modelldcatno:hasType  ex-valgfri:Oppgavegiver .
+
+ex-abstrakt:Program  a            modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description           "Et modellelement med et attibutt som er et tekstsammendrag av en klasse \"Tidslinje\" med hendelser.\nDenne demonstrerer hvordan et attributt også på samme tid er en abstraksjon. Et abstaksjonsforhold mellom to klasser er også demonstrert."@nb ;
+        dct:title                 "Program"@nb ;
+        modelldcatno:hasProperty  ex-abstrakt:sammendrag , ex-abstrakt:basedOn .
+
+ex-rel:realisereksempel
+        a                           modelldcatno:Role , owl:NamedIndividual ;
+        dct:title                   "realiserereksempel"@nb ;
+        xsd:maxOccurs               "1"^^xsd:int ;
+        xsd:minOccurs               "0"^^xsd:int ;
+        modelldcatno:hasObjectType  ex-rel:konkret .
+
+ex-abstrakt:sammendrag
+        a                             modelldcatno:Attribute , modelldcatno:Abstraction , owl:NamedIndividual ;
+        dct:description               "Dette er en individual som er et atributt og en abstraksjon på samme tid. Disse to påstandene vil sikre at attributtet blir oppfattet som en abstraksjon av klassen som er knyttet med isAbstractionOf, mens hasSimpletype beskriver knytter til klassen som beskriver formatet."@nb ;
+        dct:title                     "sammendrag"@nb ;
+        modelldcatno:hasSimpleType    ex-abstrakt::TekstType ;
+        modelldcatno:isAbstractionOf  ex-abstrakt:timeline .
+
+ex-bidir:skylderPengerTil
+        a                           modelldcatno:Role , owl:NamedIndividual ;
+        dct:title                   "skylder penger til"@nb ;
+        xsd:maxOccurs               "1"^^xsd:int ;
+        xsd:minOccurs               "0"^^xsd:int ;
+        modelldcatno:hasObjectType  ex-bidir:kreditor .
+
+ex-composition:kroppsdel
+        a                      modelldcatno:Composition , owl:NamedIndividual ;
+        dct:title              "kroppsdel"@nb ;
+        modelldcatno:contains  ex-composition:skinke .
+
+ex-composition:skinke
+        a          modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:title  "Skinke"@nb .
+
+ex-bidir:pengerTilGode
+        a                               modelldcatno:Role , owl:NamedIndividual ;
+        dct:title                       "har penger tilgode hos"@nb ;
+        xsd:maxOccurs                   "*" ;
+        xsd:minOccurs                   "1"^^xsd:int ;
+        modelldcatno:formsSymmetryWith  ex-bidir:skylderPengerTil ;
+        modelldcatno:hasObjectType      ex-bidir:debitor ;
+        modelldcatno:relationPropertyLabel
+                "Skyldforhold"@nb .
+
+ex-bidir:kanKlageTil  a        modelldcatno:Association , owl:NamedIndividual ;
+        dct:title              "kan klage til"@nb ;
+        modelldcatno:refersTo  ex-bidir:forliksraadet .
+
+ex-specialization:katteorden
+        a                               modelldcatno:Specialization , owl:NamedIndividual ;
+        dct:description                 "Som regel anonym"@nb ;
+        modelldcatno:hasGeneralConcept  ex-specialization:Pattedyr .
+
+ex-mch:godtepose  a               modelldcatno:ObjectType , owl:NamedIndividual ;
+        dct:description           "Eksempel der en kan velge mer enn en ting, med en mulig max antall valg"@nb ;
+        modelldcatno:hasProperty  ex-mch:kanInneholde .
+
+digs:AltMuligModell  a     modelldcatno:InformationModel , owl:NamedIndividual ;
+        dct:description    "Modell med eksempler"@nb ;
+        dct:hasPart        <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell> ;
+        dct:identifier     "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Altmuligmodell" ;
+        dct:issued         "2020-10-06T00:00:00+01:00"^^xsd:dateTime ;
+        dct:language       <http://publications.europa.eu/resource/authority/language/NOB> ;
+        dct:license        <http://creativecommons.org/licenses/by/4.0/deed.no> ;
+        dct:publisher      digs:Utgiver ;
+        dct:replaces       <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell> ;
+        dct:spatial        <http://publications.europa.eu/resource/authority/country/NOR> ;
+        dct:temporal       digs:Tidsintervall ;
+        dct:title          "Alt mulig modell"@nb , "Felles informasjonsmodell for Person og Enhet"@nb ;
+        dct:type           "Fellesmodell"@nb ;
+        owl:versionInfo    "1.0" ;
+        adms:status        <http://purl.org/adms/status/Completed> ;
+        dcat:contactPoint  digs:KontaktOss ;
+        dcat:keyword       "Eining"@nn , "Adresse"@nb , "Adresse"@nn , "Enhet"@nb , "Address"@en , "Legal entity"@en , "Person"@nn , "Person"@en , "Person"@nb ;
+        foaf:homepage      <https://www.difi.no/fagomrader-og-tjenester/digitalisering-og-samordning/nasjonal-arkitektur/informasjonsforvaltning/felles-informasjonsmodell-person-og-enhet-bakgrunn> ;
+        modelldcatno:containsModelElement
+                ex-valgfri:oppgave , ex-mch:sjokolade , ex-code:Aktør , ex-sch:Kanin , ex-bidir:forliksraadet , ex-rel:konkret , ex-composition:nyre , ex-composition:skinke , ex-valgfri:Oppgavegiver , ex-mch:godtepose , ex-note:oppslagstavle , ex-collection:Frukt , ex-sch:Hund , ex-mch:drops , ex-mch:tannkrem , ex-bidir:debitor , ex-composition:gris , ex-abstrakt:Program , ex-sch:husStand , ex-specialization:Katt , ex-collection:Fruktkurv , ex-bidir:kreditor , ex-mch:karamell , ex-code:kodeliste , ex-sch:Katt ;
+        modelldcatno:informationModelIdentifier
+                "https://www.digdir/AltMuligModell" .
+
+ex-collection:innhold
+        a                       modelldcatno:Collection , owl:NamedIndividual ;
+        dct:description         "Samme mønster for modelldcattno:Composition, men denne har modelldcatno:contains som objektproperty mot et modell element."@nb ;
+        dct:title               "innhold"@nb ;
+        modelldcatno:hasMember  ex-collection:Frukt .
+
+ex-code:Aktør  a                      modelldcatno:modelldcatno:RootObjectType , owl:NamedIndividual ;
+        dct:title                     "Aktør"@nb ;
+        modelldcatno:belongsToModule  "Aktør"@nb ;
+        modelldcatno:hasProperty      ex-valgfri:utgifterBarnepass , ex-note:merknad , ex-mch:godteri , ex-collection:fruktkurveksempel , ex-rel:realisereksempel , ex-code:kommuneliste , ex-sch:hustandEierKjaeledyr , ex-specialization:katteeksempel , ex-abstrakt:abstraksjonseksempel , ex-composition:griseeksempel .
+
+ex-note:merknad  a                  owl:NamedIndividual , modelldcatno:Role ;
+        dct:title                   "hustandEierKjæledyr"@nb ;
+        xsd:maxOccurs               "1"^^xsd:nonNegativeInteger ;
+        modelldcatno:hasObjectType  ex-note:oppslagstavleeksempel .
+
+digs:Tidsintervall  a   dct:PeriodOfTime , owl:NamedIndividual ;
+        dcat:endDate    "2030-02-11T00:00:00+01:00"^^xsd:dateTime ;
+        dcat:startDate  "2016-02-11T00:00:00+01:00"^^xsd:dateTime .

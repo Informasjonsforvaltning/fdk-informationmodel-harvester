@@ -1,10 +1,8 @@
 package no.fdk.fdk_informationmodel_harvester.contract
 
-import no.fdk.fdk_informationmodel_harvester.utils.ApiTestContext
-import no.fdk.fdk_informationmodel_harvester.utils.CATALOG_ID_0
-import no.fdk.fdk_informationmodel_harvester.utils.TestResponseReader
-import no.fdk.fdk_informationmodel_harvester.utils.apiGet
+import no.fdk.fdk_informationmodel_harvester.utils.*
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
@@ -24,10 +22,10 @@ class CatalogsTest: ApiTestContext() {
         val response = apiGet("/catalogs/$CATALOG_ID_0?catalogrecords=true", "application/rdf+xml")
         Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
 
-        val expected = responseReader.parseFile("catalog_0.ttl", "TURTLE")
+        val notExpected = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
         val responseModel = responseReader.parseResponse(response["body"] as String, "RDFXML")
 
-        assertTrue(expected.isIsomorphicWith(responseModel))
+        assertFalse(notExpected.isIsomorphicWith(responseModel))
     }
 
     @Test
@@ -52,9 +50,9 @@ class CatalogsTest: ApiTestContext() {
         val response = apiGet("/catalogs?catalogrecords=true", "text/turtle")
         Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
 
-        val expected = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
+        val notExpected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
         val responseModel = responseReader.parseResponse(response["body"] as String, "TURTLE")
-        assertTrue(expected.isIsomorphicWith(responseModel))
+        assertFalse(notExpected.isIsomorphicWith(responseModel))
     }
 
     @Test
