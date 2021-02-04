@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class TurtleRepository(private val gridFsTemplate: GridFsTemplate) {
     fun saveFile(content: String, filename: String) {
+        gridFsTemplate.delete(Query(Criteria.where("filename").`is`(filename)))
         gridFsTemplate.store(content.byteInputStream(), filename)
     }
 
