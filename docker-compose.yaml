@@ -10,10 +10,8 @@ services:
     ports:
       - 27017:27017
 
-  fdk-fuseki-service:
-    image: eu.gcr.io/digdir-fdk-infra/fdk-fuseki-service:latest
-    volumes:
-      - /etc/fuseki/databases/
+  fdk-sparql-service:
+    image: eu.gcr.io/digdir-fdk-infra/fdk-sparql-service:latest
     ports:
       - "3030:8080"
 

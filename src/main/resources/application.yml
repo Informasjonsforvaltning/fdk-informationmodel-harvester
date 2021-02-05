@@ -7,7 +7,7 @@ logging:
 server:
   port: 8080
 fuseki:
-  unionGraphUri: ${FDK_FUSEKI_SERVICE_URI:http://fdk-fuseki-service:8080/fuseki}/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
+  unionGraphUri: ${FDK_SPARQL_SERVICE_URI:http://fdk-sparql-service:8080}/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
 application:
   informationModelUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/informationmodels
   catalogUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/catalogs
