@@ -43,7 +43,7 @@ fun splitCatalogsFromRDF(harvested: Model): List<CatalogAndInfoModels> =
             catalogInfoModels.forEach { catalogModel = catalogModel.union(it.harvested) }
 
             CatalogAndInfoModels(
-                resource = catalogResource,
+                resourceURI = catalogResource.uri,
                 harvestedCatalog = catalogModel,
                 harvestedCatalogWithoutInfoModels = catalogModelWithoutInfoModels,
                 models = catalogInfoModels
@@ -58,7 +58,7 @@ fun Resource.extractInformationModel(): InformationModelRDFModel {
         .filter { it.isResourceProperty() }
         .forEach { infoModel = infoModel.recursiveAddNonInformationModelResource(it.resource, 10) }
 
-    return InformationModelRDFModel(resource = this, harvested = infoModel)
+    return InformationModelRDFModel(resourceURI = uri, harvested = infoModel)
 }
 
 private fun Model.addCodeElementsAssociatedWithCodeList(resource: Resource): Model {
@@ -108,14 +108,14 @@ fun calendarFromTimestamp(timestamp: Long): Calendar {
 }
 
 data class CatalogAndInfoModels (
-    val resource: Resource,
+    val resourceURI: String,
     val harvestedCatalog: Model,
     val harvestedCatalogWithoutInfoModels: Model,
     val models: List<InformationModelRDFModel>,
 )
 
 data class InformationModelRDFModel (
-    val resource: Resource,
+    val resourceURI: String,
     val harvested: Model
 )
 

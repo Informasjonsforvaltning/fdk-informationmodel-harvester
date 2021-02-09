@@ -48,14 +48,13 @@ class InformationModelHarvester(
         } else LOGGER.error("Harvest source is not defined")
 
     private fun checkHarvestedContainsChanges(harvested: Model, sourceURL: String, harvestDate: Calendar) {
-        val dbId = createIdFromUri(sourceURL)
         val dbData = turtleService.findOne(sourceURL)
             ?.let { parseRDFResponse(it, JenaType.TURTLE, null) }
 
         if (dbData != null && harvested.isIsomorphicWith(dbData)) {
             LOGGER.info("No changes from last harvest of $sourceURL")
         } else {
-            LOGGER.info("Changes detected, saving data from $sourceURL on graph $dbId, and updating FDK meta data")
+            LOGGER.info("Changes detected, saving data from $sourceURL and updating FDK meta data")
             turtleService.saveOne(filename = sourceURL, turtle = harvested.createRDFResponse(JenaType.TURTLE))
 
             val catalogs = splitCatalogsFromRDF(harvested)
@@ -67,7 +66,7 @@ class InformationModelHarvester(
 
     private fun updateDB(catalogs: List<CatalogAndInfoModels>, harvestDate: Calendar) {
         catalogs
-            .map { Pair(it, catalogRepository.findByIdOrNull(it.resource.uri)) }
+            .map { Pair(it, catalogRepository.findByIdOrNull(it.resourceURI)) }
             .filter { it.first.catalogHasChanges(it.second?.fdkId) }
             .forEach {
                 val updatedCatalogMeta = it.first.mapToCatalogMeta(harvestDate, it.second)
@@ -110,7 +109,7 @@ class InformationModelHarvester(
         harvestDate: Calendar,
         fdkCatalogURI: String
     ) {
-        val dbMeta = informationModelRepository.findByIdOrNull(resource.uri)
+        val dbMeta = informationModelRepository.findByIdOrNull(resourceURI)
         if (modelHasChanges(dbMeta?.fdkId)) {
             val modelMeta = mapToDBOMeta(harvestDate, fdkCatalogURI, dbMeta)
             informationModelRepository.save(modelMeta)
@@ -127,7 +126,7 @@ class InformationModelHarvester(
             metaModel.createResource(fdkUri)
                 .addProperty(RDF.type, DCAT.CatalogRecord)
                 .addProperty(DCTerms.identifier, modelMeta.fdkId)
-                .addProperty(FOAF.primaryTopic, metaModel.createResource(resource.uri))
+                .addProperty(FOAF.primaryTopic, metaModel.createResource(resourceURI))
                 .addProperty(DCTerms.isPartOf, metaModel.createResource(modelMeta.isPartOf))
                 .addProperty(DCTerms.issued, metaModel.createTypedLiteral(calendarFromTimestamp(modelMeta.issued)))
                 .addProperty(DCTerms.modified, metaModel.createTypedLiteral(harvestDate))
@@ -144,7 +143,7 @@ class InformationModelHarvester(
         harvestDate: Calendar,
         dbMeta: CatalogMeta?
     ): CatalogMeta {
-        val catalogURI = resource.uri
+        val catalogURI = resourceURI
         val fdkId = dbMeta?.fdkId ?: createIdFromUri(catalogURI)
         val issued = dbMeta?.issued
             ?.let { timestamp -> calendarFromTimestamp(timestamp) }
@@ -163,13 +162,13 @@ class InformationModelHarvester(
         fdkCatalogURI: String,
         dbMeta: InformationModelMeta?
     ): InformationModelMeta {
-        val fdkId = dbMeta?.fdkId ?: createIdFromUri(resource.uri)
+        val fdkId = dbMeta?.fdkId ?: createIdFromUri(resourceURI)
         val issued: Calendar = dbMeta?.issued
             ?.let { timestamp -> calendarFromTimestamp(timestamp) }
             ?: harvestDate
 
         return InformationModelMeta(
-            uri = resource.uri,
+            uri = resourceURI,
             fdkId = fdkId,
             isPartOf = fdkCatalogURI,
             issued = issued.timeInMillis,
