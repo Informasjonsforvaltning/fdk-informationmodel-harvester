@@ -1,8 +1,8 @@
 package no.fdk.fdk_informationmodel_harvester.controller
 
-import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
 import no.fdk.fdk_informationmodel_harvester.rdf.jenaTypeFromAcceptHeader
 import no.fdk.fdk_informationmodel_harvester.service.InformationModelService
+import org.apache.jena.riot.Lang
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -26,9 +26,9 @@ open class CatalogsController(private val informationModelService: InformationMo
         LOGGER.info("get InformationModel catalog with id $id")
         val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
 
-        return if (returnType == JenaType.NOT_JENA) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
+        return if (returnType == Lang.RDFNULL) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
         else {
-            informationModelService.getCatalogById(id, returnType ?: JenaType.TURTLE, catalogrecords)
+            informationModelService.getCatalogById(id, returnType ?: Lang.TURTLE, catalogrecords)
                 ?.let { ResponseEntity(it, HttpStatus.OK) }
                 ?: ResponseEntity(HttpStatus.NOT_FOUND)
         }
@@ -42,7 +42,7 @@ open class CatalogsController(private val informationModelService: InformationMo
         LOGGER.info("get all InformationModel catalogs")
         val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
 
-        return if (returnType == JenaType.NOT_JENA) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
-        else ResponseEntity(informationModelService.getAll(returnType ?: JenaType.TURTLE, catalogrecords), HttpStatus.OK)
+        return if (returnType == Lang.RDFNULL) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
+        else ResponseEntity(informationModelService.getAll(returnType ?: Lang.TURTLE, catalogrecords), HttpStatus.OK)
     }
 }

@@ -8,6 +8,7 @@ import no.fdk.fdk_informationmodel_harvester.repository.*
 import no.fdk.fdk_informationmodel_harvester.service.TurtleService
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.ModelFactory
+import org.apache.jena.riot.Lang
 import org.apache.jena.sparql.vocabulary.FOAF
 import org.apache.jena.vocabulary.DCAT
 import org.apache.jena.vocabulary.DCTerms
@@ -35,13 +36,13 @@ class InformationModelHarvester(
 
             val harvested = when (jenaWriterType) {
                 null -> null
-                JenaType.NOT_JENA -> null
+                Lang.RDFNULL -> null
                 else -> adapter.getInformationModels(source)?.let { parseRDFResponse(it, jenaWriterType, source.url) }
             }
 
             when {
                 jenaWriterType == null -> LOGGER.error("Not able to harvest from ${source.url}, no accept header supplied")
-                jenaWriterType == JenaType.NOT_JENA -> LOGGER.error("Not able to harvest from ${source.url}, header ${source.acceptHeaderValue} is not acceptable ")
+                jenaWriterType == Lang.RDFNULL -> LOGGER.error("Not able to harvest from ${source.url}, header ${source.acceptHeaderValue} is not acceptable ")
                 harvested == null -> LOGGER.info("Not able to harvest ${source.url}")
                 else -> checkHarvestedContainsChanges(harvested, source.url, harvestDate)
             }
@@ -49,13 +50,13 @@ class InformationModelHarvester(
 
     private fun checkHarvestedContainsChanges(harvested: Model, sourceURL: String, harvestDate: Calendar) {
         val dbData = turtleService.findOne(sourceURL)
-            ?.let { parseRDFResponse(it, JenaType.TURTLE, null) }
+            ?.let { parseRDFResponse(it, Lang.TURTLE, null) }
 
         if (dbData != null && harvested.isIsomorphicWith(dbData)) {
             LOGGER.info("No changes from last harvest of $sourceURL")
         } else {
             LOGGER.info("Changes detected, saving data from $sourceURL and updating FDK meta data")
-            turtleService.saveOne(filename = sourceURL, turtle = harvested.createRDFResponse(JenaType.TURTLE))
+            turtleService.saveOne(filename = sourceURL, turtle = harvested.createRDFResponse(Lang.TURTLE))
 
             val catalogs = splitCatalogsFromRDF(harvested)
 
@@ -74,7 +75,7 @@ class InformationModelHarvester(
 
                 turtleService.saveCatalog(
                     fdkId = updatedCatalogMeta.fdkId,
-                    turtle = it.first.harvestedCatalog.createRDFResponse(JenaType.TURTLE),
+                    turtle = it.first.harvestedCatalog.createRDFResponse(Lang.TURTLE),
                     withRecords = false
                 )
 
@@ -94,12 +95,12 @@ class InformationModelHarvester(
 
                 informationModelRepository.findAllByIsPartOf(fdkUri)
                     .mapNotNull { infoMeta -> turtleService.findInformationModel(infoMeta.fdkId, withRecords = true) }
-                    .map { infoModelTurtle -> parseRDFResponse(infoModelTurtle, JenaType.TURTLE, null) }
+                    .map { infoModelTurtle -> parseRDFResponse(infoModelTurtle, Lang.TURTLE, null) }
                     .forEach { infoModel -> catalogModel = catalogModel.union(infoModel) }
 
                 turtleService.saveCatalog(
                     fdkId = updatedCatalogMeta.fdkId,
-                    turtle = catalogModel.createRDFResponse(JenaType.TURTLE),
+                    turtle = catalogModel.createRDFResponse(Lang.TURTLE),
                     withRecords = true
                 )
             }
@@ -116,7 +117,7 @@ class InformationModelHarvester(
 
             turtleService.saveInformationModel(
                 fdkId = modelMeta.fdkId,
-                turtle = harvested.createRDFResponse(JenaType.TURTLE),
+                turtle = harvested.createRDFResponse(Lang.TURTLE),
                 withRecords = false
             )
 
@@ -133,7 +134,7 @@ class InformationModelHarvester(
 
             turtleService.saveInformationModel(
                 fdkId = modelMeta.fdkId,
-                turtle = metaModel.union(harvested).createRDFResponse(JenaType.TURTLE),
+                turtle = metaModel.union(harvested).createRDFResponse(Lang.TURTLE),
                 withRecords = true
             )
         }

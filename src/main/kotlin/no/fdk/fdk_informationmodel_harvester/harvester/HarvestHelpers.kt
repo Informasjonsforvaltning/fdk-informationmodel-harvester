@@ -5,6 +5,7 @@ import org.apache.jena.query.QueryExecutionFactory
 import org.apache.jena.query.QueryFactory
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.Resource
+import org.apache.jena.riot.Lang
 import org.apache.jena.vocabulary.DCAT
 import org.apache.jena.vocabulary.RDF
 import org.apache.jena.vocabulary.SKOS
@@ -13,11 +14,11 @@ import java.util.*
 
 fun CatalogAndInfoModels.harvestDiff(dboNoRecords: String?): Boolean =
     if (dboNoRecords == null) true
-    else !harvestedCatalog.isIsomorphicWith(parseRDFResponse(dboNoRecords, JenaType.TURTLE, null))
+    else !harvestedCatalog.isIsomorphicWith(parseRDFResponse(dboNoRecords, Lang.TURTLE, null))
 
 fun InformationModelRDFModel.harvestDiff(dboNoRecords: String?): Boolean =
     if (dboNoRecords == null) true
-    else !harvested.isIsomorphicWith(parseRDFResponse(dboNoRecords, JenaType.TURTLE, null))
+    else !harvested.isIsomorphicWith(parseRDFResponse(dboNoRecords, Lang.TURTLE, null))
 
 fun splitCatalogsFromRDF(harvested: Model): List<CatalogAndInfoModels> =
     harvested.listResourcesWithProperty(RDF.type, DCAT.Catalog)

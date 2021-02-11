@@ -4,12 +4,12 @@ import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.harvester.calendarFromTimestamp
 import no.fdk.fdk_informationmodel_harvester.model.*
-import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
 import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.*
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.ModelFactory
+import org.apache.jena.riot.Lang
 import org.apache.jena.sparql.vocabulary.FOAF
 import org.apache.jena.vocabulary.DCAT
 import org.apache.jena.vocabulary.DCTerms
@@ -32,18 +32,18 @@ class UpdateService (
         catalogRepository.findAll()
             .forEach {
                 turtleService.findCatalog(it.fdkId, withRecords = true)
-                    ?.let { turtle -> parseRDFResponse(turtle, JenaType.TURTLE, null) }
+                    ?.let { turtle -> parseRDFResponse(turtle, Lang.TURTLE, null) }
                     ?.run { unionWithRecords = unionWithRecords.union(this) }
 
                 turtleService.findCatalog(it.fdkId, withRecords = false)
-                    ?.let { turtle -> parseRDFResponse(turtle, JenaType.TURTLE, null) }
+                    ?.let { turtle -> parseRDFResponse(turtle, Lang.TURTLE, null) }
                     ?.run { unionNoRecords = unionNoRecords.union(this) }
             }
 
         fusekiAdapter.storeUnionModel(unionWithRecords)
 
-        turtleService.saveUnionModel(unionWithRecords.createRDFResponse(JenaType.TURTLE), withRecords = true)
-        turtleService.saveUnionModel(unionNoRecords.createRDFResponse(JenaType.TURTLE), withRecords = false)
+        turtleService.saveUnionModel(unionWithRecords.createRDFResponse(Lang.TURTLE), withRecords = true)
+        turtleService.saveUnionModel(unionNoRecords.createRDFResponse(Lang.TURTLE), withRecords = false)
     }
 
     fun updateMetaData() {
@@ -58,14 +58,14 @@ class UpdateService (
                         catalogMeta = catalogMeta.union(infoModelMeta)
 
                         turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
-                            ?.let { infoNoRecords -> parseRDFResponse(infoNoRecords, JenaType.TURTLE, null) }
-                            ?.let { infoModelNoRecords -> infoModelMeta.union(infoModelNoRecords).createRDFResponse(JenaType.TURTLE) }
+                            ?.let { infoNoRecords -> parseRDFResponse(infoNoRecords, Lang.TURTLE, null) }
+                            ?.let { infoModelNoRecords -> infoModelMeta.union(infoModelNoRecords).createRDFResponse(Lang.TURTLE) }
                             ?.run { turtleService.saveInformationModel(fdkId = infoModel.fdkId, turtle = this, withRecords = true) }
                     }
 
                 turtleService.findCatalog(catalog.fdkId, withRecords = false)
-                    ?.let { catalogNoRecords -> parseRDFResponse(catalogNoRecords, JenaType.TURTLE, null) }
-                    ?.let { catalogModelNoRecords -> catalogMeta.union(catalogModelNoRecords).createRDFResponse(JenaType.TURTLE) }
+                    ?.let { catalogNoRecords -> parseRDFResponse(catalogNoRecords, Lang.TURTLE, null) }
+                    ?.let { catalogModelNoRecords -> catalogMeta.union(catalogModelNoRecords).createRDFResponse(Lang.TURTLE) }
                     ?.run { turtleService.saveCatalog(fdkId = catalog.fdkId, turtle = this, withRecords = true) }
             }
 

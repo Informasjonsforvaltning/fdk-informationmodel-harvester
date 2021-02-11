@@ -3,12 +3,12 @@ package no.fdk.fdk_informationmodel_harvester.service
 import com.nhaarman.mockitokotlin2.*
 import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
-import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
 import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
 import no.fdk.fdk_informationmodel_harvester.utils.*
 import org.apache.jena.rdf.model.Model
+import org.apache.jena.riot.Lang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -63,16 +63,16 @@ class UpdateServiceTest {
             argumentCaptor<String, String, Boolean>().apply {
                 verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
                 assertEquals(listOf(CATALOG_ID_0, CATALOG_ID_1), first.allValues)
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, JenaType.TURTLE, null)!!, expectedCatalog0, "diffInMetaDataUpdatesTurtle-catalog0"))
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, JenaType.TURTLE, null)!!, expectedCatalog1, "diffInMetaDataUpdatesTurtle-catalog1"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, expectedCatalog0, "diffInMetaDataUpdatesTurtle-catalog0"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE, null)!!, expectedCatalog1, "diffInMetaDataUpdatesTurtle-catalog1"))
                 assertEquals(listOf(true, true), third.allValues)
             }
 
             argumentCaptor<String, String, Boolean>().apply {
                 verify(turtleService, times(2)).saveInformationModel(first.capture(), second.capture(), third.capture())
                 assertEquals(listOf(INFO_MODEL_ID_0, INFO_MODEL_ID_1), first.allValues)
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, JenaType.TURTLE, null)!!, expectedInfoModel0, "diffInMetaDataUpdatesTurtle-model0"))
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, JenaType.TURTLE, null)!!, expectedInfoModel1, "diffInMetaDataUpdatesTurtle-model1"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, expectedInfoModel0, "diffInMetaDataUpdatesTurtle-model0"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE, null)!!, expectedInfoModel1, "diffInMetaDataUpdatesTurtle-model1"))
                 assertEquals(listOf(true, true), third.allValues)
             }
         }
@@ -108,8 +108,8 @@ class UpdateServiceTest {
 
             argumentCaptor<String, Boolean>().apply {
                 verify(turtleService, times(2)).saveUnionModel(first.capture(), second.capture())
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.firstValue, JenaType.TURTLE, null)!!, expectedWithRecords, "updateUnionModel-withRecords"))
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.secondValue, JenaType.TURTLE, null)!!, expectedNoRecords, "updateUnionModel-noRecords"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.firstValue, Lang.TURTLE, null)!!, expectedWithRecords, "updateUnionModel-withRecords"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.secondValue, Lang.TURTLE, null)!!, expectedNoRecords, "updateUnionModel-noRecords"))
                 assertEquals(listOf(true, false), second.allValues)
             }
         }
