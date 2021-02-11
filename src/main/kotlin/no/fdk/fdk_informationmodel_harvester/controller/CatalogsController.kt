@@ -4,6 +4,7 @@ import no.fdk.fdk_informationmodel_harvester.rdf.jenaTypeFromAcceptHeader
 import no.fdk.fdk_informationmodel_harvester.service.InformationModelService
 import org.apache.jena.riot.Lang
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -19,12 +20,12 @@ open class CatalogsController(private val informationModelService: InformationMo
 
     @GetMapping(value = ["/{id}"])
     fun getCatalogById(
-        httpServletRequest: HttpServletRequest,
+        @RequestHeader(HttpHeaders.ACCEPT) accept: String?,
         @PathVariable id: String,
         @RequestParam(value = "catalogrecords", required = false) catalogrecords: Boolean = false
     ): ResponseEntity<String> {
         LOGGER.info("get InformationModel catalog with id $id")
-        val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
+        val returnType = jenaTypeFromAcceptHeader(accept)
 
         return if (returnType == Lang.RDFNULL) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
         else {
@@ -36,11 +37,11 @@ open class CatalogsController(private val informationModelService: InformationMo
 
     @GetMapping()
     fun getCatalogs(
-        httpServletRequest: HttpServletRequest,
+        @RequestHeader(HttpHeaders.ACCEPT) accept: String?,
         @RequestParam(value = "catalogrecords", required = false) catalogrecords: Boolean = false
     ): ResponseEntity<String> {
         LOGGER.info("get all InformationModel catalogs")
-        val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
+        val returnType = jenaTypeFromAcceptHeader(accept)
 
         return if (returnType == Lang.RDFNULL) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
         else ResponseEntity(informationModelService.getAll(returnType ?: Lang.TURTLE, catalogrecords), HttpStatus.OK)
