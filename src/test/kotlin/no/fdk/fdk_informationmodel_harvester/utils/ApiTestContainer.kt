@@ -3,6 +3,7 @@ package no.fdk.fdk_informationmodel_harvester.utils
 import org.junit.jupiter.api.BeforeAll
 import org.slf4j.LoggerFactory
 import org.springframework.boot.test.util.TestPropertyValues
+import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.testcontainers.containers.GenericContainer
@@ -13,12 +14,15 @@ import java.net.URL
 
 abstract class ApiTestContext {
 
+    @LocalServerPort
+    var port: Int = 0
+
     @BeforeAll
     fun waitForHarvest() {
-        var apiReady = harvestCompleted()
+        var apiReady = harvestCompleted(port)
         while (!apiReady) {
             Thread.sleep(1000)
-            apiReady = harvestCompleted()
+            apiReady = harvestCompleted(port)
         }
     }
 

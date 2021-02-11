@@ -11,10 +11,10 @@ import java.net.HttpURLConnection
 
 private val logger = LoggerFactory.getLogger(ApiTestContext::class.java)
 
-fun apiGet(endpoint: String, acceptHeader: String?): Map<String,Any> {
+fun apiGet(endpoint: String, acceptHeader: String?, port: Int): Map<String,Any> {
 
     return try {
-        val connection = URL("$API_TEST_URI$endpoint").openConnection() as HttpURLConnection
+        val connection = URL("http://localhost:$port$endpoint").openConnection() as HttpURLConnection
         if(acceptHeader != null) connection.setRequestProperty("Accept", acceptHeader)
         connection.connect()
 
@@ -40,10 +40,10 @@ fun apiGet(endpoint: String, acceptHeader: String?): Map<String,Any> {
     }
 }
 
-fun authorizedPost(endpoint: String, token: String?, headers: Map<String, String>): Map<String,Any> {
+fun authorizedPost(endpoint: String, token: String?, headers: Map<String, String>, port: Int): Map<String,Any> {
 
     return try {
-        val connection = URL("$API_TEST_URI$endpoint").openConnection() as HttpURLConnection
+        val connection = URL("http://localhost:$port$endpoint").openConnection() as HttpURLConnection
         headers.forEach { (key, value) -> connection.setRequestProperty(key, value) }
         if(!token.isNullOrEmpty()) connection.setRequestProperty("Authorization", "Bearer $token")
         connection.requestMethod = "POST"
@@ -71,9 +71,9 @@ fun authorizedPost(endpoint: String, token: String?, headers: Map<String, String
     }
 }
 
-fun harvestCompleted(): Boolean {
+fun harvestCompleted(port: Int): Boolean {
     return try {
-        val connection = URL("$API_TEST_URI/count").openConnection() as HttpURLConnection
+        val connection = URL("http://localhost:$port/count").openConnection() as HttpURLConnection
         connection.connect()
 
         if(isOK(connection.responseCode)) {
