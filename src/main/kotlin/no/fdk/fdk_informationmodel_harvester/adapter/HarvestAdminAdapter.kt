@@ -16,23 +16,19 @@ private val logger = LoggerFactory.getLogger(HarvestAdminAdapter::class.java)
 @Service
 class HarvestAdminAdapter(private val applicationProperties: ApplicationProperties) {
 
-    fun urlWithParameters(params: Map<String, String>?): URL {
-        val paramString: String = if (params != null && params.isNotEmpty()) {
-            val paramList = mutableListOf<String>()
-            params.forEach { paramList.add("${it.key}=${it.value}") }
-
-            "?${paramList.joinToString("&")}"
-        } else ""
-
-        return URL("${applicationProperties.harvestAdminRootUrl}/datasources$paramString")
-    }
+    fun urlWithParameters(params: Map<String, String>?): URL =
+        if (!params.isNullOrEmpty()) {
+            URL("${applicationProperties.harvestAdminRootUrl}/datasources?${
+                params.map { "${it.key}=${it.value}" }.joinToString("&")
+            }")
+        } else URL("${applicationProperties.harvestAdminRootUrl}/datasources")
 
     fun getDataSources(queryParams: Map<String, String>?): List<HarvestDataSource> {
         val url = urlWithParameters(queryParams)
-        try {
-            with(url.openConnection() as HttpURLConnection) {
-                setRequestProperty("Accept", MediaType.APPLICATION_JSON.toString())
-                setRequestProperty("Content-type", MediaType.APPLICATION_JSON.toString())
+        with(url.openConnection() as HttpURLConnection) {
+            try {
+                setRequestProperty(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON.toString())
+                setRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
 
                 if (HttpStatus.valueOf(responseCode).is2xxSuccessful) {
                     val body = inputStream.bufferedReader().use(BufferedReader::readText)
@@ -40,11 +36,13 @@ class HarvestAdminAdapter(private val applicationProperties: ApplicationProperti
                 } else {
                     logger.error("Fetch of harvest urls from $url failed, status: $responseCode")
                 }
+            } catch (ex: Exception) {
+                logger.error("Error fetching harvest urls from $url", ex)
+            } finally {
+                disconnect()
             }
-        } catch (ex: Exception) {
-            logger.error("Error fetching harvest urls from $url", ex)
+            return emptyList()
         }
-        return emptyList()
     }
 
 }

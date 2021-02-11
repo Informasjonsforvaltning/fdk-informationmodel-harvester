@@ -1,8 +1,8 @@
 package no.fdk.fdk_informationmodel_harvester.utils
 
-import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
 import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
 import org.apache.jena.rdf.model.Model
+import org.apache.jena.riot.Lang
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.net.URL
@@ -94,8 +94,8 @@ fun checkIfIsomorphicAndPrintDiff(actual: Model, expected: Model, name: String):
     val isIsomorphic = actual.isIsomorphicWith(expected)
 
     if (!isIsomorphic) {
-        val missing = actual.difference(expected).createRDFResponse(JenaType.TURTLE)
-        val nonExpected = expected.difference(actual).createRDFResponse(JenaType.TURTLE)
+        val missing = actual.difference(expected).createRDFResponse(Lang.TURTLE)
+        val nonExpected = expected.difference(actual).createRDFResponse(Lang.TURTLE)
 
         if (missing.isNotEmpty()) {
             logger.error("missing nodes in $name:")

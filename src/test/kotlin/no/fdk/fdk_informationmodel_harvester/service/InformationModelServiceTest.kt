@@ -2,8 +2,8 @@ package no.fdk.fdk_informationmodel_harvester.service
 
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
-import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
 import no.fdk.fdk_informationmodel_harvester.utils.*
+import org.apache.jena.riot.Lang
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -29,8 +29,8 @@ class InformationModelServiceTest {
 
             val expected = responseReader.parseResponse("", "TURTLE")
 
-            val responseTurtle = modelService.getAll(JenaType.TURTLE, true)
-            val responseJsonLD = modelService.getAll(JenaType.JSON_LD, false)
+            val responseTurtle = modelService.getAll(Lang.TURTLE, true)
+            val responseJsonLD = modelService.getAll(Lang.JSONLD, false)
 
             assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseTurtle, "TURTLE")))
             assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseJsonLD, "JSON-LD")))
@@ -43,9 +43,9 @@ class InformationModelServiceTest {
 
             val expected = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
 
-            val responseTurtle = modelService.getAll(JenaType.TURTLE, true)
-            val responseN3 = modelService.getAll(JenaType.N3, true)
-            val responseNTriples = modelService.getAll(JenaType.NTRIPLES, true)
+            val responseTurtle = modelService.getAll(Lang.TURTLE, true)
+            val responseN3 = modelService.getAll(Lang.N3, true)
+            val responseNTriples = modelService.getAll(Lang.NTRIPLES, true)
 
             assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseTurtle, "TURTLE")))
             assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseN3, "N3")))
@@ -59,9 +59,9 @@ class InformationModelServiceTest {
 
             val expected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
 
-            val responseTurtle = modelService.getAll(JenaType.TURTLE, false)
-            val responseN3 = modelService.getAll(JenaType.N3, false)
-            val responseNTriples = modelService.getAll(JenaType.NTRIPLES, false)
+            val responseTurtle = modelService.getAll(Lang.TURTLE, false)
+            val responseN3 = modelService.getAll(Lang.N3, false)
+            val responseNTriples = modelService.getAll(Lang.NTRIPLES, false)
 
             assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseTurtle, "TURTLE")))
             assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseN3, "N3")))
@@ -78,7 +78,7 @@ class InformationModelServiceTest {
             whenever(turtleService.findInformationModel("123", true))
                 .thenReturn(null)
 
-            val response = modelService.getCatalogById("123", JenaType.TURTLE, true)
+            val response = modelService.getCatalogById("123", Lang.TURTLE, true)
 
             assertNull(response)
         }
@@ -90,8 +90,8 @@ class InformationModelServiceTest {
             whenever(turtleService.findCatalog(CATALOG_ID_0, withRecords = false))
                 .thenReturn(javaClass.classLoader.getResource("no_meta_catalog_0.ttl")!!.readText())
 
-            val responseTurtle = modelService.getCatalogById(CATALOG_ID_0, JenaType.TURTLE, true)
-            val responseJsonRDF = modelService.getCatalogById(CATALOG_ID_0, JenaType.RDF_JSON, false)
+            val responseTurtle = modelService.getCatalogById(CATALOG_ID_0, Lang.TURTLE, true)
+            val responseJsonRDF = modelService.getCatalogById(CATALOG_ID_0, Lang.RDFJSON, false)
 
             val expectedWithMeta = responseReader.parseFile("catalog_0.ttl", "TURTLE")
             val expectedNoMeta = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
@@ -110,7 +110,7 @@ class InformationModelServiceTest {
             whenever(turtleService.findInformationModel("123", true))
                 .thenReturn(null)
 
-            val response = modelService.getInformationModelById("123", JenaType.TURTLE, true)
+            val response = modelService.getInformationModelById("123", Lang.TURTLE, true)
 
             assertNull(response)
         }
@@ -122,8 +122,8 @@ class InformationModelServiceTest {
             whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, false))
                 .thenReturn(javaClass.classLoader.getResource("no_meta_model_0.ttl")!!.readText())
 
-            val responseTurtle = modelService.getInformationModelById(INFO_MODEL_ID_0, JenaType.TURTLE, false)
-            val responseRDFXML = modelService.getInformationModelById(INFO_MODEL_ID_0, JenaType.RDF_XML, true)
+            val responseTurtle = modelService.getInformationModelById(INFO_MODEL_ID_0, Lang.TURTLE, false)
+            val responseRDFXML = modelService.getInformationModelById(INFO_MODEL_ID_0, Lang.RDFXML, true)
 
             val expectedWithMeta = responseReader.parseFile("model_0.ttl", "TURTLE")
             val expectedNoMeta = responseReader.parseFile("no_meta_model_0.ttl", "TURTLE")

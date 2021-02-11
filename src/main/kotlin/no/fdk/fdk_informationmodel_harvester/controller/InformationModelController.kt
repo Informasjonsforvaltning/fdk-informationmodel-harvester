@@ -1,8 +1,8 @@
 package no.fdk.fdk_informationmodel_harvester.controller
 
-import no.fdk.fdk_informationmodel_harvester.rdf.JenaType
 import no.fdk.fdk_informationmodel_harvester.rdf.jenaTypeFromAcceptHeader
 import no.fdk.fdk_informationmodel_harvester.service.InformationModelService
+import org.apache.jena.riot.Lang
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -26,9 +26,9 @@ open class InformationModelController(private val informationModelService: Infor
         LOGGER.info("get InformationModel with id $id")
         val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
 
-        return if (returnType == JenaType.NOT_JENA) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
+        return if (returnType == Lang.RDFNULL) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
         else {
-            informationModelService.getInformationModelById(id, returnType ?: JenaType.TURTLE, catalogrecords)
+            informationModelService.getInformationModelById(id, returnType ?: Lang.TURTLE, catalogrecords)
                 ?.let { ResponseEntity(it, HttpStatus.OK) }
                 ?: ResponseEntity(HttpStatus.NOT_FOUND)
         }
