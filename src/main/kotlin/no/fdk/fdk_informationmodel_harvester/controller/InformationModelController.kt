@@ -4,6 +4,7 @@ import no.fdk.fdk_informationmodel_harvester.rdf.jenaTypeFromAcceptHeader
 import no.fdk.fdk_informationmodel_harvester.service.InformationModelService
 import org.apache.jena.riot.Lang
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -19,12 +20,12 @@ open class InformationModelController(private val informationModelService: Infor
 
     @GetMapping(value = ["/{id}"])
     fun getInformationModelById(
-        httpServletRequest: HttpServletRequest,
+        @RequestHeader(HttpHeaders.ACCEPT) accept: String?,
         @PathVariable id: String,
         @RequestParam(value = "catalogrecords", required = false) catalogrecords: Boolean = false
     ): ResponseEntity<String> {
         LOGGER.info("get InformationModel with id $id")
-        val returnType = jenaTypeFromAcceptHeader(httpServletRequest.getHeader("Accept"))
+        val returnType = jenaTypeFromAcceptHeader(accept)
 
         return if (returnType == Lang.RDFNULL) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
         else {
