@@ -1,18 +1,17 @@
 package no.fdk.fdk_informationmodel_harvester.service;
 
-import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
-import javax.servlet.http.HttpServletRequest
+
+private const val ROLE_ROOT_ADMIN = "system:root:admin"
 
 @Component
-class EndpointPermissions(
-    private val applicationProperties: ApplicationProperties
-) {
+class EndpointPermissions {
 
-    fun isFromFDKCluster(httpServletRequest: HttpServletRequest): Boolean =
-        when (httpServletRequest.getHeader("X-API-KEY")) {
-            null -> false
-            applicationProperties.fdkApiKey -> true
-            else -> false
-        }
+    fun hasAdminPermission(jwt: Jwt): Boolean {
+        val authorities: String? = jwt.claims["authorities"] as? String
+
+        return authorities?.contains(ROLE_ROOT_ADMIN) ?: false
+    }
+
 }
