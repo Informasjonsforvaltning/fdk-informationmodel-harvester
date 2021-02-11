@@ -55,4 +55,3 @@ application:
   catalogUri: http://localhost:5000/catalogs
   harvestAdminRootUrl: http://localhost:5000/api
 fuseki.unionGraphUri: http://localhost:5000/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
-server.port: 5555
