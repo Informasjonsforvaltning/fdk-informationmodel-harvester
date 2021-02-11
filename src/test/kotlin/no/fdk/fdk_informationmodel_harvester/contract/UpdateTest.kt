@@ -1,5 +1,7 @@
 package no.fdk.fdk_informationmodel_harvester.contract
 
+import no.fdk.fdk_event_harvester.utils.jwk.Access
+import no.fdk.fdk_event_harvester.utils.jwk.JwtToken
 import no.fdk.fdk_informationmodel_harvester.utils.*
 import org.junit.jupiter.api.*
 import org.springframework.boot.test.context.SpringBootTest
@@ -18,15 +20,15 @@ class UpdateTest: ApiTestContext() {
     private val responseReader = TestResponseReader()
 
     @Test
-    fun forbiddenWhenNoApiKey() {
-        val response = apiPost("/update/meta", emptyMap())
+    fun unauthorizedForNoToken() {
+        val response = authorizedPost("/update/meta", null, emptyMap())
 
-        assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+        assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
     }
 
     @Test
-    fun forbiddenWhenWrongApiKey() {
-        val response = apiPost("/update/meta", mapOf(Pair("X-API-KEY", "wrong-api-key")))
+    fun forbiddenForNonSysAdminRole() {
+        val response = authorizedPost("/update/meta", JwtToken(Access.ORG_WRITE).toString(), mapOf(Pair("X-API-KEY", "wrong-api-key")))
 
         assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
     }
@@ -37,7 +39,7 @@ class UpdateTest: ApiTestContext() {
         val catalog = apiGet("/catalogs/$CATALOG_ID_1", "text/turtle")
         val infoModel = apiGet("/catalogs/$INFO_MODEL_ID_1", "text/turtle")
 
-        val response = apiPost("/update/meta", mapOf(Pair("X-API-KEY", "fdk-api-key")))
+        val response = authorizedPost("/update/meta", JwtToken(Access.ROOT).toString(), mapOf(Pair("X-API-KEY", "fdk-api-key")))
 
         assertEquals(HttpStatus.OK.value(), response["status"])
 
