@@ -14,25 +14,24 @@ private val LOGGER = LoggerFactory.getLogger(InformationModelAdapter::class.java
 class InformationModelAdapter {
 
     fun getInformationModels(source: HarvestDataSource): String? {
-        val connection = URL(source.url).openConnection() as HttpURLConnection
-        try {
-            connection.setRequestProperty("Accept", source.acceptHeaderValue)
+        with(URL(source.url).openConnection() as HttpURLConnection) {
+            try {
+                setRequestProperty("Accept", source.acceptHeaderValue)
 
-            return if (connection.responseCode != HttpStatus.OK.value()) {
-                LOGGER.error("${source.url} responded with ${connection.responseCode}, harvest will be aborted")
-                null
-            } else {
-                connection
-                    .inputStream
-                    .bufferedReader()
-                    .use(BufferedReader::readText)
+                return if (responseCode != HttpStatus.OK.value()) {
+                    LOGGER.error("${source.url} responded with ${responseCode}, harvest will be aborted")
+                    null
+                } else {
+                    inputStream.bufferedReader()
+                        .use(BufferedReader::readText)
+                }
+
+            } catch (ex: Exception) {
+                LOGGER.error("Error when harvesting from ${source.url}", ex)
+                return null
+            } finally {
+                disconnect()
             }
-
-        } catch (ex: Exception) {
-            LOGGER.error("Error when harvesting from ${source.url}", ex)
-            return null
-        } finally {
-            connection.disconnect()
         }
     }
 

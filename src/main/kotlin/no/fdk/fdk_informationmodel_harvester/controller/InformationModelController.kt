@@ -15,10 +15,13 @@ private val LOGGER = LoggerFactory.getLogger(InformationModelController::class.j
 
 @Controller
 @CrossOrigin
-@RequestMapping(value = ["/informationmodels"], produces = ["text/turtle", "text/n3", "application/rdf+json", "application/ld+json", "application/rdf+xml", "application/n-triples"])
+@RequestMapping(
+    value = ["/informationmodels"],
+    produces = ["text/turtle", "text/n3", "application/rdf+json", "application/ld+json", "application/rdf+xml", "application/n-triples"]
+)
 open class InformationModelController(private val informationModelService: InformationModelService) {
 
-    @GetMapping(value = ["/{id}"])
+    @GetMapping("/{id}")
     fun getInformationModelById(
         @RequestHeader(HttpHeaders.ACCEPT) accept: String?,
         @PathVariable id: String,

@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping(value = ["/update"])
+@RequestMapping("/update")
 class UpdateController(
     private val endpointPermissions: EndpointPermissions,
-    private val updateService: UpdateService) {
+    private val updateService: UpdateService
+) {
 
     @PostMapping("/meta")
     fun updateMetaData(@AuthenticationPrincipal jwt: Jwt): ResponseEntity<Void> =
