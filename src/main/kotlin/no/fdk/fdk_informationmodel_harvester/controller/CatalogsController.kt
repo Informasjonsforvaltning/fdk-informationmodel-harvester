@@ -15,10 +15,13 @@ private val LOGGER = LoggerFactory.getLogger(CatalogsController::class.java)
 
 @Controller
 @CrossOrigin
-@RequestMapping(value = ["/catalogs"], produces = ["text/turtle", "text/n3", "application/rdf+json", "application/ld+json", "application/rdf+xml", "application/n-triples"])
+@RequestMapping(
+    value = ["/catalogs"],
+    produces = ["text/turtle", "text/n3", "application/rdf+json", "application/ld+json", "application/rdf+xml", "application/n-triples"]
+)
 open class CatalogsController(private val informationModelService: InformationModelService) {
 
-    @GetMapping(value = ["/{id}"])
+    @GetMapping("/{id}")
     fun getCatalogById(
         @RequestHeader(HttpHeaders.ACCEPT) accept: String?,
         @PathVariable id: String,
@@ -35,7 +38,7 @@ open class CatalogsController(private val informationModelService: InformationMo
         }
     }
 
-    @GetMapping()
+    @GetMapping
     fun getCatalogs(
         @RequestHeader(HttpHeaders.ACCEPT) accept: String?,
         @RequestParam(value = "catalogrecords", required = false) catalogrecords: Boolean = false
