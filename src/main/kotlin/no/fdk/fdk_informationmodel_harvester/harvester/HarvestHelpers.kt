@@ -1,8 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.harvester
 
 import no.fdk.fdk_informationmodel_harvester.rdf.*
-import org.apache.jena.query.QueryExecutionFactory
-import org.apache.jena.query.QueryFactory
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.Resource
 import org.apache.jena.riot.Lang
@@ -119,10 +117,3 @@ data class InformationModelRDFModel (
     val resourceURI: String,
     val harvested: Model
 )
-
-private fun Model.containsTriple(subj: String, pred: String, obj: String): Boolean {
-    val askQuery = "ASK { $subj $pred $obj }"
-
-    val query = QueryFactory.create(askQuery)
-    return QueryExecutionFactory.create(query, this).execAsk()
-}

@@ -77,6 +77,42 @@ class UpdateServiceTest {
             }
         }
 
+
+
+        @Test
+        fun updateIsSkippedIfNotActuallyPresentInCatalog() {
+            whenever(catalogRepository.findAll())
+                .thenReturn(listOf(CATALOG_DBO_0))
+            whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/${CATALOG_ID_0}"))
+                .thenReturn(listOf(INFO_MODEL_DBO_0, INFO_MODEL_DBO_1))
+            whenever(turtleService.findCatalog(CATALOG_ID_0, false))
+                .thenReturn(responseReader.readFile("harvest_response_0_no_models.ttl"))
+            whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, false))
+                .thenReturn(responseReader.readFile("no_meta_model_0.ttl"))
+            whenever(turtleService.findInformationModel(INFO_MODEL_ID_1, false))
+                .thenReturn(responseReader.readFile("no_meta_model_1.ttl"))
+
+            whenever(valuesMock.catalogUri)
+                .thenReturn("http://localhost:5000/catalogs")
+            whenever(valuesMock.informationModelUri)
+                .thenReturn("http://localhost:5000/informationmodels")
+
+            updateService.updateMetaData()
+
+            val expectedCatalog = responseReader.parseFile("catalog_0_no_models.ttl", "TURTLE")
+
+            argumentCaptor<String, String, Boolean>().apply {
+                verify(turtleService, times(1)).saveCatalog(first.capture(), second.capture(), third.capture())
+                assertEquals(CATALOG_ID_0, first.firstValue)
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, expectedCatalog, "updateIsSkippedIfNotActuallyPresentInCatalog"))
+                assertEquals(listOf(true), third.allValues)
+            }
+
+            argumentCaptor<String, String, Boolean>().apply {
+                verify(turtleService, times(0)).saveInformationModel(first.capture(), second.capture(), third.capture())
+            }
+        }
+
     }
 
     @Nested
