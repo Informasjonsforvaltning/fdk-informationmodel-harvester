@@ -4,6 +4,8 @@ import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.harvester.calendarFromTimestamp
 import no.fdk.fdk_informationmodel_harvester.model.*
+import no.fdk.fdk_informationmodel_harvester.rdf.ModellDCATAPNO
+import no.fdk.fdk_informationmodel_harvester.rdf.containsTriple
 import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.*
@@ -51,22 +53,38 @@ class UpdateService (
             .forEach { catalog ->
                 val fdkURI = "${applicationProperties.catalogUri}/${catalog.fdkId}"
                 var catalogMeta = catalog.createMetaModel()
+                val catalogNoRecords = turtleService.findCatalog(catalog.fdkId, withRecords = false)
+                    ?.let { catalogTurtle -> parseRDFResponse(catalogTurtle, Lang.TURTLE, null) }
 
-                infoRepository.findAllByIsPartOf(fdkURI)
-                    .forEach { infoModel ->
-                        val infoModelMeta = infoModel.createMetaModel()
-                        catalogMeta = catalogMeta.union(infoModelMeta)
+                if (catalogNoRecords != null) {
 
-                        turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
-                            ?.let { infoNoRecords -> parseRDFResponse(infoNoRecords, Lang.TURTLE, null) }
-                            ?.let { infoModelNoRecords -> infoModelMeta.union(infoModelNoRecords).createRDFResponse(Lang.TURTLE) }
-                            ?.run { turtleService.saveInformationModel(fdkId = infoModel.fdkId, turtle = this, withRecords = true) }
-                    }
+                    infoRepository.findAllByIsPartOf(fdkURI)
+                        .filter { it.catalogContainsInfoModel(catalogNoRecords) }
+                        .forEach { infoModel ->
+                            val infoModelMeta = infoModel.createMetaModel()
+                            catalogMeta = catalogMeta.union(infoModelMeta)
 
-                turtleService.findCatalog(catalog.fdkId, withRecords = false)
-                    ?.let { catalogNoRecords -> parseRDFResponse(catalogNoRecords, Lang.TURTLE, null) }
-                    ?.let { catalogModelNoRecords -> catalogMeta.union(catalogModelNoRecords).createRDFResponse(Lang.TURTLE) }
-                    ?.run { turtleService.saveCatalog(fdkId = catalog.fdkId, turtle = this, withRecords = true) }
+                            turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
+                                ?.let { infoNoRecords -> parseRDFResponse(infoNoRecords, Lang.TURTLE, null) }
+                                ?.let { infoModelNoRecords ->
+                                    infoModelMeta.union(infoModelNoRecords).createRDFResponse(Lang.TURTLE)
+                                }
+                                ?.run {
+                                    turtleService.saveInformationModel(
+                                        fdkId = infoModel.fdkId,
+                                        turtle = this,
+                                        withRecords = true
+                                    )
+                                }
+                        }
+
+                    catalogNoRecords
+                        .let { catalogModelNoRecords ->
+                            catalogMeta.union(catalogModelNoRecords).createRDFResponse(Lang.TURTLE)
+                        }
+                        .run { turtleService.saveCatalog(fdkId = catalog.fdkId, turtle = this, withRecords = true) }
+
+                }
             }
 
         updateUnionModel()
@@ -102,4 +120,8 @@ class UpdateService (
 
         return metaModel
     }
+
+    private fun InformationModelMeta.catalogContainsInfoModel(model: Model): Boolean =
+        model.containsTriple("<${uri}>", "a", "<${ModellDCATAPNO.InformationModel.uri}>")
+
 }
