@@ -19,7 +19,7 @@ import org.apache.jena.vocabulary.RDF
 import org.springframework.stereotype.Service
 
 @Service
-class UpdateService (
+class UpdateService(
     private val applicationProperties: ApplicationProperties,
     private val fusekiAdapter: FusekiAdapter,
     private val catalogRepository: CatalogRepository,
@@ -53,38 +53,33 @@ class UpdateService (
             .forEach { catalog ->
                 val fdkURI = "${applicationProperties.catalogUri}/${catalog.fdkId}"
                 var catalogMeta = catalog.createMetaModel()
-                val catalogNoRecords = turtleService.findCatalog(catalog.fdkId, withRecords = false)
+                turtleService.findCatalog(catalog.fdkId, withRecords = false)
                     ?.let { catalogTurtle -> parseRDFResponse(catalogTurtle, Lang.TURTLE, null) }
+                    ?.let { catalogNoRecords ->
 
-                if (catalogNoRecords != null) {
+                        infoRepository.findAllByIsPartOf(fdkURI)
+                            .filter { it.catalogContainsInfoModel(catalogNoRecords) }
+                            .forEach { infoModel ->
+                                val infoModelMeta = infoModel.createMetaModel()
+                                catalogMeta = catalogMeta.union(infoModelMeta)
 
-                    infoRepository.findAllByIsPartOf(fdkURI)
-                        .filter { it.catalogContainsInfoModel(catalogNoRecords) }
-                        .forEach { infoModel ->
-                            val infoModelMeta = infoModel.createMetaModel()
-                            catalogMeta = catalogMeta.union(infoModelMeta)
+                                turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
+                                    ?.let { infoNoRecords -> parseRDFResponse(infoNoRecords, Lang.TURTLE, null) }
+                                    ?.let { infoModelNoRecords ->
+                                        infoModelMeta.union(infoModelNoRecords).createRDFResponse(Lang.TURTLE)
+                                    }
+                                    ?.run {
+                                        turtleService.saveInformationModel(
+                                            fdkId = infoModel.fdkId,
+                                            turtle = this,
+                                            withRecords = true
+                                        )
+                                    }
+                            }
 
-                            turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
-                                ?.let { infoNoRecords -> parseRDFResponse(infoNoRecords, Lang.TURTLE, null) }
-                                ?.let { infoModelNoRecords ->
-                                    infoModelMeta.union(infoModelNoRecords).createRDFResponse(Lang.TURTLE)
-                                }
-                                ?.run {
-                                    turtleService.saveInformationModel(
-                                        fdkId = infoModel.fdkId,
-                                        turtle = this,
-                                        withRecords = true
-                                    )
-                                }
-                        }
-
-                    catalogNoRecords
-                        .let { catalogModelNoRecords ->
-                            catalogMeta.union(catalogModelNoRecords).createRDFResponse(Lang.TURTLE)
-                        }
-                        .run { turtleService.saveCatalog(fdkId = catalog.fdkId, turtle = this, withRecords = true) }
-
-                }
+                        catalogMeta.union(catalogNoRecords).createRDFResponse(Lang.TURTLE)
+                            .run { turtleService.saveCatalog(fdkId = catalog.fdkId, turtle = this, withRecords = true) }
+                    }
             }
 
         updateUnionModel()
