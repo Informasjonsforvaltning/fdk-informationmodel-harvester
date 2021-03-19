@@ -1,6 +1,5 @@
 package no.fdk.fdk_informationmodel_harvester.service
 
-import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.harvester.calendarFromTimestamp
 import no.fdk.fdk_informationmodel_harvester.model.*
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service
 @Service
 class UpdateService(
     private val applicationProperties: ApplicationProperties,
-    private val fusekiAdapter: FusekiAdapter,
     private val catalogRepository: CatalogRepository,
     private val infoRepository: InformationModelRepository,
     private val turtleService: TurtleService
@@ -41,8 +39,6 @@ class UpdateService(
                     ?.let { turtle -> parseRDFResponse(turtle, Lang.TURTLE, null) }
                     ?.run { unionNoRecords = unionNoRecords.union(this) }
             }
-
-        fusekiAdapter.storeUnionModel(unionWithRecords)
 
         turtleService.saveUnionModel(unionWithRecords.createRDFResponse(Lang.TURTLE), withRecords = true)
         turtleService.saveUnionModel(unionNoRecords.createRDFResponse(Lang.TURTLE), withRecords = false)

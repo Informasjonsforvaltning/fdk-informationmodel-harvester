@@ -1,7 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.service
 
 import com.nhaarman.mockitokotlin2.*
-import no.fdk.fdk_informationmodel_harvester.adapter.FusekiAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
@@ -20,10 +19,9 @@ class UpdateServiceTest {
     private val catalogRepository: CatalogRepository = mock()
     private val modelRepository: InformationModelRepository = mock()
     private val valuesMock: ApplicationProperties = mock()
-    private val fusekiAdapter: FusekiAdapter = mock()
     private val turtleService: TurtleService = mock()
     private val updateService = UpdateService(
-        valuesMock, fusekiAdapter, catalogRepository, modelRepository, turtleService)
+        valuesMock, catalogRepository, modelRepository, turtleService)
 
     private val responseReader = TestResponseReader()
 
@@ -135,12 +133,6 @@ class UpdateServiceTest {
 
             val expectedWithRecords = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
             val expectedNoRecords = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
-
-            argumentCaptor<Model>().apply {
-                verify(fusekiAdapter, times(1)).storeUnionModel(capture())
-
-                assertTrue(checkIfIsomorphicAndPrintDiff(firstValue, expectedWithRecords, "updateUnionModel-fuseki"))
-            }
 
             argumentCaptor<String, Boolean>().apply {
                 verify(turtleService, times(2)).saveUnionModel(first.capture(), second.capture())
