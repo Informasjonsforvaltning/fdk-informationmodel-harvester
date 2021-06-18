@@ -17,7 +17,8 @@ private val LOGGER = LoggerFactory.getLogger(InformationModelController::class.j
 @CrossOrigin
 @RequestMapping(
     value = ["/informationmodels"],
-    produces = ["text/turtle", "text/n3", "application/rdf+json", "application/ld+json", "application/rdf+xml", "application/n-triples"]
+    produces = ["text/turtle", "text/n3", "application/rdf+json", "application/ld+json", "application/rdf+xml",
+        "application/n-triples", "application/n-quads", "application/trig", "application/trix"]
 )
 open class InformationModelController(private val informationModelService: InformationModelService) {
 

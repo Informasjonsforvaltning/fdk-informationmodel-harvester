@@ -4,6 +4,7 @@ import no.fdk.fdk_informationmodel_harvester.utils.ApiTestContext
 import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_ID_0
 import no.fdk.fdk_informationmodel_harvester.utils.TestResponseReader
 import no.fdk.fdk_informationmodel_harvester.utils.apiGet
+import org.apache.jena.riot.Lang
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.springframework.boot.test.context.SpringBootTest
@@ -34,11 +35,11 @@ class InformationModelTest: ApiTestContext() {
 
     @Test
     fun findSpecificExcludeRecords() {
-        val response = apiGet("/informationmodels/$INFO_MODEL_ID_0", "application/rdf+json", port)
+        val response = apiGet("/informationmodels/$INFO_MODEL_ID_0", "application/trig", port)
         Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
 
         val expected = responseReader.parseFile("no_meta_model_0.ttl", "TURTLE")
-        val responseModel = responseReader.parseResponse(response["body"] as String, "RDF/JSON")
+        val responseModel = responseReader.parseResponse(response["body"] as String, Lang.TRIG.name)
 
         assertTrue(expected.isIsomorphicWith(responseModel))
     }
