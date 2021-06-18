@@ -1,6 +1,7 @@
 package no.fdk.fdk_informationmodel_harvester.contract
 
 import no.fdk.fdk_informationmodel_harvester.utils.*
+import org.apache.jena.riot.Lang
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,11 +32,11 @@ class CatalogsTest: ApiTestContext() {
 
     @Test
     fun findSpecificExcludeRecords() {
-        val response = apiGet("/catalogs/$CATALOG_ID_0", "application/rdf+xml", port)
+        val response = apiGet("/catalogs/$CATALOG_ID_0", "application/n-quads", port)
         Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
 
         val expected = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
-        val responseModel = responseReader.parseResponse(response["body"] as String, "RDFXML")
+        val responseModel = responseReader.parseResponse(response["body"] as String, Lang.NQUADS.name)
 
         assertTrue(expected.isIsomorphicWith(responseModel))
     }
@@ -58,11 +59,11 @@ class CatalogsTest: ApiTestContext() {
 
     @Test
     fun findAllExcludeRecords() {
-        val response = apiGet("/catalogs", "text/turtle", port)
+        val response = apiGet("/catalogs", "application/trix", port)
         Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
 
         val expected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
-        val responseModel = responseReader.parseResponse(response["body"] as String, "TURTLE")
+        val responseModel = responseReader.parseResponse(response["body"] as String, Lang.TRIX.name)
         assertTrue(expected.isIsomorphicWith(responseModel))
     }
 
