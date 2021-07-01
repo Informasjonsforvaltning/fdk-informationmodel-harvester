@@ -117,3 +117,5 @@ data class InformationModelRDFModel (
     val resourceURI: String,
     val harvested: Model
 )
+
+class HarvestException(url: String) : Exception("Harvest failed for $url")
