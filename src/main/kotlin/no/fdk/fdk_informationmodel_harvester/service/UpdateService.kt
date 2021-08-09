@@ -54,7 +54,7 @@ class UpdateService(
                     ?.let { catalogNoRecords ->
 
                         infoRepository.findAllByIsPartOf(fdkURI)
-                            .filter { it.catalogContainsInfoModel(catalogNoRecords) }
+                            .filter { it.catalogContainsInfoModel(catalogNoRecords, catalog.uri) }
                             .forEach { infoModel ->
                                 val infoModelMeta = infoModel.createMetaModel()
                                 catalogMeta = catalogMeta.union(infoModelMeta)
@@ -112,7 +112,8 @@ class UpdateService(
         return metaModel
     }
 
-    private fun InformationModelMeta.catalogContainsInfoModel(model: Model): Boolean =
-        model.containsTriple("<${uri}>", "a", "<${ModellDCATAPNO.InformationModel.uri}>")
+    private fun InformationModelMeta.catalogContainsInfoModel(model: Model, catalogURI: String): Boolean =
+        model.containsTriple("<$catalogURI>", "<${ModellDCATAPNO.model.uri}>", "<$uri>")
+                && model.containsTriple("<$uri>", "a", "<${ModellDCATAPNO.InformationModel.uri}>")
 
 }
