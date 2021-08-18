@@ -25,6 +25,7 @@ fun splitCatalogsFromRDF(harvested: Model): List<CatalogAndInfoModels> =
         .map { catalogResource ->
             val catalogInfoModels: List<InformationModelRDFModel> = catalogResource.listProperties(ModellDCATAPNO.model)
                 .toList()
+                .filter { catalogContainsInfoModel(harvested, catalogResource.uri, it.resource.uri) }
                 .map { dataset -> dataset.resource.extractInformationModel() }
 
             var catalogModelWithoutInfoModels = catalogResource.listProperties().toModel()

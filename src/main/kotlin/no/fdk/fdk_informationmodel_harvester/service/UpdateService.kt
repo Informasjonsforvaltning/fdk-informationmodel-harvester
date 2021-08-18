@@ -3,10 +3,7 @@ package no.fdk.fdk_informationmodel_harvester.service
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.harvester.calendarFromTimestamp
 import no.fdk.fdk_informationmodel_harvester.model.*
-import no.fdk.fdk_informationmodel_harvester.rdf.ModellDCATAPNO
-import no.fdk.fdk_informationmodel_harvester.rdf.containsTriple
-import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
-import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
+import no.fdk.fdk_informationmodel_harvester.rdf.*
 import no.fdk.fdk_informationmodel_harvester.repository.*
 import org.apache.jena.rdf.model.Model
 import org.apache.jena.rdf.model.ModelFactory
@@ -54,7 +51,7 @@ class UpdateService(
                     ?.let { catalogNoRecords ->
 
                         infoRepository.findAllByIsPartOf(fdkURI)
-                            .filter { it.catalogContainsInfoModel(catalogNoRecords, catalog.uri) }
+                            .filter { catalogContainsInfoModel(catalogNoRecords, catalog.uri, it.uri) }
                             .forEach { infoModel ->
                                 val infoModelMeta = infoModel.createMetaModel()
                                 catalogMeta = catalogMeta.union(infoModelMeta)
@@ -111,9 +108,5 @@ class UpdateService(
 
         return metaModel
     }
-
-    private fun InformationModelMeta.catalogContainsInfoModel(model: Model, catalogURI: String): Boolean =
-        model.containsTriple("<$catalogURI>", "<${ModellDCATAPNO.model.uri}>", "<$uri>")
-                && model.containsTriple("<$uri>", "a", "<${ModellDCATAPNO.InformationModel.uri}>")
 
 }

@@ -1,6 +1,7 @@
 package no.fdk.fdk_informationmodel_harvester.rdf
 
 import no.fdk.fdk_informationmodel_harvester.Application
+import no.fdk.fdk_informationmodel_harvester.model.InformationModelMeta
 import org.apache.jena.query.QueryExecutionFactory
 import org.apache.jena.query.QueryFactory
 import org.apache.jena.rdf.model.Model
@@ -69,3 +70,7 @@ fun Model.containsTriple(subj: String, pred: String, obj: String): Boolean {
     val query = QueryFactory.create(askQuery)
     return QueryExecutionFactory.create(query, this).execAsk()
 }
+
+fun catalogContainsInfoModel(model: Model, catalogURI: String, infoModelURI: String): Boolean =
+    model.containsTriple("<$catalogURI>", "<${ModellDCATAPNO.model.uri}>", "<$infoModelURI>")
+            && model.containsTriple("<$infoModelURI>", "a", "<${ModellDCATAPNO.InformationModel.uri}>")
