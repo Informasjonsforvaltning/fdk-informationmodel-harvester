@@ -94,6 +94,7 @@ class InformationModelHarvester(
                     .addProperty(DCTerms.modified, catalogModel.createTypedLiteral(harvestDate))
 
                 informationModelRepository.findAllByIsPartOf(fdkUri)
+                    .filter { infoMeta -> catalogContainsInfoModel(it.first.harvestedCatalog, updatedCatalogMeta.uri, infoMeta.uri) }
                     .mapNotNull { infoMeta -> turtleService.findInformationModel(infoMeta.fdkId, withRecords = true) }
                     .map { infoModelTurtle -> parseRDFResponse(infoModelTurtle, Lang.TURTLE, null) }
                     .forEach { infoModel -> catalogModel = catalogModel.union(infoModel) }
