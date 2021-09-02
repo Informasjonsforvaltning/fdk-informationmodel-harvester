@@ -10,6 +10,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 private val LOGGER = LoggerFactory.getLogger(InformationModelAdapter::class.java)
+private const val TEN_MINUTES = 600000
 
 @Service
 class InformationModelAdapter {
@@ -18,6 +19,8 @@ class InformationModelAdapter {
         with(URL(source.url).openConnection() as HttpURLConnection) {
             try {
                 setRequestProperty("Accept", source.acceptHeaderValue)
+                connectTimeout = TEN_MINUTES
+                readTimeout = TEN_MINUTES
 
                 return if (responseCode != HttpStatus.OK.value()) {
                     LOGGER.error("${source.url} responded with ${responseCode}, harvest will be aborted", HarvestException(source.url ?: "undefined"))
