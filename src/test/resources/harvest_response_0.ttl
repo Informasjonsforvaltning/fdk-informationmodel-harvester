@@ -37,7 +37,11 @@ digdir:Katalog0  a        owl:NamedIndividual , dcat:Catalog ;
         dct:identifier          "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog0"^^xsd:string ;
         dct:publisher           digdir:Utgiver ;
         dct:title               "Digitaliseringsdirektoratets modellkatalog 0"@nb ;
-        modelldcatno:model      digdir:PersonOgEnhet .
+        modelldcatno:model      digdir:PersonOgEnhet , [ a modelldcatno:InformationModel ; dct:title "Is filtered"@en ] .
+
+[   a           dcat:Catalog ;
+    dct:title   "Is filtered"@en
+] .
 
 digdir:Utgiver  a       owl:NamedIndividual , foaf:Agent ;
         dct:identifier  "991825827"^^xsd:string ;

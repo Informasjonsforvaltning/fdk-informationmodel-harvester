@@ -70,13 +70,14 @@ class HarvesterTest {
         }
 
         val catalog0 = responseReader.parseFile("catalog_0.ttl", "TURTLE")
+        val catalog0NoMeta = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
         val model0 = parseRDFResponse(savedInfoModel, Lang.TURTLE, null)!!
         val model0NoMeta = responseReader.parseFile("no_meta_model_0.ttl", "TURTLE")
 
         argumentCaptor<String, String, Boolean>().apply {
             verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
             assertEquals(listOf(CATALOG_ID_0, CATALOG_ID_0), first.allValues)
-            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, harvestedModel, "harvestDataSourceSavedWhenDBIsEmpty-no-record-catalog"))
+            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, catalog0NoMeta, "harvestDataSourceSavedWhenDBIsEmpty-no-record-catalog"))
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE, null)!!, catalog0, "harvestDataSourceSavedWhenDBIsEmpty-record-catalog"))
             assertEquals(listOf(false, true), third.allValues)
         }
@@ -230,6 +231,7 @@ class HarvesterTest {
 
         val expectedCatalogDBO = CATALOG_DBO_0.copy(modified = NEW_TEST_HARVEST_DATE.timeInMillis)
         val expectedCatalogTurtle = responseReader.parseFile("catalog_0_catalog_diff.ttl", "TURTLE")
+        val expectedNoMetaCatalog = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
         val harvestedModel = parseRDFResponse(harvested, Lang.TURTLE, null)!!
 
         harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, NEW_TEST_HARVEST_DATE)
@@ -252,7 +254,7 @@ class HarvesterTest {
         argumentCaptor<String, String, Boolean>().apply {
             verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
             assertEquals(listOf(CATALOG_DBO_0.fdkId, CATALOG_DBO_0.fdkId), first.allValues)
-            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, harvestedModel, "onlyCatalogMetaUpdatedWhenOnlyCatalogDataChangedFromDB-no-record-catalog"))
+            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, expectedNoMetaCatalog, "onlyCatalogMetaUpdatedWhenOnlyCatalogDataChangedFromDB-no-record-catalog"))
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE, null)!!, expectedCatalogTurtle, "onlyCatalogMetaUpdatedWhenOnlyCatalogDataChangedFromDB-record-catalog"))
             assertEquals(listOf(false, true), third.allValues)
         }
