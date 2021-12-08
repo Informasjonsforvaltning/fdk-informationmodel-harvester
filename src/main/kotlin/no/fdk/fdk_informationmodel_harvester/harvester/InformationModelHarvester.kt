@@ -58,7 +58,7 @@ class InformationModelHarvester(
             LOGGER.info("Changes detected, saving data from $sourceURL and updating FDK meta data")
             turtleService.saveOne(filename = sourceURL, turtle = harvested.createRDFResponse(Lang.TURTLE))
 
-            val catalogs = splitCatalogsFromRDF(harvested)
+            val catalogs = splitCatalogsFromRDF(harvested, sourceURL)
 
             if (catalogs.isEmpty()) LOGGER.error("No catalog with information models found in data harvested from $sourceURL", HarvestException(sourceURL))
             else updateDB(catalogs, harvestDate)
