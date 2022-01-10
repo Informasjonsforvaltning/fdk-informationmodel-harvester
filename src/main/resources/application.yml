@@ -22,7 +22,20 @@ spring:
     username: ${RABBIT_USERNAME}
     password: ${RABBIT_PASSWORD}
   data.mongodb.uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/informationModelHarvester?authSource=admin&authMechanism=SCRAM-SHA-1
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  metrics:
+    export:
+      statsd:
+        enabled: true
+        flavor: telegraf
+        host: fdk-monitoring-services-telegraf
+        port: 8125
+    tags:
+      application: fdk-informationmodel-harvester
 ---
 spring:
   config.activate.on-profile: develop
