@@ -14,7 +14,7 @@ fun startMockServer() {
                 .willReturn(aResponse()
                         .withStatus(200))
         )
-        mockserver.stubFor(get(urlEqualTo("/api/datasources"))
+        mockserver.stubFor(get(urlEqualTo("/datasources?dataType=informationmodel"))
             .willReturn(okJson(jacksonObjectMapper().writeValueAsString(listOf(TEST_HARVEST_SOURCE, ERROR_HARVEST_SOURCE, TEST_HARVEST_SOURCE_1))))
         )
         mockserver.stubFor(get(urlMatching("/harvest"))
