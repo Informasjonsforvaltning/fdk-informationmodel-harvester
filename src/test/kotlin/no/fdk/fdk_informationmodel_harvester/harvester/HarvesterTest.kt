@@ -4,6 +4,8 @@ import com.nhaarman.mockitokotlin2.*
 import no.fdk.fdk_informationmodel_harvester.adapter.InformationModelAdapter
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.model.CatalogMeta
+import no.fdk.fdk_informationmodel_harvester.model.FdkIdAndUri
+import no.fdk.fdk_informationmodel_harvester.model.HarvestReport
 import no.fdk.fdk_informationmodel_harvester.model.InformationModelMeta
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
@@ -49,7 +51,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5000/informationmodels")
 
-        harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         val harvestedModel = parseRDFResponse(harvested, Lang.TURTLE, null)!!
 
@@ -89,6 +91,23 @@ class HarvesterTest {
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE, null)!!, model0, "harvestDataSourceSavedWhenDBIsEmpty-no-record-model"))
             assertEquals(listOf(false, true), third.allValues)
         }
+
+        val expectedReport = HarvestReport(
+            id="harvest",
+            url="http://localhost:5000/harvest",
+            dataType="informationmodel",
+            harvestError=false,
+            startTime = "2020-10-05 15:15:39 +0200",
+            endTime = report!!.endTime,
+            changedCatalogs = listOf(FdkIdAndUri(
+                fdkId="e5b2ad5e-078b-3aea-af04-6051c2b0244b",
+                uri="https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog0")),
+            changedResources = listOf(FdkIdAndUri(
+                fdkId="409c97dd-57e0-3a29-b5a3-023733cf5064",
+                uri="https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#PersonOgEnhet"))
+        )
+
+        kotlin.test.assertEquals(expectedReport, report)
     }
 
     @Test
@@ -111,7 +130,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5000/informationmodels")
 
-        harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE_2, TEST_HARVEST_DATE)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE_2, TEST_HARVEST_DATE)
 
         val harvestedModel = parseRDFResponse(harvested, Lang.TURTLE, null)!!
 
@@ -163,6 +182,23 @@ class HarvesterTest {
             }
             assertEquals(listOf(false, true, false, true), third.allValues)
         }
+
+        val expectedReport = HarvestReport(
+            id="harvest2",
+            url="http://localhost:5000/harvest2",
+            dataType="informationmodel",
+            harvestError=false,
+            startTime = "2020-10-05 15:15:39 +0200",
+            endTime = report!!.endTime,
+            changedCatalogs = listOf(FdkIdAndUri(
+                fdkId="f25c939d-0722-3aa3-82b1-eaa457086444",
+                uri="https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog2")),
+            changedResources = listOf(
+                FdkIdAndUri(fdkId="bcbe6738-85f6-388c-afcc-ef1fafd7cc45", uri="https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell"),
+                FdkIdAndUri(fdkId="0bf6b09f-e1c0-3415-bba0-7ff2edada89d", uri="https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#AltMuligModell"))
+        )
+
+        kotlin.test.assertEquals(expectedReport, report)
     }
 
     @Test
@@ -179,7 +215,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5000/informationmodels")
 
-        harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         argumentCaptor<String, String>().apply {
             verify(turtleService, times(0)).saveOne(first.capture(), second.capture())
@@ -201,6 +237,16 @@ class HarvesterTest {
             verify(turtleService, times(0)).saveInformationModel(first.capture(), second.capture(), third.capture())
         }
 
+        val expectedReport = HarvestReport(
+            id="harvest",
+            url="http://localhost:5000/harvest",
+            dataType="informationmodel",
+            harvestError=false,
+            startTime = "2020-10-05 15:15:39 +0200",
+            endTime = report!!.endTime
+        )
+
+        kotlin.test.assertEquals(expectedReport, report)
     }
 
     @Test
@@ -234,7 +280,7 @@ class HarvesterTest {
         val expectedNoMetaCatalog = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
         val harvestedModel = parseRDFResponse(harvested, Lang.TURTLE, null)!!
 
-        harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, NEW_TEST_HARVEST_DATE)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, NEW_TEST_HARVEST_DATE)
 
         argumentCaptor<String, String>().apply {
             verify(turtleService, times(1)).saveOne(first.capture(), second.capture())
@@ -262,6 +308,20 @@ class HarvesterTest {
         argumentCaptor<String, String, Boolean>().apply {
             verify(turtleService, times(0)).saveInformationModel(first.capture(), second.capture(), third.capture())
         }
+
+        val expectedReport = HarvestReport(
+            id="harvest",
+            url="http://localhost:5000/harvest",
+            dataType="informationmodel",
+            harvestError=false,
+            startTime = "2020-10-15 13:52:16 +0200",
+            endTime = report!!.endTime,
+            changedCatalogs = listOf(FdkIdAndUri(
+                fdkId="e5b2ad5e-078b-3aea-af04-6051c2b0244b",
+                uri="https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog0"))
+        )
+
+        kotlin.test.assertEquals(expectedReport, report)
     }
 
     @Test
@@ -274,7 +334,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5000/informationmodels")
 
-        harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         argumentCaptor<String, String>().apply {
             verify(turtleService, times(0)).saveOne(first.capture(), second.capture())
@@ -295,6 +355,18 @@ class HarvesterTest {
         argumentCaptor<String, String, Boolean>().apply {
             verify(turtleService, times(0)).saveInformationModel(first.capture(), second.capture(), third.capture())
         }
+
+        val expectedReport = HarvestReport(
+            id="harvest",
+            url="http://localhost:5000/harvest",
+            dataType="informationmodel",
+            harvestError=true,
+            errorMessage = "[line: 1, col: 1 ] Undefined prefix: digdir",
+            startTime = "2020-10-05 15:15:39 +0200",
+            endTime = report!!.endTime
+        )
+
+        kotlin.test.assertEquals(expectedReport, report)
     }
 
 }
