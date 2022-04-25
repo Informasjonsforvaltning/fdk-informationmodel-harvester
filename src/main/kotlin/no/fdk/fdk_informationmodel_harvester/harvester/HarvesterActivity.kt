@@ -2,7 +2,8 @@ package no.fdk.fdk_informationmodel_harvester.harvester
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -16,7 +17,6 @@ import java.util.*
 import javax.annotation.PostConstruct
 
 private val LOGGER = LoggerFactory.getLogger(HarvesterActivity::class.java)
-private const val HARVEST_ALL_ID = "all"
 
 @Service
 class HarvesterActivity(
@@ -27,7 +27,6 @@ class HarvesterActivity(
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
     private val activitySemaphore = Semaphore(1)
-    private val harvestSemaphore = Semaphore(5)
 
     @PostConstruct
     private fun fullHarvestOnStartup() = initiateHarvest(null)
@@ -36,33 +35,20 @@ class HarvesterActivity(
         if (params == null) LOGGER.debug("starting harvest of all information models")
         else LOGGER.debug("starting harvest with parameters $params")
 
-        val harvest = launch {
+        launch {
             activitySemaphore.withPermit {
                 harvestAdminAdapter.getDataSources(params ?: HarvestAdminParameters())
                     .filter { it.dataType == "informationmodel" }
                     .filter { it.url != null }
-                    .forEach {
-                        launch {
-                            harvestSemaphore.withPermit {
-                                try {
-                                    harvester.harvestInformationModelCatalog(it, Calendar.getInstance())
-                                } catch (exception: Exception) {
-                                    LOGGER.error("Harvest of ${it.url} failed", exception)
-                                }
-                            }
-                        }
-                    }
+                    .map { async { harvester.harvestInformationModelCatalog(it, Calendar.getInstance()) } }
+                    .awaitAll()
+                    .filterNotNull()
+                    .also { updateService.updateUnionModel() }
+                    .also {
+                        if (params != null) LOGGER.debug("completed harvest with parameters $params")
+                        else LOGGER.debug("completed harvest of all catalogs") }
+                    .run { publisher.send(this) }
             }
-        }
-
-        harvest.invokeOnCompletion {
-            LOGGER.debug("Updating union model")
-            updateService.updateUnionModel()
-
-            if (params == null) LOGGER.debug("completed harvest of all information models")
-            else LOGGER.debug("completed harvest with parameters $params")
-
-            publisher.send(HARVEST_ALL_ID)
         }
     }
 }
