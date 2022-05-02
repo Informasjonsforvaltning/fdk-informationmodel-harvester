@@ -1,7 +1,5 @@
 package no.fdk.fdk_informationmodel_harvester.rdf
 
-import no.fdk.fdk_informationmodel_harvester.Application
-import no.fdk.fdk_informationmodel_harvester.model.InformationModelMeta
 import org.apache.jena.query.QueryExecutionFactory
 import org.apache.jena.query.QueryFactory
 import org.apache.jena.rdf.model.Model
@@ -9,12 +7,10 @@ import org.apache.jena.rdf.model.ModelFactory
 import org.apache.jena.rdf.model.ResourceRequiredException
 import org.apache.jena.rdf.model.Statement
 import org.apache.jena.riot.Lang
-import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.io.StringReader
 import java.util.*
 
-private val logger = LoggerFactory.getLogger(Application::class.java)
 const val BACKUP_BASE_URI = "http://example.com/"
 
 fun jenaTypeFromAcceptHeader(accept: String?): Lang? =
@@ -35,13 +31,7 @@ fun jenaTypeFromAcceptHeader(accept: String?): Lang? =
 
 fun parseRDFResponse(responseBody: String, rdfLanguage: Lang, rdfSource: String?): Model {
     val responseModel = ModelFactory.createDefaultModel()
-
-    try {
-        responseModel.read(StringReader(responseBody), BACKUP_BASE_URI, rdfLanguage.name)
-    } catch (ex: Exception) {
-        logger.error("Parse from $rdfSource has failed", ex)
-        throw ex
-    }
+    responseModel.read(StringReader(responseBody), BACKUP_BASE_URI, rdfLanguage.name)
 
     return responseModel
 }
