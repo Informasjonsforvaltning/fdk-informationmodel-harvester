@@ -50,7 +50,7 @@ fuseki:
 application:
   informationModelUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/informationmodels
   catalogUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/catalogs
-  harvestAdminRootUrl: https://new-admin.staging.fellesdatakatalog.digdir.no
+  harvestAdminRootUrl: https://admin-api.staging.fellesdatakatalog.digdir.no
 
 ---
 spring:
