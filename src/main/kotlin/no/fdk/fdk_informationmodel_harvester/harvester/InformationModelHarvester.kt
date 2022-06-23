@@ -33,7 +33,7 @@ class InformationModelHarvester(
     private val applicationProperties: ApplicationProperties
 ) {
 
-    fun harvestInformationModelCatalog(source: HarvestDataSource, harvestDate: Calendar): HarvestReport? =
+    fun harvestInformationModelCatalog(source: HarvestDataSource, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport? =
         if (source.id != null && source.url != null) {
             try {
                 LOGGER.debug("Starting harvest of ${source.url}")
@@ -69,7 +69,7 @@ class InformationModelHarvester(
                     }
                     else -> updateIfChanged(
                         parseRDFResponse(adapter.getInformationModels(source), jenaWriterType, source.url),
-                        source.id, source.url, harvestDate
+                        source.id, source.url, harvestDate, forceUpdate
                     )
                 }
             } catch (ex: Exception) {
@@ -88,11 +88,11 @@ class InformationModelHarvester(
             null
         }
 
-    private fun updateIfChanged(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar): HarvestReport {
+    private fun updateIfChanged(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport {
         val dbData = turtleService.findOne(sourceURL)
             ?.let { parseRDFResponse(it, Lang.TURTLE, null) }
 
-        return if (dbData != null && harvested.isIsomorphicWith(dbData)) {
+        return if (!forceUpdate && dbData != null && harvested.isIsomorphicWith(dbData)) {
             LOGGER.info("No changes from last harvest of $sourceURL")
             HarvestReport(
                 id = sourceId,
@@ -105,16 +105,16 @@ class InformationModelHarvester(
             LOGGER.info("Changes detected, saving data from $sourceURL and updating FDK meta data")
             turtleService.saveOne(filename = sourceURL, turtle = harvested.createRDFResponse(Lang.TURTLE))
 
-            updateDB(harvested, sourceId, sourceURL, harvestDate)
+            updateDB(harvested, sourceId, sourceURL, harvestDate, forceUpdate)
         }
     }
 
-    private fun updateDB(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar): HarvestReport {
+    private fun updateDB(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport {
         val updatedCatalogs = mutableListOf<CatalogMeta>()
         val updatedModels = mutableListOf<InformationModelMeta>()
         splitCatalogsFromRDF(harvested, sourceURL)
             .map { Pair(it, catalogRepository.findByIdOrNull(it.resourceURI)) }
-            .filter { it.first.catalogHasChanges(it.second?.fdkId) }
+            .filter { forceUpdate || it.first.catalogHasChanges(it.second?.fdkId) }
             .forEach {
                 val updatedCatalogMeta = it.first.mapToCatalogMeta(harvestDate, it.second)
                 catalogRepository.save(updatedCatalogMeta)
@@ -129,7 +129,7 @@ class InformationModelHarvester(
                 val fdkUri = "${applicationProperties.catalogUri}/${updatedCatalogMeta.fdkId}"
 
                 it.first.models.forEach { infoModel ->
-                    infoModel.updateDBOs(harvestDate, fdkUri)
+                    infoModel.updateDBOs(harvestDate, fdkUri, forceUpdate)
                         ?.let { modelMeta -> updatedModels.add(modelMeta) }
                 }
 
@@ -167,10 +167,11 @@ class InformationModelHarvester(
 
     private fun InformationModelRDFModel.updateDBOs(
         harvestDate: Calendar,
-        fdkCatalogURI: String
+        fdkCatalogURI: String,
+        forceUpdate: Boolean
     ): InformationModelMeta? {
         val dbMeta = informationModelRepository.findByIdOrNull(resourceURI)
-        if (modelHasChanges(dbMeta?.fdkId)) {
+        if (forceUpdate || modelHasChanges(dbMeta?.fdkId)) {
             val modelMeta = mapToDBOMeta(harvestDate, fdkCatalogURI, dbMeta)
             informationModelRepository.save(modelMeta)
 
