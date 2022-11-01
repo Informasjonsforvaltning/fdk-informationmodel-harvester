@@ -112,6 +112,7 @@ class InformationModelHarvester(
     private fun updateDB(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport {
         val updatedCatalogs = mutableListOf<CatalogMeta>()
         val updatedModels = mutableListOf<InformationModelMeta>()
+        val removedModels = mutableListOf<InformationModelMeta>()
         splitCatalogsFromRDF(harvested, sourceURL)
             .map { Pair(it, catalogRepository.findByIdOrNull(it.resourceURI)) }
             .filter { forceUpdate || it.first.catalogHasChanges(it.second?.fdkId) }
@@ -133,6 +134,13 @@ class InformationModelHarvester(
                         ?.let { modelMeta -> updatedModels.add(modelMeta) }
                 }
 
+                removedModels.addAll(
+                    getInfoModelsRemovedThisHarvest(
+                        fdkUri,
+                        it.first.models.map { infoModel -> infoModel.resourceURI }
+                    )
+                )
+
                 var catalogModel = it.first.harvestedCatalogWithoutInfoModels
                 catalogModel.createResource(fdkUri)
                     .addProperty(RDF.type, DCAT.CatalogRecord)
@@ -153,6 +161,9 @@ class InformationModelHarvester(
                     withRecords = true
                 )
             }
+
+        removedModels.map { it.copy(removed = true) }.run { informationModelRepository.saveAll(this) }
+
         LOGGER.debug("Harvest of $sourceURL completed")
         return HarvestReport(
             id = sourceId,
@@ -161,7 +172,8 @@ class InformationModelHarvester(
             startTime = harvestDate.formatWithOsloTimeZone(),
             endTime = formatNowWithOsloTimeZone(),
             changedCatalogs = updatedCatalogs.map { FdkIdAndUri(fdkId = it.fdkId, uri = it.uri) },
-            changedResources = updatedModels.map { FdkIdAndUri(fdkId = it.fdkId, uri = it.uri) }
+            changedResources = updatedModels.map { FdkIdAndUri(fdkId = it.fdkId, uri = it.uri) },
+            removedResources = removedModels.map { FdkIdAndUri(fdkId = it.fdkId, uri = it.uri) }
         )
     }
 
@@ -254,4 +266,8 @@ class InformationModelHarvester(
     private fun Calendar.formatWithOsloTimeZone(): String =
         ZonedDateTime.from(toInstant().atZone(ZoneId.of("Europe/Oslo")))
             .format(DateTimeFormatter.ofPattern(dateFormat))
+
+    private fun getInfoModelsRemovedThisHarvest(catalog: String, infoModels: List<String>): List<InformationModelMeta> =
+        informationModelRepository.findAllByIsPartOf(catalog)
+            .filter { !it.removed && !infoModels.contains(it.uri) }
 }
