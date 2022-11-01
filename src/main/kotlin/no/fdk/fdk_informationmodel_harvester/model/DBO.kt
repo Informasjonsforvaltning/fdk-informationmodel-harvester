@@ -13,6 +13,8 @@ data class InformationModelMeta (
     val fdkId: String,
 
     val isPartOf: String,
+    val removed: Boolean = false,
+
     val issued: Long,
     val modified: Long
 )
