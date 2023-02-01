@@ -33,14 +33,14 @@ digs:Utgiver  a         owl:NamedIndividual , foaf:Agent ;
         dct:type        "Organisasjonsledd"@nb ;
         foaf:name       "Digitaliseringsdirektoratet"@nb .
 
-digs:AlternativModellformat
+<https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell/.well-known/skolem/dc69cc9a-8667-3550-8473-7a10eb564f8e>
         a           owl:NamedIndividual , <https://informasjonsforvaltning.github.io/modelldcat-ap-no/images/ModellDCAT-ap-no.png> , foaf:Document ;
         dct:format  <http://publications.europa.eu/resource/authority/file-type/PNG> ;
         dct:title   "Forenklet modell for ModellDCAT-AP-NO"@nb .
 
 digs:Diversemodell  a      owl:NamedIndividual , modelldcatno:InformationModel ;
         dct:description    "Modell med diverse i. Inneholder modellelementer som AltMuligModell skal peke til."@nb ;
-        dct:hasFormat      digs:AlternativModellformat ;
+        dct:hasFormat      <https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell/.well-known/skolem/dc69cc9a-8667-3550-8473-7a10eb564f8e> ;
         dct:identifier     "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell" ;
         dct:isPartOf       <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Altmuligmodell> ;
         dct:isReplacedBy   <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Altmuligmodell> ;

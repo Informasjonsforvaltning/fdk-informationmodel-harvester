@@ -74,22 +74,28 @@ digs:Diversemodell   a          modelldcatno:InformationModel , owl:NamedIndivid
         dcat:theme              <https://psi.norge.no/los/tema/eiendom> ;
         dct:isPartOf            <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Altmuligmodell> ;
         dct:isReplacedBy        <https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Altmuligmodell> ;
-        dct:hasFormat           digs:AlternativModellformat .
+        dct:hasFormat           <https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell/.well-known/skolem/dc69cc9a-8667-3550-8473-7a10eb564f8e> .
 
 digs:Katalog2  a        owl:NamedIndividual , dcat:Catalog ;
         dct:description         "Digdirs modelleksempler"@nb ;
         dct:identifier          "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog"^^xsd:string ;
-        dct:publisher           digs:Utgiver ;
+        dct:publisher           <https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog2/.well-known/skolem/874c72cc-a8ac-3ea5-9d50-51e42a476804> ;
         dct:license             <http://creativecommons.org/licenses/by/4.0/deed.no> ;
         dct:title               "Digitaliseringsdirektoratets modellkatalog"@nb ;
         modelldcatno:model      digs:AltMuligModell , digs:Diversemodell ;
         dct:modified            "2017-09-28T00:00:00+01:00"^^xsd:dateTime ;
         dct:spatial             <http://publications.europa.eu/resource/authority/country/NOR> .
 
-digs:AlternativModellformat a owl:NamedIndividual , <https://informasjonsforvaltning.github.io/modelldcat-ap-no/images/ModellDCAT-ap-no.png> , foaf:Document ;
+<https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell/.well-known/skolem/dc69cc9a-8667-3550-8473-7a10eb564f8e>
+      a owl:NamedIndividual , <https://informasjonsforvaltning.github.io/modelldcat-ap-no/images/ModellDCAT-ap-no.png> , foaf:Document ;
       dct:title                 "Forenklet modell for ModellDCAT-AP-NO"@nb ;
       dct:format                <http://publications.europa.eu/resource/authority/file-type/PNG> .
 
+<https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog2/.well-known/skolem/874c72cc-a8ac-3ea5-9d50-51e42a476804>
+        a               foaf:Agent , owl:NamedIndividual ;
+        dct:identifier  "991825827" ;
+        dct:type        "Organisasjonsledd"@nb ;
+        foaf:name       "Digitaliseringsdirektoratet"@nb .
 
 digs:Utgiver  a       owl:NamedIndividual , foaf:Agent ;
         dct:identifier  "991825827"^^xsd:string ;

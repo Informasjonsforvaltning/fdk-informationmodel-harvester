@@ -219,7 +219,7 @@ class InformationModelHarvester(
         dbMeta: CatalogMeta?
     ): CatalogMeta {
         val catalogURI = resourceURI
-        val fdkId = dbMeta?.fdkId ?: createIdFromUri(catalogURI)
+        val fdkId = dbMeta?.fdkId ?: createIdFromString(catalogURI)
         val issued = dbMeta?.issued
             ?.let { timestamp -> calendarFromTimestamp(timestamp) }
             ?: harvestDate
@@ -237,7 +237,7 @@ class InformationModelHarvester(
         fdkCatalogURI: String,
         dbMeta: InformationModelMeta?
     ): InformationModelMeta {
-        val fdkId = dbMeta?.fdkId ?: createIdFromUri(resourceURI)
+        val fdkId = dbMeta?.fdkId ?: createIdFromString(resourceURI)
         val issued: Calendar = dbMeta?.issued
             ?.let { timestamp -> calendarFromTimestamp(timestamp) }
             ?: harvestDate

@@ -7,6 +7,7 @@ import org.apache.jena.rdf.model.ModelFactory
 import org.apache.jena.rdf.model.Resource
 import org.apache.jena.rdf.model.Statement
 import org.apache.jena.riot.Lang
+import org.apache.jena.util.ResourceUtils
 import org.apache.jena.vocabulary.DCAT
 import org.apache.jena.vocabulary.RDF
 import org.apache.jena.vocabulary.SKOS
@@ -36,11 +37,8 @@ fun splitCatalogsFromRDF(harvested: Model, sourceURL: String): List<CatalogAndIn
                 .filter { catalogContainsInfoModel(harvested, catalogResource.uri, it.uri) }
                 .map { infoModel -> infoModel.extractInformationModel() }
 
-            val catalogModelWithoutInfoModels = ModelFactory.createDefaultModel()
-            catalogModelWithoutInfoModels.setNsPrefixes(harvested.nsPrefixMap)
-
-            catalogResource.listProperties().toList()
-                .forEach { catalogModelWithoutInfoModels.addCatalogProperties(it) }
+            val catalogModelWithoutInfoModels = catalogResource.extractCatalogModel()
+                .recursiveBlankNodeSkolem(catalogResource.uri)
 
             var catalogModel = catalogModelWithoutInfoModels
             catalogInfoModels.forEach { catalogModel = catalogModel.union(it.harvested) }
@@ -52,6 +50,15 @@ fun splitCatalogsFromRDF(harvested: Model, sourceURL: String): List<CatalogAndIn
                 models = catalogInfoModels
             )
         }
+
+fun Resource.extractCatalogModel(): Model {
+    val catalogModelWithoutServices = ModelFactory.createDefaultModel()
+    catalogModelWithoutServices.setNsPrefixes(model.nsPrefixMap)
+    listProperties()
+        .toList()
+        .forEach { catalogModelWithoutServices.addCatalogProperties(it) }
+    return catalogModelWithoutServices
+}
 
 private fun List<Resource>.filterBlankNodeCatalogsAndModels(sourceURL: String): List<Resource> =
     filter {
@@ -82,7 +89,7 @@ fun Resource.extractInformationModel(): InformationModelRDFModel {
         .filter { it.isResourceProperty() }
         .forEach { infoModel = infoModel.recursiveAddNonInformationModelResource(it.resource, 10) }
 
-    return InformationModelRDFModel(resourceURI = uri, harvested = infoModel)
+    return InformationModelRDFModel(resourceURI = uri, harvested = infoModel.recursiveBlankNodeSkolem(uri))
 }
 
 private fun Model.addCodeElementsAssociatedWithCodeList(resource: Resource): Model {
@@ -124,6 +131,36 @@ private fun Model.recursiveAddNonInformationModelResource(resource: Resource, re
 
         this
     }
+
+private fun Model.recursiveBlankNodeSkolem(baseURI: String): Model {
+    val anonSubjects = listSubjects().toList().filter { it.isAnon }
+    return if (anonSubjects.isEmpty()) this
+    else {
+        anonSubjects
+            .filter { it.doesNotContainAnon() }
+            .forEach {
+                ResourceUtils.renameResource(it, "$baseURI/.well-known/skolem/${it.createSkolemID()}")
+            }
+        this.recursiveBlankNodeSkolem(baseURI)
+    }
+}
+
+private fun Resource.doesNotContainAnon(): Boolean =
+    listProperties().toList()
+        .filter { it.isResourceProperty() }
+        .map { it.resource }
+        .filter { it.listProperties().toList().size > 0 }
+        .none { it.isAnon }
+
+private fun Resource.createSkolemID(): String =
+    createIdFromString(
+        listProperties().toModel()
+            .createRDFResponse(Lang.N3)
+            .replace("\\s".toRegex(), "")
+            .toCharArray()
+            .sorted()
+            .toString()
+    )
 
 fun calendarFromTimestamp(timestamp: Long): Calendar {
     val calendar = Calendar.getInstance()
