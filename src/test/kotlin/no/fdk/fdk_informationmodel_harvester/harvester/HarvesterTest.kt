@@ -151,6 +151,7 @@ class HarvesterTest {
         }
 
         val catalog2 = responseReader.parseFile("catalog_2.ttl", "TURTLE")
+        val catalogNoMeta2 = responseReader.parseFile("no_meta_catalog_2.ttl", "TURTLE")
         val model2 = parseRDFResponse(savedModel2, Lang.TURTLE, null)
         val modelNoMeta2 = responseReader.parseFile("no_meta_model_2.ttl", "TURTLE")
         val model3 = parseRDFResponse(savedModel3, Lang.TURTLE, null)
@@ -159,7 +160,7 @@ class HarvesterTest {
         argumentCaptor<String, String, Boolean>().apply {
             verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
             assertEquals(listOf(CATALOG_DBO_2.fdkId, CATALOG_DBO_2.fdkId), first.allValues)
-            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null), harvestedModel, "sourceWithCodeListIsParsedCorrectly-no-record-catalog"))
+            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null), catalogNoMeta2, "sourceWithCodeListIsParsedCorrectly-no-record-catalog"))
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE, null), catalog2, "sourceWithCodeListIsParsedCorrectly-record-catalog"))
             assertEquals(listOf(false, true), third.allValues)
         }
