@@ -5,7 +5,6 @@ import org.apache.jena.riot.Lang
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertTrue

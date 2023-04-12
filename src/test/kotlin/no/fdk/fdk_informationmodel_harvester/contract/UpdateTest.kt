@@ -5,7 +5,6 @@ import no.fdk.fdk_event_harvester.utils.jwk.JwtToken
 import no.fdk.fdk_informationmodel_harvester.utils.*
 import org.junit.jupiter.api.*
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertEquals
