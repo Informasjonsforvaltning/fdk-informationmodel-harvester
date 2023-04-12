@@ -1,18 +1,21 @@
 package no.fdk.fdk_informationmodel_harvester.service
 
-import com.nhaarman.mockitokotlin2.*
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
 import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
 import no.fdk.fdk_informationmodel_harvester.utils.*
-import org.apache.jena.rdf.model.Model
 import org.apache.jena.riot.Lang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @Tag("unit")
 class UpdateServiceTest {
