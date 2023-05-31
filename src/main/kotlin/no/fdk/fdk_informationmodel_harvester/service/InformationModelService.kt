@@ -13,21 +13,21 @@ class InformationModelService(private val turtleService: TurtleService) {
         turtleService.findUnionModel(includeFDKCatalogRecords)
             ?.let {
                 if (returnType == Lang.TURTLE) it
-                else parseRDFResponse(it, Lang.TURTLE, null)?.createRDFResponse(returnType)
+                else parseRDFResponse(it, Lang.TURTLE).createRDFResponse(returnType)
         } ?: ModelFactory.createDefaultModel().createRDFResponse(returnType)
 
     fun getInformationModelById(id: String, returnType: Lang, includeFDKCatalogRecords: Boolean): String? =
         turtleService.findInformationModel(id, includeFDKCatalogRecords)
             ?.let {
                 if (returnType == Lang.TURTLE) it
-                else parseRDFResponse(it, Lang.TURTLE, null)?.createRDFResponse(returnType)
+                else parseRDFResponse(it, Lang.TURTLE).createRDFResponse(returnType)
             }
 
     fun getCatalogById(id: String, returnType: Lang, includeFDKCatalogRecords: Boolean): String? =
         turtleService.findCatalog(id, includeFDKCatalogRecords)
             ?.let {
                 if (returnType == Lang.TURTLE) it
-                else parseRDFResponse(it, Lang.TURTLE, null)?.createRDFResponse(returnType)
+                else parseRDFResponse(it, Lang.TURTLE).createRDFResponse(returnType)
             }
 
 }
