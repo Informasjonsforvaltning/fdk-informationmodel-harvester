@@ -29,11 +29,11 @@ class UpdateService(
         catalogRepository.findAll()
             .forEach {
                 turtleService.findCatalog(it.fdkId, withRecords = true)
-                    ?.let { turtle -> parseRDFResponse(turtle, Lang.TURTLE) }
+                    ?.let { turtle -> safeParseRDF(turtle, Lang.TURTLE) }
                     ?.run { unionWithRecords = unionWithRecords.union(this) }
 
                 turtleService.findCatalog(it.fdkId, withRecords = false)
-                    ?.let { turtle -> parseRDFResponse(turtle, Lang.TURTLE) }
+                    ?.let { turtle -> safeParseRDF(turtle, Lang.TURTLE) }
                     ?.run { unionNoRecords = unionNoRecords.union(this) }
             }
 
@@ -47,7 +47,7 @@ class UpdateService(
                 val fdkURI = "${applicationProperties.catalogUri}/${catalog.fdkId}"
                 var catalogMeta = catalog.createMetaModel()
                 turtleService.findCatalog(catalog.fdkId, withRecords = false)
-                    ?.let { catalogTurtle -> parseRDFResponse(catalogTurtle, Lang.TURTLE) }
+                    ?.let { catalogTurtle -> safeParseRDF(catalogTurtle, Lang.TURTLE) }
                     ?.let { catalogNoRecords ->
 
                         infoRepository.findAllByIsPartOf(fdkURI)
@@ -57,7 +57,7 @@ class UpdateService(
                                 catalogMeta = catalogMeta.union(infoModelMeta)
 
                                 turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
-                                    ?.let { infoNoRecords -> parseRDFResponse(infoNoRecords, Lang.TURTLE) }
+                                    ?.let { infoNoRecords -> safeParseRDF(infoNoRecords, Lang.TURTLE) }
                                     ?.let { infoModelNoRecords ->
                                         infoModelMeta.union(infoModelNoRecords).createRDFResponse(Lang.TURTLE)
                                     }

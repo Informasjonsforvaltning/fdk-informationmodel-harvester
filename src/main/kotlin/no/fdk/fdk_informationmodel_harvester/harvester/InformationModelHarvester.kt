@@ -90,7 +90,7 @@ class InformationModelHarvester(
 
     private fun updateIfChanged(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport {
         val dbData = turtleService.findOne(sourceURL)
-            ?.let { parseRDFResponse(it, Lang.TURTLE) }
+            ?.let { safeParseRDF(it, Lang.TURTLE) }
 
         return if (!forceUpdate && dbData != null && harvested.isIsomorphicWith(dbData)) {
             LOGGER.info("No changes from last harvest of $sourceURL")
@@ -152,7 +152,7 @@ class InformationModelHarvester(
                 informationModelRepository.findAllByIsPartOf(fdkUri)
                     .filter { infoMeta -> catalogContainsInfoModel(it.first.harvestedCatalog, updatedCatalogMeta.uri, infoMeta.uri) }
                     .mapNotNull { infoMeta -> turtleService.findInformationModel(infoMeta.fdkId, withRecords = true) }
-                    .map { infoModelTurtle -> parseRDFResponse(infoModelTurtle, Lang.TURTLE) }
+                    .map { infoModelTurtle -> safeParseRDF(infoModelTurtle, Lang.TURTLE) }
                     .forEach { infoModel -> catalogModel = catalogModel.union(infoModel) }
 
                 turtleService.saveCatalog(
