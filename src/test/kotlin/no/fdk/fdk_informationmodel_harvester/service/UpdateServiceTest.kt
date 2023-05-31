@@ -64,16 +64,16 @@ class UpdateServiceTest {
             argumentCaptor<String, String, Boolean>().apply {
                 verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
                 assertEquals(listOf(CATALOG_ID_0, CATALOG_ID_1), first.allValues)
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, expectedCatalog0, "diffInMetaDataUpdatesTurtle-catalog0"))
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE, null)!!, expectedCatalog1, "diffInMetaDataUpdatesTurtle-catalog1"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), expectedCatalog0, "diffInMetaDataUpdatesTurtle-catalog0"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE), expectedCatalog1, "diffInMetaDataUpdatesTurtle-catalog1"))
                 assertEquals(listOf(true, true), third.allValues)
             }
 
             argumentCaptor<String, String, Boolean>().apply {
                 verify(turtleService, times(2)).saveInformationModel(first.capture(), second.capture(), third.capture())
                 assertEquals(listOf(INFO_MODEL_ID_0, INFO_MODEL_ID_1), first.allValues)
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, expectedInfoModel0, "diffInMetaDataUpdatesTurtle-model0"))
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE, null)!!, expectedInfoModel1, "diffInMetaDataUpdatesTurtle-model1"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), expectedInfoModel0, "diffInMetaDataUpdatesTurtle-model0"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE), expectedInfoModel1, "diffInMetaDataUpdatesTurtle-model1"))
                 assertEquals(listOf(true, true), third.allValues)
             }
         }
@@ -105,7 +105,7 @@ class UpdateServiceTest {
             argumentCaptor<String, String, Boolean>().apply {
                 verify(turtleService, times(1)).saveCatalog(first.capture(), second.capture(), third.capture())
                 assertEquals(CATALOG_ID_0, first.firstValue)
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE, null)!!, expectedCatalog, "updateIsSkippedIfNotActuallyPresentInCatalog"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), expectedCatalog, "updateIsSkippedIfNotActuallyPresentInCatalog"))
                 assertEquals(listOf(true), third.allValues)
             }
 
@@ -139,8 +139,8 @@ class UpdateServiceTest {
 
             argumentCaptor<String, Boolean>().apply {
                 verify(turtleService, times(2)).saveUnionModel(first.capture(), second.capture())
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.firstValue, Lang.TURTLE, null)!!, expectedWithRecords, "updateUnionModel-withRecords"))
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.secondValue, Lang.TURTLE, null)!!, expectedNoRecords, "updateUnionModel-noRecords"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.firstValue, Lang.TURTLE), expectedWithRecords, "updateUnionModel-withRecords"))
+                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.secondValue, Lang.TURTLE), expectedNoRecords, "updateUnionModel-noRecords"))
                 assertEquals(listOf(true, false), second.allValues)
             }
         }
