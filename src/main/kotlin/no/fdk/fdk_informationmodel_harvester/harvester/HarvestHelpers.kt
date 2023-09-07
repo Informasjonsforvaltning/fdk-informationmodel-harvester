@@ -75,7 +75,7 @@ private fun List<Resource>.filterBlankNodeCatalogsAndModels(sourceURL: String): 
 private fun Model.addCatalogProperties(property: Statement): Model =
     when {
         property.predicate != ModellDCATAPNO.model && property.isResourceProperty() ->
-            add(property).recursiveAddNonInformationModelResource(property.resource, 5)
+            add(property).recursiveAddNonInformationModelResource(property.resource)
         property.predicate != ModellDCATAPNO.model -> add(property)
         property.isResourceProperty() && property.resource.isURIResource -> add(property)
         else -> this
@@ -87,7 +87,7 @@ fun Resource.extractInformationModel(): InformationModelRDFModel {
 
     listProperties().toList()
         .filter { it.isResourceProperty() }
-        .forEach { infoModel.recursiveAddNonInformationModelResource(it.resource, 10) }
+        .forEach { infoModel.recursiveAddNonInformationModelResource(it.resource) }
 
     return InformationModelRDFModel(resourceURI = uri, harvested = infoModel.recursiveBlankNodeSkolem(uri))
 }
@@ -108,23 +108,19 @@ private fun Model.addCodeElementsAssociatedWithCodeList(resource: Resource): Mod
     return this
 }
 
-private fun Model.recursiveAddNonInformationModelResource(resource: Resource, recursiveCount: Int): Model =
+private fun Model.recursiveAddNonInformationModelResource(resource: Resource): Model =
     if (resource.isURIResource && containsTriple("<${resource.uri}>", "a", "?o")) this
     else {
-        val newCount = recursiveCount - 1
         val types = resource.listProperties(RDF.type)
             .toList()
             .map { it.`object` }
 
         if (!types.contains(ModellDCATAPNO.InformationModel)) {
-
             add(resource.listProperties())
 
-            if (newCount > 0) {
-                resource.listProperties().toList()
-                    .filter { it.isResourceProperty() }
-                    .forEach { recursiveAddNonInformationModelResource(it.resource, newCount) }
-            }
+            resource.listProperties().toList()
+                .filter { it.isResourceProperty() }
+                .forEach { recursiveAddNonInformationModelResource(it.resource) }
 
             if (types.contains(ModellDCATAPNO.CodeList)) addCodeElementsAssociatedWithCodeList(resource)
         }
