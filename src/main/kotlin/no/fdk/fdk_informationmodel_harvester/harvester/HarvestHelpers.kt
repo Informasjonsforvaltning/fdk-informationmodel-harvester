@@ -40,12 +40,12 @@ fun splitCatalogsFromRDF(harvested: Model, sourceURL: String): List<CatalogAndIn
             val catalogModelWithoutInfoModels = catalogResource.extractCatalogModel()
                 .recursiveBlankNodeSkolem(catalogResource.uri)
 
-            var catalogModel = catalogModelWithoutInfoModels
-            catalogInfoModels.forEach { catalogModel = catalogModel.union(it.harvested) }
+            val catalogModel = ModelFactory.createDefaultModel()
+            catalogInfoModels.forEach { catalogModel.add(it.harvested) }
 
             CatalogAndInfoModels(
                 resourceURI = catalogResource.uri,
-                harvestedCatalog = catalogModel,
+                harvestedCatalog = catalogModel.union(catalogModelWithoutInfoModels),
                 harvestedCatalogWithoutInfoModels = catalogModelWithoutInfoModels,
                 models = catalogInfoModels
             )
@@ -82,12 +82,12 @@ private fun Model.addCatalogProperties(property: Statement): Model =
     }
 
 fun Resource.extractInformationModel(): InformationModelRDFModel {
-    var infoModel = listProperties().toModel()
-    infoModel = infoModel.setNsPrefixes(model.nsPrefixMap)
+    val infoModel = listProperties().toModel()
+    infoModel.setNsPrefixes(model.nsPrefixMap)
 
     listProperties().toList()
         .filter { it.isResourceProperty() }
-        .forEach { infoModel = infoModel.recursiveAddNonInformationModelResource(it.resource, 10) }
+        .forEach { infoModel.recursiveAddNonInformationModelResource(it.resource, 10) }
 
     return InformationModelRDFModel(resourceURI = uri, harvested = infoModel.recursiveBlankNodeSkolem(uri))
 }
