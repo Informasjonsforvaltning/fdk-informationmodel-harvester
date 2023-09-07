@@ -141,7 +141,8 @@ class InformationModelHarvester(
                     )
                 )
 
-                var catalogModel = it.first.harvestedCatalogWithoutInfoModels
+                val catalogModel = ModelFactory.createDefaultModel()
+                catalogModel.add(it.first.harvestedCatalogWithoutInfoModels)
                 catalogModel.createResource(fdkUri)
                     .addProperty(RDF.type, DCAT.CatalogRecord)
                     .addProperty(DCTerms.identifier, updatedCatalogMeta.fdkId)
@@ -153,7 +154,7 @@ class InformationModelHarvester(
                     .filter { infoMeta -> catalogContainsInfoModel(it.first.harvestedCatalog, updatedCatalogMeta.uri, infoMeta.uri) }
                     .mapNotNull { infoMeta -> turtleService.findInformationModel(infoMeta.fdkId, withRecords = true) }
                     .map { infoModelTurtle -> safeParseRDF(infoModelTurtle, Lang.TURTLE) }
-                    .forEach { infoModel -> catalogModel = catalogModel.union(infoModel) }
+                    .forEach { infoModel -> catalogModel.add(infoModel) }
 
                 turtleService.saveCatalog(
                     fdkId = updatedCatalogMeta.fdkId,

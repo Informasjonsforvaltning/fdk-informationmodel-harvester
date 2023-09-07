@@ -23,18 +23,18 @@ class UpdateService(
 ) {
 
     fun updateUnionModel() {
-        var unionWithRecords = ModelFactory.createDefaultModel()
-        var unionNoRecords = ModelFactory.createDefaultModel()
+        val unionWithRecords = ModelFactory.createDefaultModel()
+        val unionNoRecords = ModelFactory.createDefaultModel()
 
         catalogRepository.findAll()
             .forEach {
                 turtleService.findCatalog(it.fdkId, withRecords = true)
                     ?.let { turtle -> safeParseRDF(turtle, Lang.TURTLE) }
-                    ?.run { unionWithRecords = unionWithRecords.union(this) }
+                    ?.run { unionWithRecords.add(this) }
 
                 turtleService.findCatalog(it.fdkId, withRecords = false)
                     ?.let { turtle -> safeParseRDF(turtle, Lang.TURTLE) }
-                    ?.run { unionNoRecords = unionNoRecords.union(this) }
+                    ?.run { unionNoRecords.add(this) }
             }
 
         turtleService.saveUnionModel(unionWithRecords.createRDFResponse(Lang.TURTLE), withRecords = true)
@@ -45,7 +45,7 @@ class UpdateService(
         catalogRepository.findAll()
             .forEach { catalog ->
                 val fdkURI = "${applicationProperties.catalogUri}/${catalog.fdkId}"
-                var catalogMeta = catalog.createMetaModel()
+                val catalogMeta = catalog.createMetaModel()
                 turtleService.findCatalog(catalog.fdkId, withRecords = false)
                     ?.let { catalogTurtle -> safeParseRDF(catalogTurtle, Lang.TURTLE) }
                     ?.let { catalogNoRecords ->
@@ -54,7 +54,7 @@ class UpdateService(
                             .filter { catalogContainsInfoModel(catalogNoRecords, catalog.uri, it.uri) }
                             .forEach { infoModel ->
                                 val infoModelMeta = infoModel.createMetaModel()
-                                catalogMeta = catalogMeta.union(infoModelMeta)
+                                catalogMeta.add(infoModelMeta)
 
                                 turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
                                     ?.let { infoNoRecords -> safeParseRDF(infoNoRecords, Lang.TURTLE) }
