@@ -28,7 +28,6 @@ fun splitCatalogsFromRDF(harvested: Model, sourceURL: String): List<CatalogAndIn
     harvested.listResourcesWithProperty(RDF.type, DCAT.Catalog)
         .toList()
         .filterBlankNodeCatalogsAndModels(sourceURL)
-        .filter { it.hasProperty(ModellDCATAPNO.model) }
         .map { catalogResource ->
             val catalogInfoModels: List<InformationModelRDFModel> = catalogResource.listProperties(ModellDCATAPNO.model)
                 .toList()
