@@ -1,4 +1,4 @@
-package no.fdk.fdk_informationmodel_harvester.controller
+package no.fdk.fdk_informationmodel_harvester.contract
 
 import no.fdk.fdk_informationmodel_harvester.repository.CatalogRepository
 import org.springframework.http.HttpStatus
@@ -9,16 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin
-class ApplicationStatusController(private val catalogRepository: CatalogRepository) {
-
-    @GetMapping("/ping")
-    fun ping(): ResponseEntity<Void> =
-        ResponseEntity.ok().build()
-
-    @GetMapping("/ready")
-    fun ready(): ResponseEntity<Void> =
-        ResponseEntity.ok().build()
-
+class CountController(private val catalogRepository: CatalogRepository) {
     @GetMapping("/count")
     fun count(): ResponseEntity<Long> {
         try {
