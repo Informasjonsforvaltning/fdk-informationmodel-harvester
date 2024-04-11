@@ -87,7 +87,6 @@ class HarvesterActivity(
                         .awaitAll()
                         .filterNotNull()
                         .also { updateService.updateMetaData() }
-                        .also { updateService.updateUnionModel() }
                         .also {
                             if (params.harvestAllModels()) LOGGER.debug("completed harvest with parameters $params, force update: $forceUpdate")
                             else LOGGER.debug("completed harvest of all catalogs, force update: $forceUpdate")
