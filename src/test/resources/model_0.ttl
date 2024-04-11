@@ -366,3 +366,17 @@ digdir:geografiskAdresseSpesialiserer a       owl:NamedIndividual , modelldcatno
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:PersonOgEnhet .
+
+digdir:Katalog0  a        owl:NamedIndividual , dcat:Catalog ;
+        dct:description         "Katalog med oversikt over Digitaliseringsdirektoratets modeller"@nb ;
+        dct:identifier          "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog0"^^xsd:string ;
+        dct:publisher           digdir:Utgiver ;
+        dct:title               "Digitaliseringsdirektoratets modellkatalog 0"@nb ;
+        modelldcatno:model      digdir:PersonOgEnhet .
+
+<http://localhost:5050/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b>
+        a                  dcat:CatalogRecord ;
+        dct:identifier     "e5b2ad5e-078b-3aea-af04-6051c2b0244b" ;
+        dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
+        dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
+        foaf:primaryTopic  digdir:Katalog0 .

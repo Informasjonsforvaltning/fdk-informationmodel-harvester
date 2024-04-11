@@ -270,3 +270,17 @@ digdir:vegadresseSpesialiserer a       owl:NamedIndividual , modelldcatno:Specia
         dct:issued         "2020-11-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-11-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:AdresseModell .
+
+digdir:Katalog1  a        owl:NamedIndividual , dcat:Catalog ;
+        dct:description         "Katalog med oversikt over Digitaliseringsdirektoratets modeller"@nb ;
+        dct:identifier          "https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog1"^^xsd:string ;
+        dct:publisher           digdir:Utgiver ;
+        dct:title               "Digitaliseringsdirektoratets modellkatalog 1"@nb ;
+        modelldcatno:model      digdir:AdresseModell .
+
+<http://localhost:5050/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb>
+        a                  dcat:CatalogRecord ;
+        dct:identifier     "wrong-catalog-identifier" ;
+        dct:issued         "2020-11-05T13:15:39.831Z"^^xsd:dateTime ;
+        dct:modified       "2020-11-05T13:15:39.831Z"^^xsd:dateTime ;
+        foaf:primaryTopic  digdir:Katalog1 .

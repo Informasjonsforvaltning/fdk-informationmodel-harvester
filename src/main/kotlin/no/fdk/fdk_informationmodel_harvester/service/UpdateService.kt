@@ -2,6 +2,7 @@ package no.fdk.fdk_informationmodel_harvester.service
 
 import no.fdk.fdk_informationmodel_harvester.configuration.ApplicationProperties
 import no.fdk.fdk_informationmodel_harvester.harvester.calendarFromTimestamp
+import no.fdk.fdk_informationmodel_harvester.harvester.extractCatalogModel
 import no.fdk.fdk_informationmodel_harvester.model.*
 import no.fdk.fdk_informationmodel_harvester.rdf.*
 import no.fdk.fdk_informationmodel_harvester.repository.*
@@ -46,20 +47,27 @@ class UpdateService(
             .forEach { catalog ->
                 val fdkURI = "${applicationProperties.catalogUri}/${catalog.fdkId}"
                 val catalogMeta = catalog.createMetaModel()
+                val completeMetaModel = ModelFactory.createDefaultModel()
+                completeMetaModel.add(catalogMeta)
                 turtleService.findCatalog(catalog.fdkId, withRecords = false)
                     ?.let { catalogTurtle -> safeParseRDF(catalogTurtle, Lang.TURTLE) }
                     ?.let { catalogNoRecords ->
+                        val catalogTriples = catalogNoRecords.getResource(catalog.uri)
+                            .extractCatalogModel()
+                        catalogTriples.add(catalogMeta)
 
                         infoRepository.findAllByIsPartOf(fdkURI)
                             .filter { catalogContainsInfoModel(catalogNoRecords, catalog.uri, it.uri) }
                             .forEach { infoModel ->
                                 val infoModelMeta = infoModel.createMetaModel()
-                                catalogMeta.add(infoModelMeta)
+                                completeMetaModel.add(infoModelMeta)
 
                                 turtleService.findInformationModel(infoModel.fdkId, withRecords = false)
                                     ?.let { infoNoRecords -> safeParseRDF(infoNoRecords, Lang.TURTLE) }
                                     ?.let { infoModelNoRecords ->
-                                        infoModelMeta.union(infoModelNoRecords).createRDFResponse(Lang.TURTLE)
+                                        infoModelMeta.union(infoModelNoRecords)
+                                            .union(catalogTriples)
+                                            .createRDFResponse(Lang.TURTLE)
                                     }
                                     ?.run {
                                         turtleService.saveInformationModel(
@@ -70,7 +78,7 @@ class UpdateService(
                                     }
                             }
 
-                        catalogMeta.union(catalogNoRecords).createRDFResponse(Lang.TURTLE)
+                        completeMetaModel.union(catalogNoRecords).createRDFResponse(Lang.TURTLE)
                             .run { turtleService.saveCatalog(fdkId = catalog.fdkId, turtle = this, withRecords = true) }
                     }
             }
