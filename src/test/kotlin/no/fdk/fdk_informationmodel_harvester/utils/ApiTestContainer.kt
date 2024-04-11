@@ -1,6 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.utils
 
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -17,7 +17,7 @@ abstract class ApiTestContext {
     @LocalServerPort
     var port: Int = 0
 
-    @BeforeAll
+    @BeforeEach
     fun waitForHarvest() {
         var apiReady = harvestCompleted(port)
         while (!apiReady) {

@@ -82,19 +82,17 @@ class HarvesterTest {
         val model0NoMeta = responseReader.parseFile("no_meta_model_0.ttl", "TURTLE")
 
         argumentCaptor<String, String, Boolean>().apply {
-            verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
-            assertEquals(listOf(CATALOG_ID_0, CATALOG_ID_0), first.allValues)
+            verify(turtleService, times(1)).saveCatalog(first.capture(), second.capture(), third.capture())
+            assertEquals(listOf(CATALOG_ID_0), first.allValues)
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), catalog0NoMeta, "harvestDataSourceSavedWhenDBIsEmpty-no-record-catalog"))
-            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE), catalog0, "harvestDataSourceSavedWhenDBIsEmpty-record-catalog"))
-            assertEquals(listOf(false, true), third.allValues)
+            assertEquals(listOf(false), third.allValues)
         }
 
         argumentCaptor<String, String, Boolean>().apply {
-            verify(turtleService, times(2)).saveInformationModel(first.capture(), second.capture(), third.capture())
-            assertEquals(listOf(INFO_MODEL_ID_0, INFO_MODEL_ID_0), first.allValues)
+            verify(turtleService, times(1)).saveInformationModel(first.capture(), second.capture(), third.capture())
+            assertEquals(listOf(INFO_MODEL_ID_0), first.allValues)
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), model0NoMeta, "harvestDataSourceSavedWhenDBIsEmpty-record-model"))
-            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE), model0, "harvestDataSourceSavedWhenDBIsEmpty-no-record-model"))
-            assertEquals(listOf(false, true), third.allValues)
+            assertEquals(listOf(false), third.allValues)
         }
 
         val expectedReport = HarvestReport(
@@ -163,30 +161,24 @@ class HarvesterTest {
         val modelNoMeta3 = responseReader.parseFile("no_meta_model_3.ttl", "TURTLE")
 
         argumentCaptor<String, String, Boolean>().apply {
-            verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
-            assertEquals(listOf(CATALOG_DBO_2.fdkId, CATALOG_DBO_2.fdkId), first.allValues)
+            verify(turtleService, times(1)).saveCatalog(first.capture(), second.capture(), third.capture())
+            assertEquals(listOf(CATALOG_DBO_2.fdkId), first.allValues)
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), catalogNoMeta2, "sourceWithCodeListIsParsedCorrectly-no-record-catalog"))
-            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE), catalog2, "sourceWithCodeListIsParsedCorrectly-record-catalog"))
-            assertEquals(listOf(false, true), third.allValues)
+            assertEquals(listOf(false), third.allValues)
         }
 
         argumentCaptor<String, String, Boolean>().apply {
-            verify(turtleService, times(4)).saveInformationModel(first.capture(), second.capture(), third.capture())
+            verify(turtleService, times(2)).saveInformationModel(first.capture(), second.capture(), third.capture())
             if (first.firstValue == INFO_MODEL_META_2.fdkId) {
-                assertEquals(listOf(INFO_MODEL_META_2.fdkId, INFO_MODEL_META_2.fdkId, INFO_MODEL_META_3.fdkId, INFO_MODEL_META_3.fdkId), first.allValues)
+                assertEquals(listOf(INFO_MODEL_META_2.fdkId, INFO_MODEL_META_3.fdkId), first.allValues)
                 Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[0], Lang.TURTLE), modelNoMeta2, "sourceWithCodeListIsParsedCorrectly-model0"))
-                Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[1], Lang.TURTLE), model2, "sourceWithCodeListIsParsedCorrectly-model1"))
-                Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[2], Lang.TURTLE), modelNoMeta3, "sourceWithCodeListIsParsedCorrectly-model2"))
-                Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[3], Lang.TURTLE), model3, "sourceWithCodeListIsParsedCorrectly-model3"))
+                Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[1], Lang.TURTLE), modelNoMeta3, "sourceWithCodeListIsParsedCorrectly-model2"))
             } else {
-                assertEquals(listOf(INFO_MODEL_META_3.fdkId, INFO_MODEL_META_3.fdkId, INFO_MODEL_META_2.fdkId, INFO_MODEL_META_2.fdkId), first.allValues)
+                assertEquals(listOf(INFO_MODEL_META_3.fdkId, INFO_MODEL_META_2.fdkId), first.allValues)
                 Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[0], Lang.TURTLE), modelNoMeta3, "sourceWithCodeListIsParsedCorrectly-model4"))
-                Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[1], Lang.TURTLE), model3, "sourceWithCodeListIsParsedCorrectly-model5"))
-                Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[2], Lang.TURTLE), modelNoMeta2, "sourceWithCodeListIsParsedCorrectly-model6"))
-                Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[3], Lang.TURTLE), model2, "sourceWithCodeListIsParsedCorrectly-model7"))
-
+                Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.allValues[1], Lang.TURTLE), modelNoMeta2, "sourceWithCodeListIsParsedCorrectly-model6"))
             }
-            assertEquals(listOf(false, true, false, true), third.allValues)
+            assertEquals(listOf(false, false), third.allValues)
         }
 
         val expectedReport = HarvestReport(
@@ -260,8 +252,8 @@ class HarvesterTest {
         verify(turtleService, times(1)).saveOne(any(), any())
         verify(catalogRepository, times(1)).save(any())
         verify(modelRepository, times(1)).save(any())
-        verify(turtleService, times(2)).saveCatalog(any(), any(), any())
-        verify(turtleService, times(2)).saveInformationModel(any(), any(), any())
+        verify(turtleService, times(1)).saveCatalog(any(), any(), any())
+        verify(turtleService, times(1)).saveInformationModel(any(), any(), any())
 
         val expectedReport = HarvestReport(
             id="harvest",
@@ -326,11 +318,10 @@ class HarvesterTest {
         }
 
         argumentCaptor<String, String, Boolean>().apply {
-            verify(turtleService, times(2)).saveCatalog(first.capture(), second.capture(), third.capture())
-            assertEquals(listOf(CATALOG_DBO_0.fdkId, CATALOG_DBO_0.fdkId), first.allValues)
+            verify(turtleService, times(1)).saveCatalog(first.capture(), second.capture(), third.capture())
+            assertEquals(listOf(CATALOG_DBO_0.fdkId), first.allValues)
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), expectedNoMetaCatalog, "onlyCatalogMetaUpdatedWhenOnlyCatalogDataChangedFromDB-no-record-catalog"))
-            Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.secondValue, Lang.TURTLE), expectedCatalogTurtle, "onlyCatalogMetaUpdatedWhenOnlyCatalogDataChangedFromDB-record-catalog"))
-            assertEquals(listOf(false, true), third.allValues)
+            assertEquals(listOf(false), third.allValues)
         }
 
         argumentCaptor<String, String, Boolean>().apply {
