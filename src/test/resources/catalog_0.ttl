@@ -366,17 +366,17 @@ digdir:geografiskAdresseSpesialiserer a       owl:NamedIndividual , modelldcatno
         dct:title  "geografiskAdresseSpesialiserer"^^xsd:string ;
         modelldcatno:hasGeneralConcept digdir:Adresse .
 
-<http://localhost:5000/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b>
+<http://localhost:5050/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b>
         a                  dcat:CatalogRecord ;
         dct:identifier     "e5b2ad5e-078b-3aea-af04-6051c2b0244b" ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:Katalog0 .
 
-<http://localhost:5000/informationmodels/409c97dd-57e0-3a29-b5a3-023733cf5064>
+<http://localhost:5050/informationmodels/409c97dd-57e0-3a29-b5a3-023733cf5064>
         a                  dcat:CatalogRecord ;
         dct:identifier     "409c97dd-57e0-3a29-b5a3-023733cf5064" ;
-        dct:isPartOf       <http://localhost:5000/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b> ;
+        dct:isPartOf       <http://localhost:5050/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b> ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:PersonOgEnhet .

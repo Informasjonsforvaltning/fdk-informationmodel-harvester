@@ -51,7 +51,7 @@ abstract class ApiTestContext {
             mongoContainer.start()
 
             try {
-                val con = URL("http://localhost:5000/ping").openConnection() as HttpURLConnection
+                val con = URL("http://localhost:5050/ping").openConnection() as HttpURLConnection
                 con.connect()
                 if (con.responseCode != 200) {
                     logger.debug("Ping to mock server failed")

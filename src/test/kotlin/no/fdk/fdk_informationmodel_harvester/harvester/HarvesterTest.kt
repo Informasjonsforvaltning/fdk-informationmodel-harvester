@@ -46,15 +46,15 @@ class HarvesterTest {
 
         whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
             .thenReturn(harvested)
-        whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/$CATALOG_ID_0"))
+        whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
             .thenReturn(listOf(INFO_MODEL_DBO_0))
         whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, true))
             .thenReturn(savedInfoModel)
 
         whenever(valuesMock.catalogUri)
-            .thenReturn("http://localhost:5000/catalogs")
+            .thenReturn("http://localhost:5050/catalogs")
         whenever(valuesMock.informationModelUri)
-            .thenReturn("http://localhost:5000/informationmodels")
+            .thenReturn("http://localhost:5050/informationmodels")
 
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
 
@@ -99,7 +99,7 @@ class HarvesterTest {
 
         val expectedReport = HarvestReport(
             id="harvest",
-            url="http://localhost:5000/harvest",
+            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -123,7 +123,7 @@ class HarvesterTest {
 
         whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE_2))
             .thenReturn(harvested)
-        whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/$CATALOG_ID_2"))
+        whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_2"))
             .thenReturn(listOf(INFO_MODEL_META_2, INFO_MODEL_META_3))
         whenever(turtleService.findInformationModel(INFO_MODEL_META_2.fdkId, true))
             .thenReturn(savedModel2)
@@ -131,9 +131,9 @@ class HarvesterTest {
             .thenReturn(savedModel3)
 
         whenever(valuesMock.catalogUri)
-            .thenReturn("http://localhost:5000/catalogs")
+            .thenReturn("http://localhost:5050/catalogs")
         whenever(valuesMock.informationModelUri)
-            .thenReturn("http://localhost:5000/informationmodels")
+            .thenReturn("http://localhost:5050/informationmodels")
 
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE_2, TEST_HARVEST_DATE, false)
 
@@ -191,7 +191,7 @@ class HarvesterTest {
 
         val expectedReport = HarvestReport(
             id="harvest2",
-            url="http://localhost:5000/harvest2",
+            url="http://localhost:5050/harvest2",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -217,9 +217,9 @@ class HarvesterTest {
             .thenReturn(harvested)
 
         whenever(valuesMock.catalogUri)
-            .thenReturn("http://localhost:5000/catalogs")
+            .thenReturn("http://localhost:5050/catalogs")
         whenever(valuesMock.informationModelUri)
-            .thenReturn("http://localhost:5000/informationmodels")
+            .thenReturn("http://localhost:5050/informationmodels")
 
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
 
@@ -231,7 +231,7 @@ class HarvesterTest {
 
         val expectedReport = HarvestReport(
             id="harvest",
-            url="http://localhost:5000/harvest",
+            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -251,9 +251,9 @@ class HarvesterTest {
             .thenReturn(harvested)
 
         whenever(valuesMock.catalogUri)
-            .thenReturn("http://localhost:5000/catalogs")
+            .thenReturn("http://localhost:5050/catalogs")
         whenever(valuesMock.informationModelUri)
-            .thenReturn("http://localhost:5000/informationmodels")
+            .thenReturn("http://localhost:5050/informationmodels")
 
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, true)
 
@@ -265,7 +265,7 @@ class HarvesterTest {
 
         val expectedReport = HarvestReport(
             id="harvest",
-            url="http://localhost:5000/harvest",
+            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -285,13 +285,13 @@ class HarvesterTest {
 
         val catalogDiffTurtle = responseReader.readFile("harvest_response_0_catalog_diff.ttl")
 
-        whenever(turtleService.findOne("http://localhost:5000/harvest"))
+        whenever(turtleService.findOne("http://localhost:5050/harvest"))
             .thenReturn(catalogDiffTurtle)
         whenever(catalogRepository.findById(CATALOG_DBO_0.uri))
             .thenReturn(Optional.of(CATALOG_DBO_0))
         whenever(modelRepository.findById(INFO_MODEL_DBO_0.uri))
             .thenReturn(Optional.of(INFO_MODEL_DBO_0))
-        whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/$CATALOG_ID_0"))
+        whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
             .thenReturn(listOf(INFO_MODEL_DBO_0))
         whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, true))
             .thenReturn(responseReader.readFile("model_0.ttl"))
@@ -299,9 +299,9 @@ class HarvesterTest {
             .thenReturn(responseReader.readFile("no_meta_model_0.ttl"))
 
         whenever(valuesMock.catalogUri)
-            .thenReturn("http://localhost:5000/catalogs")
+            .thenReturn("http://localhost:5050/catalogs")
         whenever(valuesMock.informationModelUri)
-            .thenReturn("http://localhost:5000/informationmodels")
+            .thenReturn("http://localhost:5050/informationmodels")
 
         val expectedCatalogDBO = CATALOG_DBO_0.copy(modified = NEW_TEST_HARVEST_DATE.timeInMillis)
         val expectedCatalogTurtle = responseReader.parseFile("catalog_0_catalog_diff.ttl", "TURTLE")
@@ -312,7 +312,7 @@ class HarvesterTest {
 
         argumentCaptor<String, String>().apply {
             verify(turtleService, times(1)).saveOne(first.capture(), second.capture())
-            assertEquals("http://localhost:5000/harvest", first.firstValue)
+            assertEquals("http://localhost:5050/harvest", first.firstValue)
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), harvestedModel, "onlyCatalogMetaUpdatedWhenOnlyCatalogDataChangedFromDB-harvested"))
         }
 
@@ -339,7 +339,7 @@ class HarvesterTest {
 
         val expectedReport = HarvestReport(
             id="harvest",
-            url="http://localhost:5000/harvest",
+            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-15 13:52:16 +0200",
@@ -358,9 +358,9 @@ class HarvesterTest {
             .thenReturn(responseReader.readFile("harvest_error_response.ttl"))
 
         whenever(valuesMock.catalogUri)
-            .thenReturn("http://localhost:5000/catalogs")
+            .thenReturn("http://localhost:5050/catalogs")
         whenever(valuesMock.informationModelUri)
-            .thenReturn("http://localhost:5000/informationmodels")
+            .thenReturn("http://localhost:5050/informationmodels")
 
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
 
@@ -372,7 +372,7 @@ class HarvesterTest {
 
         val expectedReport = HarvestReport(
             id="harvest",
-            url="http://localhost:5000/harvest",
+            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=true,
             errorMessage = "[line: 1, col: 1 ] Undefined prefix: digdir",
@@ -391,13 +391,13 @@ class HarvesterTest {
             .thenReturn(harvested)
         whenever(turtleService.findOne(TEST_HARVEST_SOURCE.url!!))
             .thenReturn(old)
-        whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/$CATALOG_ID_0"))
+        whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
             .thenReturn(listOf(INFO_MODEL_DBO_0))
 
         whenever(valuesMock.catalogUri)
-            .thenReturn("http://localhost:5000/catalogs")
+            .thenReturn("http://localhost:5050/catalogs")
         whenever(valuesMock.informationModelUri)
-            .thenReturn("http://localhost:5000/informationmodels")
+            .thenReturn("http://localhost:5050/informationmodels")
 
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
 
@@ -408,7 +408,7 @@ class HarvesterTest {
 
         val expectedReport = HarvestReport(
             id="harvest",
-            url="http://localhost:5000/harvest",
+            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -430,19 +430,19 @@ class HarvesterTest {
             .thenReturn(harvested)
         whenever(turtleService.findOne(TEST_HARVEST_SOURCE.url!!))
             .thenReturn(old)
-        whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/$CATALOG_ID_0"))
+        whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
             .thenReturn(listOf(INFO_MODEL_DBO_0))
 
         whenever(valuesMock.catalogUri)
-            .thenReturn("http://localhost:5000/catalogs")
+            .thenReturn("http://localhost:5050/catalogs")
         whenever(valuesMock.informationModelUri)
-            .thenReturn("http://localhost:5000/informationmodels")
+            .thenReturn("http://localhost:5050/informationmodels")
 
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
 
         val expectedReport = HarvestReport(
             id="harvest",
-            url="http://localhost:5000/harvest",
+            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
