@@ -270,17 +270,17 @@ digdir:vegadresseSpesialiserer a       owl:NamedIndividual , modelldcatno:Specia
       dct:title  "vegadresseSpesialiserer"^^xsd:string ;
       modelldcatno:hasGeneralConcept digdir:GeografiskAdresse .
 
-<http://localhost:5000/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb>
+<http://localhost:5050/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb>
         a                  dcat:CatalogRecord ;
         dct:identifier     "wrong-catalog-identifier" ;
         dct:issued         "2020-11-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-11-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:Katalog1 .
 
-<http://localhost:5000/informationmodels/1f44a866-2cbd-3b80-bf72-cccb99965e25>
+<http://localhost:5050/informationmodels/1f44a866-2cbd-3b80-bf72-cccb99965e25>
         a                  dcat:CatalogRecord ;
         dct:identifier     "wrong-model-identifier" ;
-        dct:isPartOf       <http://localhost:5000/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb> ;
+        dct:isPartOf       <http://localhost:5050/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb> ;
         dct:issued         "2020-11-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-11-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:AdresseModell .

@@ -35,9 +35,9 @@ class UpdateServiceTest {
         fun catalogRecordsIsRecreatedFromMetaDBO() {
             whenever(catalogRepository.findAll())
                 .thenReturn(listOf(CATALOG_DBO_0, CATALOG_DBO_1))
-            whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/${CATALOG_DBO_0.fdkId}"))
+            whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/${CATALOG_DBO_0.fdkId}"))
                 .thenReturn(listOf(INFO_MODEL_DBO_0))
-            whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/${CATALOG_DBO_1.fdkId}"))
+            whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/${CATALOG_DBO_1.fdkId}"))
                 .thenReturn(listOf(INFO_MODEL_DBO_1))
             whenever(turtleService.findCatalog(CATALOG_ID_0, false))
                 .thenReturn(responseReader.readFile("no_meta_catalog_0.ttl"))
@@ -50,9 +50,9 @@ class UpdateServiceTest {
 
 
             whenever(valuesMock.catalogUri)
-                .thenReturn("http://localhost:5000/catalogs")
+                .thenReturn("http://localhost:5050/catalogs")
             whenever(valuesMock.informationModelUri)
-                .thenReturn("http://localhost:5000/informationmodels")
+                .thenReturn("http://localhost:5050/informationmodels")
 
             updateService.updateMetaData()
 
@@ -84,7 +84,7 @@ class UpdateServiceTest {
         fun updateIsSkippedIfNotActuallyPresentInCatalog() {
             whenever(catalogRepository.findAll())
                 .thenReturn(listOf(CATALOG_DBO_0))
-            whenever(modelRepository.findAllByIsPartOf("http://localhost:5000/catalogs/${CATALOG_ID_0}"))
+            whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/${CATALOG_ID_0}"))
                 .thenReturn(listOf(INFO_MODEL_DBO_0, INFO_MODEL_DBO_1))
             whenever(turtleService.findCatalog(CATALOG_ID_0, false))
                 .thenReturn(responseReader.readFile("harvest_response_0_no_models.ttl"))
@@ -94,9 +94,9 @@ class UpdateServiceTest {
                 .thenReturn(responseReader.readFile("no_meta_model_1.ttl"))
 
             whenever(valuesMock.catalogUri)
-                .thenReturn("http://localhost:5000/catalogs")
+                .thenReturn("http://localhost:5050/catalogs")
             whenever(valuesMock.informationModelUri)
-                .thenReturn("http://localhost:5000/informationmodels")
+                .thenReturn("http://localhost:5050/informationmodels")
 
             updateService.updateMetaData()
 

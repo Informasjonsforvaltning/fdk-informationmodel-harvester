@@ -65,10 +65,10 @@ ex-collection:Frukt  a  modelldcatno:ObjectType , owl:NamedIndividual ;
 ex-composition:nyre  a  modelldcatno:ObjectType , owl:NamedIndividual ;
         dct:title  "Nyre"@nb .
 
-<http://localhost:5000/informationmodels/0bf6b09f-e1c0-3415-bba0-7ff2edada89d>
+<http://localhost:5050/informationmodels/0bf6b09f-e1c0-3415-bba0-7ff2edada89d>
         a                  dcat:CatalogRecord ;
         dct:identifier     "0bf6b09f-e1c0-3415-bba0-7ff2edada89d" ;
-        dct:isPartOf       <http://localhost:5000/catalogs/f25c939d-0722-3aa3-82b1-eaa457086444> ;
+        dct:isPartOf       <http://localhost:5050/catalogs/f25c939d-0722-3aa3-82b1-eaa457086444> ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digs:AltMuligModell .

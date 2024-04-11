@@ -33,10 +33,10 @@ digs:Utgiver  a         foaf:Agent , owl:NamedIndividual ;
         dct:type        "Organisasjonsledd"@nb ;
         foaf:name       "Digitaliseringsdirektoratet"@nb .
 
-<http://localhost:5000/informationmodels/bcbe6738-85f6-388c-afcc-ef1fafd7cc45>
+<http://localhost:5050/informationmodels/bcbe6738-85f6-388c-afcc-ef1fafd7cc45>
         a                  dcat:CatalogRecord ;
         dct:identifier     "bcbe6738-85f6-388c-afcc-ef1fafd7cc45" ;
-        dct:isPartOf       <http://localhost:5000/catalogs/f25c939d-0722-3aa3-82b1-eaa457086444> ;
+        dct:isPartOf       <http://localhost:5050/catalogs/f25c939d-0722-3aa3-82b1-eaa457086444> ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digs:Diversemodell .

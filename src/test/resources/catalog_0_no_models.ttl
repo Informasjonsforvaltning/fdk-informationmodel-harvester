@@ -23,7 +23,7 @@ digdir:Utgiver  a       owl:NamedIndividual , foaf:Agent ;
         dct:type        "Organisasjonsledd"@nb ;
         foaf:name       "Digitaliseringsdirektoratet"@nb .
 
-<http://localhost:5000/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b>
+<http://localhost:5050/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b>
         a                  dcat:CatalogRecord ;
         dct:identifier     "e5b2ad5e-078b-3aea-af04-6051c2b0244b" ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;

@@ -591,32 +591,32 @@ digdir:vegadresseSpesialiserer a       owl:NamedIndividual , modelldcatno:Specia
       dct:title  "vegadresseSpesialiserer"^^xsd:string ;
       modelldcatno:hasGeneralConcept digdir:GeografiskAdresse .
 
-<http://localhost:5000/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb>
+<http://localhost:5050/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb>
         a                  dcat:CatalogRecord ;
         dct:identifier     "3edd0561-326b-303d-9dcb-1966ef7c63eb" ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:Katalog1 .
 
-<http://localhost:5000/informationmodels/1f44a866-2cbd-3b80-bf72-cccb99965e25>
+<http://localhost:5050/informationmodels/1f44a866-2cbd-3b80-bf72-cccb99965e25>
         a                  dcat:CatalogRecord ;
         dct:identifier     "1f44a866-2cbd-3b80-bf72-cccb99965e25" ;
-        dct:isPartOf       <http://localhost:5000/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb> ;
+        dct:isPartOf       <http://localhost:5050/catalogs/3edd0561-326b-303d-9dcb-1966ef7c63eb> ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:AdresseModell .
 
-<http://localhost:5000/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b>
+<http://localhost:5050/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b>
         a                  dcat:CatalogRecord ;
         dct:identifier     "e5b2ad5e-078b-3aea-af04-6051c2b0244b" ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:Katalog0 .
 
-<http://localhost:5000/informationmodels/409c97dd-57e0-3a29-b5a3-023733cf5064>
+<http://localhost:5050/informationmodels/409c97dd-57e0-3a29-b5a3-023733cf5064>
         a                  dcat:CatalogRecord ;
         dct:identifier     "409c97dd-57e0-3a29-b5a3-023733cf5064" ;
-        dct:isPartOf       <http://localhost:5000/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b> ;
+        dct:isPartOf       <http://localhost:5050/catalogs/e5b2ad5e-078b-3aea-af04-6051c2b0244b> ;
         dct:issued         "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         dct:modified       "2020-10-05T13:15:39.831Z"^^xsd:dateTime ;
         foaf:primaryTopic  digdir:PersonOgEnhet .
