@@ -140,27 +140,6 @@ class InformationModelHarvester(
                         it.first.models.map { infoModel -> infoModel.resourceURI }
                     )
                 )
-
-                val catalogModel = ModelFactory.createDefaultModel()
-                catalogModel.add(it.first.harvestedCatalogWithoutInfoModels)
-                catalogModel.createResource(fdkUri)
-                    .addProperty(RDF.type, DCAT.CatalogRecord)
-                    .addProperty(DCTerms.identifier, updatedCatalogMeta.fdkId)
-                    .addProperty(FOAF.primaryTopic, catalogModel.createResource(updatedCatalogMeta.uri))
-                    .addProperty(DCTerms.issued, catalogModel.createTypedLiteral(calendarFromTimestamp(updatedCatalogMeta.issued)))
-                    .addProperty(DCTerms.modified, catalogModel.createTypedLiteral(harvestDate))
-
-                informationModelRepository.findAllByIsPartOf(fdkUri)
-                    .filter { infoMeta -> catalogContainsInfoModel(it.first.harvestedCatalog, updatedCatalogMeta.uri, infoMeta.uri) }
-                    .mapNotNull { infoMeta -> turtleService.findInformationModel(infoMeta.fdkId, withRecords = true) }
-                    .map { infoModelTurtle -> safeParseRDF(infoModelTurtle, Lang.TURTLE) }
-                    .forEach { infoModel -> catalogModel.add(infoModel) }
-
-                turtleService.saveCatalog(
-                    fdkId = updatedCatalogMeta.fdkId,
-                    turtle = catalogModel.createRDFResponse(Lang.TURTLE),
-                    withRecords = true
-                )
             }
 
         removedModels.map { it.copy(removed = true) }.run { informationModelRepository.saveAll(this) }
@@ -192,23 +171,6 @@ class InformationModelHarvester(
                 fdkId = modelMeta.fdkId,
                 turtle = harvested.createRDFResponse(Lang.TURTLE),
                 withRecords = false
-            )
-
-            val fdkUri = "${applicationProperties.informationModelUri}/${modelMeta.fdkId}"
-            val metaModel = ModelFactory.createDefaultModel()
-
-            metaModel.createResource(fdkUri)
-                .addProperty(RDF.type, DCAT.CatalogRecord)
-                .addProperty(DCTerms.identifier, modelMeta.fdkId)
-                .addProperty(FOAF.primaryTopic, metaModel.createResource(resourceURI))
-                .addProperty(DCTerms.isPartOf, metaModel.createResource(modelMeta.isPartOf))
-                .addProperty(DCTerms.issued, metaModel.createTypedLiteral(calendarFromTimestamp(modelMeta.issued)))
-                .addProperty(DCTerms.modified, metaModel.createTypedLiteral(harvestDate))
-
-            turtleService.saveInformationModel(
-                fdkId = modelMeta.fdkId,
-                turtle = metaModel.union(harvested).createRDFResponse(Lang.TURTLE),
-                withRecords = true
             )
 
             return modelMeta

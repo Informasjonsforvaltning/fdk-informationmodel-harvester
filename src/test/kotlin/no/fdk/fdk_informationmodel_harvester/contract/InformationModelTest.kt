@@ -6,6 +6,7 @@ import no.fdk.fdk_informationmodel_harvester.utils.TestResponseReader
 import no.fdk.fdk_informationmodel_harvester.utils.apiGet
 import org.apache.jena.riot.Lang
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
@@ -24,7 +25,7 @@ class InformationModelTest: ApiTestContext() {
     @Test
     fun findSpecific() {
         val response = apiGet("/informationmodels/$INFO_MODEL_ID_0?catalogrecords=true", "application/rdf+json", port)
-        Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
+        assertEquals(HttpStatus.OK.value(), response["status"])
 
         val notExpected = responseReader.parseFile("no_meta_model_0.ttl", "TURTLE")
         val responseModel = responseReader.parseResponse(response["body"] as String, "RDF/JSON")
@@ -35,7 +36,7 @@ class InformationModelTest: ApiTestContext() {
     @Test
     fun findSpecificExcludeRecords() {
         val response = apiGet("/informationmodels/$INFO_MODEL_ID_0", "application/trig", port)
-        Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
+        assertEquals(HttpStatus.OK.value(), response["status"])
 
         val expected = responseReader.parseFile("no_meta_model_0.ttl", "TURTLE")
         val responseModel = responseReader.parseResponse(response["body"] as String, Lang.TRIG.name)
@@ -46,7 +47,7 @@ class InformationModelTest: ApiTestContext() {
     @Test
     fun idDoesNotExist() {
         val response = apiGet("/dataservices/123", "text/turtle", port)
-        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+        assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
     }
 
 }
