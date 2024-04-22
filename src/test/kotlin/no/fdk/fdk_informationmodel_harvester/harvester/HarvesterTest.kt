@@ -192,8 +192,8 @@ class HarvesterTest {
                 fdkId="f25c939d-0722-3aa3-82b1-eaa457086444",
                 uri="https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog2")),
             changedResources = listOf(
-                FdkIdAndUri(fdkId="0bf6b09f-e1c0-3415-bba0-7ff2edada89d", uri="https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#AltMuligModell"),
-                FdkIdAndUri(fdkId="bcbe6738-85f6-388c-afcc-ef1fafd7cc45", uri="https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell"))
+                FdkIdAndUri(fdkId="bcbe6738-85f6-388c-afcc-ef1fafd7cc45", uri="https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Diversemodell"),
+                FdkIdAndUri(fdkId="0bf6b09f-e1c0-3415-bba0-7ff2edada89d", uri="https://raw.github.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#AltMuligModell"))
         )
 
         kotlin.test.assertEquals(expectedReport, report)
