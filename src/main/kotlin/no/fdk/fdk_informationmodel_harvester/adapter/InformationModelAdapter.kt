@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.io.BufferedReader
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 
 private const val TEN_MINUTES = 600000
@@ -14,7 +15,7 @@ private const val TEN_MINUTES = 600000
 class InformationModelAdapter {
 
     fun getInformationModels(source: HarvestDataSource): String {
-        with(URL(source.url).openConnection() as HttpURLConnection) {
+        with(URI(source.url).toURL().openConnection() as HttpURLConnection) {
             try {
                 setRequestProperty("Accept", source.acceptHeaderValue)
                 connectTimeout = TEN_MINUTES

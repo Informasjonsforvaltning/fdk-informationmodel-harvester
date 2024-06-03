@@ -12,6 +12,7 @@ application:
   informationModelUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/informationmodels
   catalogUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/catalogs
   harvestAdminRootUrl: ${HARVEST_ADMIN_ROOT_URL:http://new-harvest-admin:8080}
+  harvestAdminApiKey: ${ADMIN_API_KEY}
 spring:
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk/protocol/openid-connect/certs
@@ -48,6 +49,7 @@ application:
   informationModelUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/informationmodels
   catalogUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/catalogs
   harvestAdminRootUrl: https://admin-api.staging.fellesdatakatalog.digdir.no
+  harvestAdminApiKey: test-key
 
 ---
 spring:
@@ -64,4 +66,5 @@ application:
   informationModelUri: http://localhost:5050/informationmodels
   catalogUri: http://localhost:5050/catalogs
   harvestAdminRootUrl: http://localhost:5050
+  harvestAdminApiKey: test-key
 fuseki.unionGraphUri: http://localhost:5050/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
