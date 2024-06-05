@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fdk-informationmodel-harvester
+  labels:
+    app: fdk-informationmodel-harvester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fdk-informationmodel-harvester
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: fdk-informationmodel-harvester
+      annotations:
+        prometheus.io/scrape: "false"
+    spec:
+      containers:
+        - name: fdk-informationmodel-harvester
+          image: fdk-informationmodel-harvester
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+          resources:
+            requests:
+              memory: "3000Mi"
+              cpu: "750m"
+            limits:
+              memory: "3000Mi"
+              cpu: "750m"
