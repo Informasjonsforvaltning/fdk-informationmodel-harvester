@@ -163,18 +163,28 @@ class InformationModelHarvester(
         forceUpdate: Boolean
     ): InformationModelMeta? {
         val dbMeta = informationModelRepository.findByIdOrNull(resourceURI)
-        if (forceUpdate || modelHasChanges(dbMeta?.fdkId)) {
-            val modelMeta = mapToDBOMeta(harvestDate, fdkCatalogURI, dbMeta)
-            informationModelRepository.save(modelMeta)
+        return when {
+            dbMeta == null || dbMeta.removed || modelHasChanges(dbMeta.fdkId) -> {
+                val updatedMeta = mapToDBOMeta(harvestDate, fdkCatalogURI, dbMeta)
+                informationModelRepository.save(updatedMeta)
+                turtleService.saveInformationModel(
+                    turtle = harvested.createRDFResponse(Lang.TURTLE),
+                    fdkId = updatedMeta.fdkId,
+                    withRecords = false
+                )
 
-            turtleService.saveInformationModel(
-                fdkId = modelMeta.fdkId,
-                turtle = harvested.createRDFResponse(Lang.TURTLE),
-                withRecords = false
-            )
-
-            return modelMeta
-        } else return null
+                updatedMeta
+            }
+            forceUpdate -> {
+                turtleService.saveInformationModel(
+                    turtle = harvested.createRDFResponse(Lang.TURTLE),
+                    fdkId = dbMeta.fdkId,
+                    withRecords = false
+                )
+                dbMeta
+            }
+            else -> null
+        }
     }
 
     private fun CatalogAndInfoModels.mapToCatalogMeta(
