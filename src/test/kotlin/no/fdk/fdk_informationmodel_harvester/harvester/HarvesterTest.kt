@@ -447,4 +447,45 @@ class HarvesterTest {
         assertEquals(expectedReport, report)
     }
 
+    @Test
+    fun earlierRemovedInfoModelWithNoChangesAddedToReport() {
+        val harvested = responseReader.readFile("harvest_response_0.ttl")
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+            .thenReturn(harvested)
+        whenever(turtleService.findOne(TEST_HARVEST_SOURCE.url!!))
+            .thenReturn(responseReader.readFile("harvest_response_0_old_model_removed.ttl"))
+        whenever(modelRepository.findById(INFO_MODEL_DBO_0.uri))
+            .thenReturn(Optional.of(INFO_MODEL_DBO_0.copy(removed = true)))
+        whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
+            .thenReturn(listOf(INFO_MODEL_DBO_0.copy(removed = true)))
+        whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, withRecords = false))
+            .thenReturn(responseReader.readFile("no_meta_model_0.ttl"))
+
+        whenever(valuesMock.catalogUri)
+            .thenReturn("http://localhost:5050/catalogs")
+        whenever(valuesMock.informationModelUri)
+            .thenReturn("http://localhost:5050/informationmodels")
+
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
+
+        argumentCaptor<InformationModelMeta>().apply {
+            verify(modelRepository, times(1)).save(capture())
+            assertEquals(INFO_MODEL_DBO_0, firstValue)
+        }
+
+        val expectedReport = HarvestReport(
+            id="harvest",
+            url="http://localhost:5050/harvest",
+            dataType="informationmodel",
+            harvestError=false,
+            startTime = "2020-10-05 15:15:39 +0200",
+            endTime = report!!.endTime,
+            errorMessage=null,
+            changedCatalogs=listOf(FdkIdAndUri(fdkId="e5b2ad5e-078b-3aea-af04-6051c2b0244b", uri="https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#Katalog0")),
+            changedResources=listOf(FdkIdAndUri(fdkId="409c97dd-57e0-3a29-b5a3-023733cf5064", uri="https://raw.githubusercontent.com/Informasjonsforvaltning/model-publisher/master/src/model/model-catalog.ttl#PersonOgEnhet"))
+        )
+
+        assertEquals(expectedReport, report)
+    }
+
 }
