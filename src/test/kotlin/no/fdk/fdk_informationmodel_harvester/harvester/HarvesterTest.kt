@@ -76,9 +76,7 @@ class HarvesterTest {
             assertEquals(INFO_MODEL_DBO_0, firstValue)
         }
 
-        val catalog0 = responseReader.parseFile("catalog_0.ttl", "TURTLE")
         val catalog0NoMeta = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
-        val model0 = parseRDFResponse(savedInfoModel, Lang.TURTLE)
         val model0NoMeta = responseReader.parseFile("no_meta_model_0.ttl", "TURTLE")
 
         argumentCaptor<String, String, Boolean>().apply {
@@ -153,11 +151,8 @@ class HarvesterTest {
             assertEquals(listOf(INFO_MODEL_META_2, INFO_MODEL_META_3), allValues.sortedBy { it.fdkId })
         }
 
-        val catalog2 = responseReader.parseFile("catalog_2.ttl", "TURTLE")
         val catalogNoMeta2 = responseReader.parseFile("no_meta_catalog_2.ttl", "TURTLE")
-        val model2 = parseRDFResponse(savedModel2, Lang.TURTLE)
         val modelNoMeta2 = responseReader.parseFile("no_meta_model_2.ttl", "TURTLE")
-        val model3 = parseRDFResponse(savedModel3, Lang.TURTLE)
         val modelNoMeta3 = responseReader.parseFile("no_meta_model_3.ttl", "TURTLE")
 
         argumentCaptor<String, String, Boolean>().apply {
@@ -238,9 +233,14 @@ class HarvesterTest {
         val harvested = responseReader.readFile("harvest_response_0.ttl")
         whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
             .thenReturn(harvested)
-
         whenever(turtleService.findOne(TEST_HARVEST_SOURCE.url!!))
             .thenReturn(harvested)
+        whenever(modelRepository.findById(INFO_MODEL_DBO_0.uri))
+            .thenReturn(Optional.of(INFO_MODEL_DBO_0))
+        whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
+            .thenReturn(listOf(INFO_MODEL_DBO_0))
+        whenever(turtleService.findInformationModel(INFO_MODEL_ID_0, withRecords = false))
+            .thenReturn(responseReader.readFile("no_meta_model_0.ttl"))
 
         whenever(valuesMock.catalogUri)
             .thenReturn("http://localhost:5050/catalogs")
@@ -250,8 +250,7 @@ class HarvesterTest {
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, true)
 
         verify(turtleService, times(1)).saveOne(any(), any())
-        verify(catalogRepository, times(1)).save(any())
-        verify(modelRepository, times(1)).save(any())
+        verify(modelRepository, times(0)).save(any())
         verify(turtleService, times(1)).saveCatalog(any(), any(), any())
         verify(turtleService, times(1)).saveInformationModel(any(), any(), any())
 
@@ -296,7 +295,6 @@ class HarvesterTest {
             .thenReturn("http://localhost:5050/informationmodels")
 
         val expectedCatalogDBO = CATALOG_DBO_0.copy(modified = NEW_TEST_HARVEST_DATE.timeInMillis)
-        val expectedCatalogTurtle = responseReader.parseFile("catalog_0_catalog_diff.ttl", "TURTLE")
         val expectedNoMetaCatalog = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
         val harvestedModel = parseRDFResponse(harvested, Lang.TURTLE)
 
