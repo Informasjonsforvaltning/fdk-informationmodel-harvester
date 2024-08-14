@@ -1,4 +1,4 @@
-package no.fdk.fdk_event_harvester.utils.jwk
+package no.fdk.fdk_informationmodel_harvester.utils.jwk
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

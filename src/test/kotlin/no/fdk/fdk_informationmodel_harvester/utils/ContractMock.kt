@@ -3,7 +3,7 @@ package no.fdk.fdk_informationmodel_harvester.utils
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import no.fdk.fdk_event_harvester.utils.jwk.JwkStore
+import no.fdk.fdk_informationmodel_harvester.utils.jwk.JwkStore
 import java.io.File
 
 private val mockserver = WireMockServer(LOCAL_SERVER_PORT)

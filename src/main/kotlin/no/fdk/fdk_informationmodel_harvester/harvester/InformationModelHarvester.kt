@@ -22,7 +22,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 private val LOGGER = LoggerFactory.getLogger(InformationModelHarvester::class.java)
-private const val dateFormat: String = "yyyy-MM-dd HH:mm:ss Z"
 
 @Service
 class InformationModelHarvester(
@@ -231,14 +230,6 @@ class InformationModelHarvester(
     private fun InformationModelRDFModel.modelHasChanges(fdkId: String?): Boolean =
         if (fdkId == null) true
         else harvestDiff(turtleService.findInformationModel(fdkId, withRecords = false))
-
-    private fun formatNowWithOsloTimeZone(): String =
-        ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
-            .format(DateTimeFormatter.ofPattern(dateFormat))
-
-    private fun Calendar.formatWithOsloTimeZone(): String =
-        ZonedDateTime.from(toInstant().atZone(ZoneId.of("Europe/Oslo")))
-            .format(DateTimeFormatter.ofPattern(dateFormat))
 
     private fun getInfoModelsRemovedThisHarvest(catalog: String, infoModels: List<String>): List<InformationModelMeta> =
         informationModelRepository.findAllByIsPartOf(catalog)

@@ -12,9 +12,13 @@ import org.apache.jena.vocabulary.DCAT
 import org.apache.jena.vocabulary.RDF
 import org.apache.jena.vocabulary.SKOS
 import org.slf4j.LoggerFactory
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 private val LOGGER = LoggerFactory.getLogger(Application::class.java)
+private const val dateFormat: String = "yyyy-MM-dd HH:mm:ss Z"
 
 fun CatalogAndInfoModels.harvestDiff(dboNoRecords: String?): Boolean =
     if (dboNoRecords == null) true
@@ -162,6 +166,14 @@ fun calendarFromTimestamp(timestamp: Long): Calendar {
     calendar.timeInMillis = timestamp
     return calendar
 }
+
+fun formatNowWithOsloTimeZone(): String =
+    ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
+        .format(DateTimeFormatter.ofPattern(dateFormat))
+
+fun Calendar.formatWithOsloTimeZone(): String =
+    ZonedDateTime.from(toInstant().atZone(ZoneId.of("Europe/Oslo")))
+        .format(DateTimeFormatter.ofPattern(dateFormat))
 
 data class CatalogAndInfoModels (
     val resourceURI: String,

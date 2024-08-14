@@ -4,6 +4,9 @@ import no.fdk.fdk_informationmodel_harvester.utils.ApiTestContext
 import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_ID_0
 import no.fdk.fdk_informationmodel_harvester.utils.TestResponseReader
 import no.fdk.fdk_informationmodel_harvester.utils.apiGet
+import no.fdk.fdk_informationmodel_harvester.utils.authorizedRequest
+import no.fdk.fdk_informationmodel_harvester.utils.jwk.Access
+import no.fdk.fdk_informationmodel_harvester.utils.jwk.JwtToken
 import org.apache.jena.riot.Lang
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -46,8 +49,47 @@ class InformationModelTest: ApiTestContext() {
 
     @Test
     fun idDoesNotExist() {
-        val response = apiGet("/dataservices/123", "text/turtle", port)
+        val response = apiGet("/informationmodels/123", "text/turtle", port)
         assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+    }
+
+    @Nested
+    internal inner class RemoveInformationModelById {
+
+        @Test
+        fun unauthorizedForNoToken() {
+            val response = authorizedRequest("/informationmodels/$INFO_MODEL_ID_0", null, port, "DELETE")
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+        @Test
+        fun forbiddenWithNonSysAdminRole() {
+            val response = authorizedRequest(
+                "/informationmodels/$INFO_MODEL_ID_0",
+                JwtToken(Access.ORG_WRITE).toString(),
+                port,
+                "DELETE"
+            )
+            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+        }
+
+        @Test
+        fun notFoundWhenIdNotInDB() {
+            val response =
+                authorizedRequest("/informationmodels/123", JwtToken(Access.ROOT).toString(), port, "DELETE")
+            assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
+        }
+
+        @Test
+        fun okWithSysAdminRole() {
+            val response = authorizedRequest(
+                "/informationmodels/$INFO_MODEL_ID_0",
+                JwtToken(Access.ROOT).toString(),
+                port,
+                "DELETE"
+            )
+            assertEquals(HttpStatus.NO_CONTENT.value(), response["status"])
+        }
     }
 
 }
