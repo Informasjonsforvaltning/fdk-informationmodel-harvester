@@ -1,6 +1,10 @@
 package no.fdk.fdk_informationmodel_harvester.contract
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.fdk.fdk_informationmodel_harvester.model.DuplicateIRI
 import no.fdk.fdk_informationmodel_harvester.utils.ApiTestContext
+import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_DBO_0
+import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_DBO_1
 import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_ID_0
 import no.fdk.fdk_informationmodel_harvester.utils.TestResponseReader
 import no.fdk.fdk_informationmodel_harvester.utils.apiGet
@@ -12,6 +16,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import kotlin.test.assertTrue
@@ -19,11 +24,13 @@ import kotlin.test.assertTrue
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     properties = ["spring.profiles.active=contract-test"],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
 @ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
 @Tag("contract")
-class InformationModelTest: ApiTestContext() {
+class InformationModelTest : ApiTestContext() {
     private val responseReader = TestResponseReader()
+    private val mapper = jacksonObjectMapper()
 
     @Test
     fun findSpecific() {
@@ -58,7 +65,12 @@ class InformationModelTest: ApiTestContext() {
 
         @Test
         fun unauthorizedForNoToken() {
-            val response = authorizedRequest("/informationmodels/$INFO_MODEL_ID_0", null, port, "DELETE")
+            val response = authorizedRequest(
+                "/informationmodels/$INFO_MODEL_ID_0",
+                null,
+                port,
+                HttpMethod.DELETE
+            )
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
 
@@ -68,15 +80,19 @@ class InformationModelTest: ApiTestContext() {
                 "/informationmodels/$INFO_MODEL_ID_0",
                 JwtToken(Access.ORG_WRITE).toString(),
                 port,
-                "DELETE"
+                HttpMethod.DELETE
             )
             assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
         }
 
         @Test
         fun notFoundWhenIdNotInDB() {
-            val response =
-                authorizedRequest("/informationmodels/123", JwtToken(Access.ROOT).toString(), port, "DELETE")
+            val response = authorizedRequest(
+                "/informationmodels/123",
+                JwtToken(Access.ROOT).toString(),
+                port,
+                HttpMethod.DELETE
+            )
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
 
@@ -86,10 +102,69 @@ class InformationModelTest: ApiTestContext() {
                 "/informationmodels/$INFO_MODEL_ID_0",
                 JwtToken(Access.ROOT).toString(),
                 port,
-                "DELETE"
+                HttpMethod.DELETE
             )
             assertEquals(HttpStatus.NO_CONTENT.value(), response["status"])
         }
     }
+
+    @Nested
+    internal inner class RemoveDuplicates {
+
+        @Test
+        fun unauthorizedForNoToken() {
+            val body = listOf(DuplicateIRI(iriToRemove = INFO_MODEL_DBO_0.uri, iriToRetain = INFO_MODEL_DBO_1.uri))
+            val response = authorizedRequest(
+                "/informationmodels/duplicates",
+                null,
+                port,
+                HttpMethod.POST,
+                mapper.writeValueAsString(body)
+            )
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+        @Test
+        fun forbiddenWithNonSysAdminRole() {
+            val body = listOf(DuplicateIRI(iriToRemove = INFO_MODEL_DBO_0.uri, iriToRetain = INFO_MODEL_DBO_1.uri))
+            val response = authorizedRequest(
+                "/informationmodels/duplicates",
+                JwtToken(Access.ORG_WRITE).toString(),
+                port,
+                HttpMethod.POST,
+                mapper.writeValueAsString(body)
+            )
+            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+        }
+
+        @Test
+        fun badRequestWhenRemoveIRINotInDB() {
+            val body = listOf(DuplicateIRI(iriToRemove = "https://123.no", iriToRetain = INFO_MODEL_DBO_1.uri))
+            val response =
+                authorizedRequest(
+                    "/informationmodels/duplicates",
+                    JwtToken(Access.ROOT).toString(),
+                    port,
+                    HttpMethod.POST,
+                    mapper.writeValueAsString(body)
+                )
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
+        }
+
+        @Test
+        fun okWithSysAdminRole() {
+            val body = listOf(DuplicateIRI(iriToRemove = INFO_MODEL_DBO_0.uri, iriToRetain = INFO_MODEL_DBO_1.uri))
+            val response = authorizedRequest(
+                "/informationmodels/duplicates",
+                JwtToken(Access.ROOT).toString(),
+                port,
+                HttpMethod.POST,
+                mapper.writeValueAsString(body)
+            )
+            assertEquals(HttpStatus.OK.value(), response["status"])
+        }
+    }
+
+
 
 }

@@ -1,5 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.controller
 
+import no.fdk.fdk_informationmodel_harvester.model.DuplicateIRI
 import no.fdk.fdk_informationmodel_harvester.rdf.jenaTypeFromAcceptHeader
 import no.fdk.fdk_informationmodel_harvester.service.EndpointPermissions
 import no.fdk.fdk_informationmodel_harvester.service.InformationModelService
@@ -52,6 +53,16 @@ open class InformationModelController(
         if (endpointPermissions.hasAdminPermission(jwt)) {
             informationModelService.removeInformationModel(id)
             ResponseEntity(HttpStatus.NO_CONTENT)
+        } else ResponseEntity(HttpStatus.FORBIDDEN)
+
+    @PostMapping("/duplicates")
+    fun removeDuplicates(
+        @AuthenticationPrincipal jwt: Jwt,
+        @RequestBody duplicates: List<DuplicateIRI>
+    ): ResponseEntity<Void> =
+        if (endpointPermissions.hasAdminPermission(jwt)) {
+            informationModelService.removeDuplicates(duplicates)
+            ResponseEntity(HttpStatus.OK)
         } else ResponseEntity(HttpStatus.FORBIDDEN)
 
 }

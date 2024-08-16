@@ -7,18 +7,10 @@ import no.fdk.fdk_informationmodel_harvester.rdf.*
 import no.fdk.fdk_informationmodel_harvester.repository.*
 import no.fdk.fdk_informationmodel_harvester.service.TurtleService
 import org.apache.jena.rdf.model.Model
-import org.apache.jena.rdf.model.ModelFactory
 import org.apache.jena.riot.Lang
-import org.apache.jena.sparql.vocabulary.FOAF
-import org.apache.jena.vocabulary.DCAT
-import org.apache.jena.vocabulary.DCTerms
-import org.apache.jena.vocabulary.RDF
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 private val LOGGER = LoggerFactory.getLogger(InformationModelHarvester::class.java)
