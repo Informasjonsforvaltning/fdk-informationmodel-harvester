@@ -1,5 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.service
 
+import no.fdk.fdk_informationmodel_harvester.model.DuplicateIRI
 import no.fdk.fdk_informationmodel_harvester.model.FdkIdAndUri
 import no.fdk.fdk_informationmodel_harvester.model.HarvestReport
 import no.fdk.fdk_informationmodel_harvester.model.InformationModelMeta
@@ -14,12 +15,14 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
+import java.util.*
 
 @Tag("unit")
 class InformationModelServiceTest {
@@ -197,6 +200,154 @@ class InformationModelServiceTest {
                     firstValue
                 )
             }
+        }
+
+    }
+
+    @Nested
+    internal inner class RemoveDuplicates {
+
+        @Test
+        fun throwsExceptionWhenRemoveIRINotFoundInDB() {
+            whenever(repository.findById("https://123.no"))
+                .thenReturn(Optional.empty())
+            whenever(repository.findById(INFO_MODEL_DBO_1.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_1))
+
+            val duplicateIRI = DuplicateIRI(
+                iriToRemove = "https://123.no",
+                iriToRetain = INFO_MODEL_DBO_1.uri
+            )
+            assertThrows<ResponseStatusException> { modelService.removeDuplicates(listOf(duplicateIRI)) }
+        }
+
+        @Test
+        fun createsNewMetaWhenRetainIRINotFoundInDB() {
+            whenever(repository.findById(INFO_MODEL_DBO_0.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_0))
+            whenever(repository.findById(INFO_MODEL_DBO_1.uri))
+                .thenReturn(Optional.empty())
+
+            val duplicateIRI = DuplicateIRI(
+                iriToRemove = INFO_MODEL_DBO_0.uri,
+                iriToRetain = INFO_MODEL_DBO_1.uri
+            )
+            modelService.removeDuplicates(listOf(duplicateIRI))
+
+            argumentCaptor<List<InformationModelMeta>>().apply {
+                verify(repository, times(1)).saveAll(capture())
+                assertEquals(listOf(INFO_MODEL_DBO_0.copy(removed = true), INFO_MODEL_DBO_0.copy(uri = INFO_MODEL_DBO_1.uri)), firstValue)
+            }
+
+            verify(publisher, times(0)).send(any())
+        }
+
+        @Test
+        fun sendsRabbitReportWithRetainFdkIdWhenKeepingRemoveFdkId() {
+            whenever(repository.findById(INFO_MODEL_DBO_0.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_0))
+            whenever(repository.findById(INFO_MODEL_DBO_1.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_1))
+
+            val duplicateIRI = DuplicateIRI(
+                iriToRemove = INFO_MODEL_DBO_0.uri,
+                iriToRetain = INFO_MODEL_DBO_1.uri
+            )
+            modelService.removeDuplicates(listOf(duplicateIRI))
+
+            argumentCaptor<List<InformationModelMeta>>().apply {
+                verify(repository, times(1)).saveAll(capture())
+                assertEquals(listOf(
+                    INFO_MODEL_DBO_0.copy(removed = true),
+                    INFO_MODEL_DBO_0.copy(uri = INFO_MODEL_DBO_1.uri, isPartOf = INFO_MODEL_DBO_1.isPartOf)
+                ), firstValue)
+            }
+
+            val expectedReport = HarvestReport(
+                id = "duplicate-delete",
+                url = "https://fellesdatakatalog.digdir.no/duplicates",
+                harvestError = false,
+                startTime = "startTime",
+                endTime = "endTime",
+                removedResources = listOf(FdkIdAndUri(INFO_MODEL_DBO_1.fdkId, INFO_MODEL_DBO_1.uri))
+            )
+            argumentCaptor<List<HarvestReport>>().apply {
+                verify(publisher, times(1)).send(capture())
+
+                assertEquals(
+                    listOf(expectedReport.copy(
+                        startTime = firstValue.first().startTime,
+                        endTime = firstValue.first().endTime
+                    )),
+                    firstValue
+                )
+            }
+        }
+
+        @Test
+        fun sendsRabbitReportWithRemoveFdkIdWhenNotKeepingRemoveFdkId() {
+            whenever(repository.findById(INFO_MODEL_DBO_0.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_0))
+            whenever(repository.findById(INFO_MODEL_DBO_1.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_1))
+
+            val duplicateIRI = DuplicateIRI(
+                iriToRemove = INFO_MODEL_DBO_1.uri,
+                iriToRetain = INFO_MODEL_DBO_0.uri,
+                keepRemovedFdkId = false
+            )
+            modelService.removeDuplicates(listOf(duplicateIRI))
+
+            argumentCaptor<List<InformationModelMeta>>().apply {
+                verify(repository, times(1)).saveAll(capture())
+                assertEquals(listOf(
+                    INFO_MODEL_DBO_1.copy(removed = true),
+                    INFO_MODEL_DBO_0
+                ), firstValue)
+            }
+
+            val expectedReport = HarvestReport(
+                id = "duplicate-delete",
+                url = "https://fellesdatakatalog.digdir.no/duplicates",
+                harvestError = false,
+                startTime = "startTime",
+                endTime = "endTime",
+                removedResources = listOf(FdkIdAndUri(INFO_MODEL_DBO_1.fdkId, INFO_MODEL_DBO_1.uri))
+            )
+            argumentCaptor<List<HarvestReport>>().apply {
+                verify(publisher, times(1)).send(capture())
+
+                assertEquals(
+                    listOf(expectedReport.copy(
+                        startTime = firstValue.first().startTime,
+                        endTime = firstValue.first().endTime
+                    )),
+                    firstValue
+                )
+            }
+        }
+
+        @Test
+        fun throwsExceptionWhenTryingToReportAlreadyRemovedAsRemoved() {
+            whenever(repository.findById(INFO_MODEL_DBO_0.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_0.copy(removed = true)))
+            whenever(repository.findById(INFO_MODEL_DBO_1.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_1))
+
+            val duplicateIRI = DuplicateIRI(
+                iriToRemove = INFO_MODEL_DBO_0.uri,
+                iriToRetain = INFO_MODEL_DBO_1.uri,
+                keepRemovedFdkId = false
+            )
+
+            assertThrows<ResponseStatusException> { modelService.removeDuplicates(listOf(duplicateIRI)) }
+
+            whenever(repository.findById(INFO_MODEL_DBO_0.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_0))
+            whenever(repository.findById(INFO_MODEL_DBO_1.uri))
+                .thenReturn(Optional.of(INFO_MODEL_DBO_1.copy(removed = true)))
+
+            assertThrows<ResponseStatusException> { modelService.removeDuplicates(listOf(duplicateIRI.copy(keepRemovedFdkId = true))) }
         }
 
     }

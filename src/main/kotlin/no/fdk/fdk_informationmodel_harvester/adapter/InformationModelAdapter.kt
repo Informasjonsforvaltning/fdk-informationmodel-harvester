@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service
 import java.io.BufferedReader
 import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
 
 private const val TEN_MINUTES = 600000
 
