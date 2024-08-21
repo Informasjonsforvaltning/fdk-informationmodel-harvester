@@ -12,6 +12,12 @@ class TurtleRepository(private val gridFsTemplate: GridFsTemplate) {
         gridFsTemplate.store(content.byteInputStream(), filename)
     }
 
+    fun deleteAllByFilename(filenames: List<String>) {
+        filenames.forEach { filename ->
+            gridFsTemplate.delete(Query(Criteria.where("filename").`is`(filename)))
+        }
+    }
+
     fun readFileContent(filename: String): String? =
         gridFsTemplate.findOne(Query(Criteria.where("filename").`is`(filename)))
             ?.let { gridFsTemplate.getResource(it) }

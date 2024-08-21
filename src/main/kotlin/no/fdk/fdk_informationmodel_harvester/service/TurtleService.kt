@@ -41,6 +41,15 @@ class TurtleService (private val turtleRepository: TurtleRepository) {
     fun findUnionModel(withRecords: Boolean): String? =
         findOne(filenameUnion(withRecords))
 
+    fun deleteTurtleFiles(fdkId: String) {
+        turtleRepository.deleteAllByFilename(
+            listOf(
+                filenameInformationModel(fdkId, true),
+                filenameInformationModel(fdkId, false)
+            )
+        )
+    }
+
     private fun filenameCatalog(fdkId: String, withFDKRecords: Boolean): String =
         "$CATALOG_ID_PREFIX${if (withFDKRecords) "" else NO_RECORDS_ID_PREFIX}$fdkId"
 

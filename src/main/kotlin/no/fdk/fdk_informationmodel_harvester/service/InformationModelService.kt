@@ -108,4 +108,13 @@ class InformationModelService(
         }
     }
 
+    // Purges everything associated with a removed fdkID
+    fun purgeByFdkId(fdkId: String) {
+        informationModelRepository.findAllByFdkId(fdkId)
+            .also { infoModels -> if (infoModels.any { !it.removed }) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to purge files, information model with id $fdkId has not been removed") }
+            .run { informationModelRepository.deleteAll(this) }
+
+        turtleService.deleteTurtleFiles(fdkId)
+    }
+
 }

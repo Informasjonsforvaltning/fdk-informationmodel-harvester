@@ -6,6 +6,7 @@ import no.fdk.fdk_informationmodel_harvester.utils.ApiTestContext
 import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_DBO_0
 import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_DBO_1
 import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_ID_0
+import no.fdk.fdk_informationmodel_harvester.utils.INFO_MODEL_ID_1
 import no.fdk.fdk_informationmodel_harvester.utils.TestResponseReader
 import no.fdk.fdk_informationmodel_harvester.utils.apiGet
 import no.fdk.fdk_informationmodel_harvester.utils.authorizedRequest
@@ -165,6 +166,48 @@ class InformationModelTest : ApiTestContext() {
         }
     }
 
+    @Nested
+    internal inner class PurgeById {
 
+        @Test
+        fun unauthorizedForNoToken() {
+            val response = authorizedRequest("/informationmodels/removed", null, port, HttpMethod.DELETE)
+            assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
+        }
+
+        @Test
+        fun forbiddenWithNonSysAdminRole() {
+            val response = authorizedRequest(
+                "/informationmodels/removed",
+                JwtToken(Access.ORG_WRITE).toString(),
+                port,
+                HttpMethod.DELETE
+            )
+            assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
+        }
+
+        @Test
+        fun badRequestWhenNotAlreadyRemoved() {
+            val response = authorizedRequest(
+                "/informationmodels/$INFO_MODEL_ID_1",
+                JwtToken(Access.ROOT).toString(),
+                port,
+                HttpMethod.DELETE
+            )
+            assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
+        }
+
+        @Test
+        fun okWithSysAdminRole() {
+            val response = authorizedRequest(
+                "/informationmodels/removed",
+                JwtToken(Access.ROOT).toString(),
+                port,
+                HttpMethod.DELETE
+            )
+            assertEquals(HttpStatus.NO_CONTENT.value(), response["status"])
+        }
+
+    }
 
 }
