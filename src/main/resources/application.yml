@@ -6,7 +6,6 @@ logging:
   level.org.apache.jena: ERROR
 server:
   port: 8080
-  error.include-message: always
 fuseki:
   unionGraphUri: ${FDK_SPARQL_SERVICE_URI:http://fdk-sparql-service:8080}/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
 application:
