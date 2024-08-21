@@ -115,7 +115,7 @@ class InformationModelTest : ApiTestContext() {
         fun unauthorizedForNoToken() {
             val body = listOf(DuplicateIRI(iriToRemove = INFO_MODEL_DBO_0.uri, iriToRetain = INFO_MODEL_DBO_1.uri))
             val response = authorizedRequest(
-                "/informationmodels/duplicates",
+                "/informationmodels/remove-duplicates",
                 null,
                 port,
                 HttpMethod.POST,
@@ -128,7 +128,7 @@ class InformationModelTest : ApiTestContext() {
         fun forbiddenWithNonSysAdminRole() {
             val body = listOf(DuplicateIRI(iriToRemove = INFO_MODEL_DBO_0.uri, iriToRetain = INFO_MODEL_DBO_1.uri))
             val response = authorizedRequest(
-                "/informationmodels/duplicates",
+                "/informationmodels/remove-duplicates",
                 JwtToken(Access.ORG_WRITE).toString(),
                 port,
                 HttpMethod.POST,
@@ -142,7 +142,7 @@ class InformationModelTest : ApiTestContext() {
             val body = listOf(DuplicateIRI(iriToRemove = "https://123.no", iriToRetain = INFO_MODEL_DBO_1.uri))
             val response =
                 authorizedRequest(
-                    "/informationmodels/duplicates",
+                    "/informationmodels/remove-duplicates",
                     JwtToken(Access.ROOT).toString(),
                     port,
                     HttpMethod.POST,
@@ -155,7 +155,7 @@ class InformationModelTest : ApiTestContext() {
         fun okWithSysAdminRole() {
             val body = listOf(DuplicateIRI(iriToRemove = INFO_MODEL_DBO_0.uri, iriToRetain = INFO_MODEL_DBO_1.uri))
             val response = authorizedRequest(
-                "/informationmodels/duplicates",
+                "/informationmodels/remove-duplicates",
                 JwtToken(Access.ROOT).toString(),
                 port,
                 HttpMethod.POST,
