@@ -66,10 +66,10 @@ class InformationModelTest : ApiTestContext() {
         @Test
         fun unauthorizedForNoToken() {
             val response = authorizedRequest(
-                "/informationmodels/$INFO_MODEL_ID_0",
+                "/informationmodels/$INFO_MODEL_ID_0/remove",
                 null,
                 port,
-                HttpMethod.DELETE
+                HttpMethod.POST
             )
             assertEquals(HttpStatus.UNAUTHORIZED.value(), response["status"])
         }
@@ -77,10 +77,10 @@ class InformationModelTest : ApiTestContext() {
         @Test
         fun forbiddenWithNonSysAdminRole() {
             val response = authorizedRequest(
-                "/informationmodels/$INFO_MODEL_ID_0",
+                "/informationmodels/$INFO_MODEL_ID_0/remove",
                 JwtToken(Access.ORG_WRITE).toString(),
                 port,
-                HttpMethod.DELETE
+                HttpMethod.POST
             )
             assertEquals(HttpStatus.FORBIDDEN.value(), response["status"])
         }
@@ -88,10 +88,10 @@ class InformationModelTest : ApiTestContext() {
         @Test
         fun notFoundWhenIdNotInDB() {
             val response = authorizedRequest(
-                "/informationmodels/123",
+                "/informationmodels/123/remove",
                 JwtToken(Access.ROOT).toString(),
                 port,
-                HttpMethod.DELETE
+                HttpMethod.POST
             )
             assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
         }
@@ -99,12 +99,12 @@ class InformationModelTest : ApiTestContext() {
         @Test
         fun okWithSysAdminRole() {
             val response = authorizedRequest(
-                "/informationmodels/$INFO_MODEL_ID_0",
+                "/informationmodels/$INFO_MODEL_ID_0/remove",
                 JwtToken(Access.ROOT).toString(),
                 port,
-                HttpMethod.DELETE
+                HttpMethod.POST
             )
-            assertEquals(HttpStatus.NO_CONTENT.value(), response["status"])
+            assertEquals(HttpStatus.OK.value(), response["status"])
         }
     }
 

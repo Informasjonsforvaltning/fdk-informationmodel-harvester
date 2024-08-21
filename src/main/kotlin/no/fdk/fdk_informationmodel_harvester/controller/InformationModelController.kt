@@ -45,14 +45,14 @@ open class InformationModelController(
         }
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}/remove")
     fun removeInformationModelById(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable id: String
     ): ResponseEntity<Void> =
         if (endpointPermissions.hasAdminPermission(jwt)) {
             informationModelService.removeInformationModel(id)
-            ResponseEntity(HttpStatus.NO_CONTENT)
+            ResponseEntity(HttpStatus.OK)
         } else ResponseEntity(HttpStatus.FORBIDDEN)
 
     @PostMapping("/duplicates")
