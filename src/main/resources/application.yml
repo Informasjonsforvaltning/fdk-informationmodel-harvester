@@ -6,8 +6,6 @@ logging:
   level.org.apache.jena: ERROR
 server:
   port: 8080
-fuseki:
-  unionGraphUri: ${FDK_SPARQL_SERVICE_URI:http://fdk-sparql-service:8080}/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
 application:
   informationModelUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/informationmodels
   catalogUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/catalogs
@@ -23,7 +21,15 @@ spring:
     port: 5672
     username: ${RABBIT_USERNAME}
     password: ${RABBIT_PASSWORD}
-  data.mongodb.uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/informationModelHarvester?authSource=admin&authMechanism=SCRAM-SHA-1
+  data.mongodb:
+    host: ${MONGODB_HOST}
+    username: ${MONGODB_USER}
+    password: ${MONGODB_PASSWORD}
+    authentication-database: ${MONGODB_AUTH}
+    replica-set-name: ${MONGODB_REPLICASET}
+    port: 27017
+    database: informationModelHarvester
+    auto-index-creation: true
 management:
   endpoints:
     web:
@@ -43,9 +49,12 @@ spring:
     port: 5672
     username: admin
     password: admin
-  data.mongodb.uri: mongodb://admin:admin@localhost:27017/informationModelHarvester?authSource=admin&authMechanism=SCRAM-SHA-1
-fuseki:
-  unionGraphUri: http://localhost:3030/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no
+  data.mongodb:
+    host: localhost
+    username: admin
+    password: admin
+    authentication-database: admin
+    replica-set-name: null
 application:
   informationModelUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/informationmodels
   catalogUri: https://informationmodels.staging.fellesdatakatalog.digdir.no/catalogs
@@ -64,10 +73,15 @@ spring:
     port: 5001
     username: admin
     password: admin
+  data.mongodb:
+    host: localhost
+    username: testuser
+    password: testpassword
+    authentication-database: admin
+    replica-set-name: null
 application:
   informationModelUri: http://localhost:5050/informationmodels
   catalogUri: http://localhost:5050/catalogs
   harvestAdminRootUrl: http://localhost:5050
   harvestAdminApiKey: test-key
   cors.originPatterns: "*"
-fuseki.unionGraphUri: http://localhost:5050/fuseki/harvested?graph=https://informationmodels.fellesdatakatalog.digdir.no

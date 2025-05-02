@@ -4,7 +4,6 @@ import no.fdk.fdk_informationmodel_harvester.rdf.safeParseRDF
 import no.fdk.fdk_informationmodel_harvester.service.ungzip
 import org.apache.jena.riot.Lang
 import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection = "informationModelMeta")
@@ -12,7 +11,6 @@ data class InformationModelMeta (
     @Id
     val uri: String,
 
-    @Indexed(unique = true)
     val fdkId: String,
 
     val isPartOf: String,
@@ -27,7 +25,6 @@ data class CatalogMeta (
         @Id
         val uri: String,
 
-        @Indexed(unique = true)
         val fdkId: String,
 
         val issued: Long,
