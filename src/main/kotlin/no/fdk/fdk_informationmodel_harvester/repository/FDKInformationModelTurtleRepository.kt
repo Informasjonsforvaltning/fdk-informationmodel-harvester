@@ -1,0 +1,8 @@
+package no.fdk.fdk_informationmodel_harvester.repository
+
+import no.fdk.fdk_informationmodel_harvester.model.FDKInformationModelTurtle
+import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.stereotype.Repository
+
+@Repository
+interface FDKInformationModelTurtleRepository : MongoRepository<FDKInformationModelTurtle, String>

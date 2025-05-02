@@ -1,5 +1,7 @@
 package no.fdk.fdk_informationmodel_harvester.utils
 
+import no.fdk.fdk_informationmodel_harvester.utils.jwk.Access
+import no.fdk.fdk_informationmodel_harvester.utils.jwk.JwtToken
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
 import org.springframework.boot.test.util.TestPropertyValues
@@ -18,12 +20,8 @@ abstract class ApiTestContext {
     var port: Int = 0
 
     @BeforeEach
-    fun waitForHarvest() {
-        var apiReady = harvestCompleted(port)
-        while (!apiReady) {
-            Thread.sleep(1000)
-            apiReady = harvestCompleted(port)
-        }
+    fun rerunHarvest() {
+        authorizedRequest("/update/meta", JwtToken(Access.ROOT).toString(), port)
     }
 
     internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {

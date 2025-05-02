@@ -80,7 +80,7 @@ class InformationModelHarvester(
         }
 
     private fun updateIfChanged(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport {
-        val dbData = turtleService.findOne(sourceURL)
+        val dbData = turtleService.findHarvestSource(sourceURL)
             ?.let { safeParseRDF(it, Lang.TURTLE) }
 
         return if (!forceUpdate && dbData != null && harvested.isIsomorphicWith(dbData)) {
@@ -94,7 +94,7 @@ class InformationModelHarvester(
             )
         } else {
             LOGGER.info("Changes detected, saving data from $sourceURL and updating FDK meta data")
-            turtleService.saveOne(filename = sourceURL, turtle = harvested.createRDFResponse(Lang.TURTLE))
+            turtleService.saveAsHarvestSource(sourceURL, harvested.createRDFResponse(Lang.TURTLE))
 
             updateDB(harvested, sourceId, sourceURL, harvestDate, forceUpdate)
         }
