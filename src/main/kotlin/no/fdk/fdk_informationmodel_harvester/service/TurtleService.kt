@@ -83,31 +83,31 @@ class TurtleService (
         fdkInformationModelTurtleRepository.deleteById(fdkId)
     }
 
-    private fun createInformationModelTurtleDBO(id: String, turtle: String): InformationModelTurtle =
+    fun createInformationModelTurtleDBO(id: String, turtle: String): InformationModelTurtle =
         InformationModelTurtle(
             id = id,
             turtle = gzip(turtle)
         )
 
-    private fun createFDKInformationModelTurtleDBO(id: String, turtle: String): FDKInformationModelTurtle =
+    fun createFDKInformationModelTurtleDBO(id: String, turtle: String): FDKInformationModelTurtle =
         FDKInformationModelTurtle(
             id = id,
             turtle = gzip(turtle)
         )
 
-    private fun createCatalogTurtleDBO(id: String, turtle: String): CatalogTurtle =
+    fun createCatalogTurtleDBO(id: String, turtle: String): CatalogTurtle =
         CatalogTurtle(
             id = id,
             turtle = gzip(turtle)
         )
 
-    private fun createFDKCatalogTurtleDBO(id: String, turtle: String): FDKCatalogTurtle =
+    fun createFDKCatalogTurtleDBO(id: String, turtle: String): FDKCatalogTurtle =
         FDKCatalogTurtle(
             id = id,
             turtle = gzip(turtle)
         )
 
-    private fun createHarvestSourceTurtleDBO(uri: String, turtle: String): HarvestSourceTurtle =
+    fun createHarvestSourceTurtleDBO(uri: String, turtle: String): HarvestSourceTurtle =
         HarvestSourceTurtle(
             id = uri,
             turtle = gzip(turtle)
