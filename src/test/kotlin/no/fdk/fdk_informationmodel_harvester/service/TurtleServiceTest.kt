@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 @Tag("unit")
 class TurtleServiceTest {
@@ -51,6 +53,8 @@ class TurtleServiceTest {
             )
 
             assertEquals(harvestSourceTurtle, result)
+            assertEquals(harvestSourceTurtle.hashCode(), result.hashCode())
+            assertTrue(harvestSourceTurtle == result)
         }
 
         @Test
@@ -66,6 +70,8 @@ class TurtleServiceTest {
             )
 
             assertNotEquals(harvestSourceTurtle, result)
+            assertNotEquals(harvestSourceTurtle.hashCode(), result.hashCode())
+            assertFalse(harvestSourceTurtle == result)
         }
 
         @Test
@@ -81,6 +87,8 @@ class TurtleServiceTest {
             )
 
             assertEquals(catalogTurtle, result)
+            assertEquals(catalogTurtle.hashCode(), result.hashCode())
+            assertTrue(catalogTurtle == result)
         }
 
         @Test
@@ -96,6 +104,8 @@ class TurtleServiceTest {
             )
 
             assertNotEquals(catalogTurtle, result)
+            assertNotEquals(catalogTurtle.hashCode(), result.hashCode())
+            assertFalse(catalogTurtle == result)
         }
 
         @Test
@@ -111,6 +121,8 @@ class TurtleServiceTest {
             )
 
             assertEquals(fdkCatalogTurtle, result)
+            assertEquals(fdkCatalogTurtle.hashCode(), result.hashCode())
+            assertTrue(fdkCatalogTurtle == result)
         }
 
         @Test
@@ -126,6 +138,8 @@ class TurtleServiceTest {
             )
 
             assertNotEquals(fdkCatalogTurtle, result)
+            assertNotEquals(fdkCatalogTurtle.hashCode(), result.hashCode())
+            assertFalse(fdkCatalogTurtle == result)
         }
 
         @Test
@@ -141,6 +155,8 @@ class TurtleServiceTest {
             )
 
             assertEquals(informationModelTurtle, result)
+            assertEquals(informationModelTurtle.hashCode(), result.hashCode())
+            assertTrue(informationModelTurtle == result)
         }
 
         @Test
@@ -156,6 +172,8 @@ class TurtleServiceTest {
             )
 
             assertNotEquals(informationModelTurtle, result)
+            assertNotEquals(informationModelTurtle.hashCode(), result.hashCode())
+            assertFalse(informationModelTurtle == result)
         }
 
         @Test
@@ -171,6 +189,8 @@ class TurtleServiceTest {
             )
 
             assertEquals(fdkInformationModelTurtle, result)
+            assertEquals(fdkInformationModelTurtle.hashCode(), result.hashCode())
+            assertTrue(fdkInformationModelTurtle == result)
         }
 
         @Test
@@ -186,6 +206,8 @@ class TurtleServiceTest {
             )
 
             assertNotEquals(fdkInformationModelTurtle, result)
+            assertNotEquals(fdkInformationModelTurtle.hashCode(), result.hashCode())
+            assertFalse(fdkInformationModelTurtle == result)
         }
 
     }
