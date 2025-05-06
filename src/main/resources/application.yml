@@ -7,15 +7,15 @@ logging:
 server:
   port: 8080
 application:
-  informationModelUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/informationmodels
-  catalogUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI:https://informationmodels.staging.fellesdatakatalog.digdir.no}/catalogs
-  harvestAdminRootUrl: ${HARVEST_ADMIN_ROOT_URL:http://new-harvest-admin:8080}
+  informationModelUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI}/informationmodels
+  catalogUri: ${FDK_INFORMATIONMODEL_HARVESTER_URI}/catalogs
+  harvestAdminRootUrl: ${HARVEST_ADMIN_ROOT_URL}
   harvestAdminApiKey: ${ADMIN_API_KEY}
   cors.originPatterns: "${CORS_ORIGIN_PATTERNS}"
 spring:
   security.oauth2.resourceserver.jwt:
-    jwk-set-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk/protocol/openid-connect/certs
-    issuer-uri: ${SSO_HOST:https://sso.staging.fellesdatakatalog.digdir.no}/auth/realms/fdk
+    jwk-set-uri: ${SSO_HOST}/auth/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: ${SSO_HOST}/auth/realms/fdk
   rabbitmq:
     host: rabbitmq
     port: 5672
@@ -44,6 +44,9 @@ management:
 ---
 spring:
   config.activate.on-profile: develop
+  security.oauth2.resourceserver.jwt:
+    jwk-set-uri: https://sso.staging.fellesdatakatalog.digdir.no/auth/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: https://sso.staging.fellesdatakatalog.digdir.no/auth/realms/fdk
   rabbitmq:
     host: 127.0.0.1
     port: 5672
