@@ -87,22 +87,6 @@ fun authorizedRequest(
     }
 }
 
-fun harvestCompleted(port: Int): Boolean {
-    return try {
-        val connection = URL("http://localhost:$port/count").openConnection() as HttpURLConnection
-        connection.connect()
-
-        if (isOK(connection.responseCode)) {
-            val responseBody = connection.inputStream.bufferedReader().use(BufferedReader::readText)
-            return responseBody.toInt() > 0
-        } else {
-            false
-        }
-    } catch (e: Exception) {
-        false
-    }
-}
-
 private fun isOK(response: Int?): Boolean =
     if (response == null) false
     else HttpStatus.resolve(response)?.is2xxSuccessful == true

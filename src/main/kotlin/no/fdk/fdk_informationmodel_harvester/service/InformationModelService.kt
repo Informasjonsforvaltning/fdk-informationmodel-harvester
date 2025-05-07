@@ -23,7 +23,7 @@ class InformationModelService(
 ) {
 
     fun getAll(returnType: Lang, includeFDKCatalogRecords: Boolean): String =
-        turtleService.findUnionModel(includeFDKCatalogRecords)
+        turtleService.findCatalogUnion(includeFDKCatalogRecords)
             ?.let {
                 if (returnType == Lang.TURTLE) it
                 else parseRDFResponse(it, Lang.TURTLE).createRDFResponse(returnType)

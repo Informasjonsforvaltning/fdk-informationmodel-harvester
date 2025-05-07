@@ -138,7 +138,7 @@ class UpdateServiceTest {
             val expectedNoRecords = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
 
             argumentCaptor<String, Boolean>().apply {
-                verify(turtleService, times(2)).saveUnionModel(first.capture(), second.capture())
+                verify(turtleService, times(2)).saveAsCatalogUnion(first.capture(), second.capture())
                 assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.firstValue, Lang.TURTLE), expectedWithRecords, "updateUnionModel-withRecords"))
                 assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.secondValue, Lang.TURTLE), expectedNoRecords, "updateUnionModel-noRecords"))
                 assertEquals(listOf(true, false), second.allValues)

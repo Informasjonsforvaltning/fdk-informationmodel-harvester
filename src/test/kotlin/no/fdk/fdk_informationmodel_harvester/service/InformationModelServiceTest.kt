@@ -38,9 +38,9 @@ class InformationModelServiceTest {
 
         @Test
         fun responseIsometricWithEmptyModelForEmptyDB() {
-            whenever(turtleService.findUnionModel(withRecords = true))
+            whenever(turtleService.findCatalogUnion(withRecords = true))
                 .thenReturn(null)
-            whenever(turtleService.findUnionModel(withRecords = false))
+            whenever(turtleService.findCatalogUnion(withRecords = false))
                 .thenReturn(null)
 
             val expected = responseReader.parseResponse("", "TURTLE")
@@ -54,7 +54,7 @@ class InformationModelServiceTest {
 
         @Test
         fun getAllHandlesTurtleAndOtherRDF() {
-            whenever(turtleService.findUnionModel(true))
+            whenever(turtleService.findCatalogUnion(true))
                 .thenReturn(javaClass.classLoader.getResource("all_catalogs.ttl")!!.readText())
 
             val expected = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
@@ -70,7 +70,7 @@ class InformationModelServiceTest {
 
         @Test
         fun getAllHarvestedHandlesTurtleAndOtherRDF() {
-            whenever(turtleService.findUnionModel(false))
+            whenever(turtleService.findCatalogUnion(false))
                 .thenReturn(javaClass.classLoader.getResource("no_meta_all_catalogs.ttl")!!.readText())
 
             val expected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")

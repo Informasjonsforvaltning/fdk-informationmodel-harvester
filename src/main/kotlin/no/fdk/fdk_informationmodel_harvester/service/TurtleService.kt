@@ -1,74 +1,129 @@
 package no.fdk.fdk_informationmodel_harvester.service
 
-import no.fdk.fdk_informationmodel_harvester.repository.TurtleRepository
+import no.fdk.fdk_informationmodel_harvester.model.CatalogTurtle
+import no.fdk.fdk_informationmodel_harvester.model.FDKCatalogTurtle
+import no.fdk.fdk_informationmodel_harvester.model.FDKInformationModelTurtle
+import no.fdk.fdk_informationmodel_harvester.model.HarvestSourceTurtle
+import no.fdk.fdk_informationmodel_harvester.model.InformationModelTurtle
+import no.fdk.fdk_informationmodel_harvester.repository.CatalogTurtleRepository
+import no.fdk.fdk_informationmodel_harvester.repository.FDKCatalogTurtleRepository
+import no.fdk.fdk_informationmodel_harvester.repository.FDKInformationModelTurtleRepository
+import no.fdk.fdk_informationmodel_harvester.repository.HarvestSourceTurtleRepository
+import no.fdk.fdk_informationmodel_harvester.repository.InformationModelTurtleRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.io.ByteArrayOutputStream
 import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
-
-private const val NO_RECORDS_ID_PREFIX = "no-records-"
-private const val CATALOG_ID_PREFIX = "catalog-"
-private const val INFORMATION_MODEL_ID_PREFIX = "informationmodel-"
-private const val UNION_ID = "information-model-catalogs-union-graph"
+private const val UNION_ID = "union-graph"
 
 @Service
-class TurtleService (private val turtleRepository: TurtleRepository) {
+class TurtleService (
+    private val harvestSourceTurtleRepository: HarvestSourceTurtleRepository,
+    private val catalogTurtleRepository: CatalogTurtleRepository,
+    private val fdkCatalogTurtleRepository: FDKCatalogTurtleRepository,
+    private val informationModelTurtleRepository: InformationModelTurtleRepository,
+    private val fdkInformationModelTurtleRepository: FDKInformationModelTurtleRepository
+) {
 
-    fun saveOne(filename: String, turtle: String) =
-        turtleRepository.saveFile(content = gzip(turtle), filename)
+    fun saveAsCatalogUnion(turtle: String, withRecords: Boolean) {
+        if (withRecords) fdkCatalogTurtleRepository.save(createFDKCatalogTurtleDBO(UNION_ID, turtle))
+        else catalogTurtleRepository.save(createCatalogTurtleDBO(UNION_ID, turtle))
+    }
 
-    fun findOne(filename: String): String? =
-        turtleRepository.readFileContent(filename)
+    fun findCatalogUnion(withRecords: Boolean): String? =
+        if (withRecords) fdkCatalogTurtleRepository.findByIdOrNull(UNION_ID)
+            ?.turtle
+            ?.let { ungzip(it) }
+        else catalogTurtleRepository.findByIdOrNull(UNION_ID)
+            ?.turtle
             ?.let { ungzip(it) }
 
-    fun saveCatalog(fdkId: String, turtle: String, withRecords: Boolean)  =
-        saveOne(filename = filenameCatalog(fdkId, withRecords), turtle)
+    fun saveCatalog(fdkId: String, turtle: String, withRecords: Boolean) {
+        if (withRecords) fdkCatalogTurtleRepository.save(createFDKCatalogTurtleDBO(fdkId, turtle))
+        else catalogTurtleRepository.save(createCatalogTurtleDBO(fdkId, turtle))
+    }
 
     fun findCatalog(fdkId: String, withRecords: Boolean): String? =
-        findOne(filenameCatalog(fdkId, withRecords))
+        if (withRecords) fdkCatalogTurtleRepository.findByIdOrNull(fdkId)
+            ?.turtle
+            ?.let { ungzip(it) }
+        else catalogTurtleRepository.findByIdOrNull(fdkId)
+            ?.turtle
+            ?.let { ungzip(it) }
 
-    fun saveInformationModel(fdkId: String, turtle: String, withRecords: Boolean) =
-        saveOne(filename = filenameInformationModel(fdkId, withRecords), turtle)
+    fun saveInformationModel(fdkId: String, turtle: String, withRecords: Boolean) {
+        if (withRecords) fdkInformationModelTurtleRepository
+            .save(createFDKInformationModelTurtleDBO(fdkId, turtle))
+        else informationModelTurtleRepository
+            .save(createInformationModelTurtleDBO(fdkId, turtle))
+    }
 
     fun findInformationModel(fdkId: String, withRecords: Boolean): String? =
-        findOne(filenameInformationModel(fdkId, withRecords))
+        if (withRecords) fdkInformationModelTurtleRepository.findByIdOrNull(fdkId)
+            ?.turtle
+            ?.let { ungzip(it) }
+        else informationModelTurtleRepository.findByIdOrNull(fdkId)
+            ?.turtle
+            ?.let { ungzip(it) }
 
-    fun saveUnionModel(turtle: String, withRecords: Boolean) =
-        saveOne(filename = filenameUnion(withRecords), turtle)
+    fun saveAsHarvestSource(uri: String, turtle: String) {
+        harvestSourceTurtleRepository.save(createHarvestSourceTurtleDBO(uri, turtle))
+    }
 
-    fun findUnionModel(withRecords: Boolean): String? =
-        findOne(filenameUnion(withRecords))
+    fun findHarvestSource(uri: String): String? =
+        harvestSourceTurtleRepository.findByIdOrNull(uri)
+            ?.turtle
+            ?.let { ungzip(it) }
 
     fun deleteTurtleFiles(fdkId: String) {
-        turtleRepository.deleteAllByFilename(
-            listOf(
-                filenameInformationModel(fdkId, true),
-                filenameInformationModel(fdkId, false)
-            )
+        informationModelTurtleRepository.deleteById(fdkId)
+        fdkInformationModelTurtleRepository.deleteById(fdkId)
+    }
+
+    fun createInformationModelTurtleDBO(id: String, turtle: String): InformationModelTurtle =
+        InformationModelTurtle(
+            id = id,
+            turtle = gzip(turtle)
         )
-    }
 
-    private fun filenameCatalog(fdkId: String, withFDKRecords: Boolean): String =
-        "$CATALOG_ID_PREFIX${if (withFDKRecords) "" else NO_RECORDS_ID_PREFIX}$fdkId"
+    fun createFDKInformationModelTurtleDBO(id: String, turtle: String): FDKInformationModelTurtle =
+        FDKInformationModelTurtle(
+            id = id,
+            turtle = gzip(turtle)
+        )
 
-    private fun filenameInformationModel(fdkId: String, withFDKRecords: Boolean): String =
-        "$INFORMATION_MODEL_ID_PREFIX${if (withFDKRecords) "" else NO_RECORDS_ID_PREFIX}$fdkId"
+    fun createCatalogTurtleDBO(id: String, turtle: String): CatalogTurtle =
+        CatalogTurtle(
+            id = id,
+            turtle = gzip(turtle)
+        )
 
-    private fun filenameUnion(withFDKRecords: Boolean): String =
-        "${if (withFDKRecords) "" else NO_RECORDS_ID_PREFIX}$UNION_ID"
+    fun createFDKCatalogTurtleDBO(id: String, turtle: String): FDKCatalogTurtle =
+        FDKCatalogTurtle(
+            id = id,
+            turtle = gzip(turtle)
+        )
 
-    private fun gzip(content: String): String {
-        val bos = ByteArrayOutputStream()
-        GZIPOutputStream(bos).bufferedWriter(Charsets.UTF_8).use { it.write(content) }
-        return Base64.getEncoder().encodeToString(bos.toByteArray())
-    }
+    fun createHarvestSourceTurtleDBO(uri: String, turtle: String): HarvestSourceTurtle =
+        HarvestSourceTurtle(
+            id = uri,
+            turtle = gzip(turtle)
+        )
 
-    private fun ungzip(base64Content: String): String {
-        val content = Base64.getDecoder().decode(base64Content)
-        return GZIPInputStream(content.inputStream())
-            .bufferedReader(Charsets.UTF_8)
-            .use { it.readText() }
-    }
+}
+
+fun gzip(content: String): String {
+    val bos = ByteArrayOutputStream()
+    GZIPOutputStream(bos).bufferedWriter(Charsets.UTF_8).use { it.write(content) }
+    return Base64.getEncoder().encodeToString(bos.toByteArray())
+}
+
+fun ungzip(base64Content: String): String {
+    val content = Base64.getDecoder().decode(base64Content)
+    return GZIPInputStream(content.inputStream())
+        .bufferedReader(Charsets.UTF_8)
+        .use { it.readText() }
 }

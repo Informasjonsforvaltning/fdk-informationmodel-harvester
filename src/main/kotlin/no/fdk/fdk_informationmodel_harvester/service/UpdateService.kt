@@ -38,8 +38,8 @@ class UpdateService(
                     ?.run { unionNoRecords.add(this) }
             }
 
-        turtleService.saveUnionModel(unionWithRecords.createRDFResponse(Lang.TURTLE), withRecords = true)
-        turtleService.saveUnionModel(unionNoRecords.createRDFResponse(Lang.TURTLE), withRecords = false)
+        turtleService.saveAsCatalogUnion(unionWithRecords.createRDFResponse(Lang.TURTLE), withRecords = true)
+        turtleService.saveAsCatalogUnion(unionNoRecords.createRDFResponse(Lang.TURTLE), withRecords = false)
     }
 
     fun updateMetaData() {
