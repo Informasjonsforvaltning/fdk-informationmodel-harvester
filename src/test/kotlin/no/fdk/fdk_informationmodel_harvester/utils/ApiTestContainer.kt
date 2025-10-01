@@ -1,5 +1,7 @@
 package no.fdk.fdk_informationmodel_harvester.utils
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import no.fdk.fdk_informationmodel_harvester.utils.jwk.Access
 import no.fdk.fdk_informationmodel_harvester.utils.jwk.JwtToken
 import org.junit.jupiter.api.BeforeEach
@@ -22,6 +24,9 @@ abstract class ApiTestContext {
     @BeforeEach
     fun rerunHarvest() {
         authorizedRequest("/update/meta", JwtToken(Access.ROOT).toString(), port)
+        runBlocking {
+            delay(2000)
+        }
     }
 
     internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
