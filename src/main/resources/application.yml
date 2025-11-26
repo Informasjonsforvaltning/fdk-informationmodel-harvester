@@ -14,8 +14,8 @@ application:
   cors.originPatterns: "${CORS_ORIGIN_PATTERNS}"
 spring:
   security.oauth2.resourceserver.jwt:
-    jwk-set-uri: ${SSO_HOST}/auth/realms/fdk/protocol/openid-connect/certs
-    issuer-uri: ${SSO_HOST}/auth/realms/fdk
+    jwk-set-uri: ${KEYCLOAK_OIDC_ISSUER}/protocol/openid-connect/certs
+    issuer-uri: ${KEYCLOAK_OIDC_ISSUER}
   rabbitmq:
     host: rabbitmq
     port: 5672
@@ -45,8 +45,8 @@ management:
 spring:
   config.activate.on-profile: develop
   security.oauth2.resourceserver.jwt:
-    jwk-set-uri: https://sso.staging.fellesdatakatalog.digdir.no/auth/realms/fdk/protocol/openid-connect/certs
-    issuer-uri: https://sso.staging.fellesdatakatalog.digdir.no/auth/realms/fdk
+    jwk-set-uri: https://auth.staging.fellesdatakatalog.digdir.no/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: https://auth.staging.fellesdatakatalog.digdir.no/realms/fdk
   rabbitmq:
     host: 127.0.0.1
     port: 5672
@@ -69,8 +69,8 @@ application:
 spring:
   config.activate.on-profile: contract-test
   security.oauth2.resourceserver.jwt:
-    jwk-set-uri: http://localhost:5050/auth/realms/fdk/protocol/openid-connect/certs
-    issuer-uri: http://localhost:5050/auth/realms/fdk
+    jwk-set-uri: http://localhost:5050/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: http://localhost:5050/realms/fdk
   rabbitmq:
     host: localhost
     port: 5001
