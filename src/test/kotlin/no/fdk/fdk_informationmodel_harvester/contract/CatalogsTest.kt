@@ -46,24 +46,4 @@ class CatalogsTest: ApiTestContext() {
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response["status"])
     }
 
-    @Test
-    fun findAll() {
-        val response = apiGet("/catalogs?catalogrecords=true", "text/turtle", port)
-        Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
-
-        val notExpected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
-        val responseModel = responseReader.parseResponse(response["body"] as String, "TURTLE")
-        assertFalse(notExpected.isIsomorphicWith(responseModel))
-    }
-
-    @Test
-    fun findAllExcludeRecords() {
-        val response = apiGet("/catalogs", "application/trix", port)
-        Assumptions.assumeTrue(HttpStatus.OK.value() == response["status"])
-
-        val expected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
-        val responseModel = responseReader.parseResponse(response["body"] as String, Lang.TRIX.name)
-        assertTrue(expected.isIsomorphicWith(responseModel))
-    }
-
 }

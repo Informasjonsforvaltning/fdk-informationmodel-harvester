@@ -42,11 +42,6 @@ open class CatalogsController(private val informationModelService: InformationMo
     fun getCatalogs(
         @RequestHeader(HttpHeaders.ACCEPT) accept: String?,
         @RequestParam(value = "catalogrecords", required = false) catalogrecords: Boolean = false
-    ): ResponseEntity<String> {
-        LOGGER.info("get all InformationModel catalogs")
-        val returnType = jenaTypeFromAcceptHeader(accept)
-
-        return if (returnType == Lang.RDFNULL) ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
-        else ResponseEntity(informationModelService.getAll(returnType ?: Lang.TURTLE, catalogrecords), HttpStatus.OK)
-    }
+    ): ResponseEntity<String> =
+        ResponseEntity(HttpStatus.MOVED_PERMANENTLY)
 }

@@ -8,7 +8,6 @@ import no.fdk.fdk_informationmodel_harvester.rabbit.RabbitMQPublisher
 import no.fdk.fdk_informationmodel_harvester.rdf.createRDFResponse
 import no.fdk.fdk_informationmodel_harvester.rdf.parseRDFResponse
 import no.fdk.fdk_informationmodel_harvester.repository.InformationModelRepository
-import org.apache.jena.rdf.model.ModelFactory
 import org.apache.jena.riot.Lang
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
@@ -21,13 +20,6 @@ class InformationModelService(
     private val rabbitPublisher: RabbitMQPublisher,
     private val turtleService: TurtleService
 ) {
-
-    fun getAll(returnType: Lang, includeFDKCatalogRecords: Boolean): String =
-        turtleService.findCatalogUnion(includeFDKCatalogRecords)
-            ?.let {
-                if (returnType == Lang.TURTLE) it
-                else parseRDFResponse(it, Lang.TURTLE).createRDFResponse(returnType)
-        } ?: ModelFactory.createDefaultModel().createRDFResponse(returnType)
 
     fun getInformationModelById(id: String, returnType: Lang, includeFDKCatalogRecords: Boolean): String? =
         turtleService.findInformationModel(id, includeFDKCatalogRecords)

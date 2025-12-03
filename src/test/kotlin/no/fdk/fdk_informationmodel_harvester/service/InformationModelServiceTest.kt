@@ -34,59 +34,6 @@ class InformationModelServiceTest {
     private val responseReader = TestResponseReader()
 
     @Nested
-    internal inner class AllCatalogs {
-
-        @Test
-        fun responseIsometricWithEmptyModelForEmptyDB() {
-            whenever(turtleService.findCatalogUnion(withRecords = true))
-                .thenReturn(null)
-            whenever(turtleService.findCatalogUnion(withRecords = false))
-                .thenReturn(null)
-
-            val expected = responseReader.parseResponse("", "TURTLE")
-
-            val responseTurtle = modelService.getAll(Lang.TURTLE, true)
-            val responseJsonLD = modelService.getAll(Lang.JSONLD, false)
-
-            assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseTurtle, "TURTLE")))
-            assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseJsonLD, "JSON-LD")))
-        }
-
-        @Test
-        fun getAllHandlesTurtleAndOtherRDF() {
-            whenever(turtleService.findCatalogUnion(true))
-                .thenReturn(javaClass.classLoader.getResource("all_catalogs.ttl")!!.readText())
-
-            val expected = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
-
-            val responseTurtle = modelService.getAll(Lang.TURTLE, true)
-            val responseN3 = modelService.getAll(Lang.N3, true)
-            val responseNTriples = modelService.getAll(Lang.NTRIPLES, true)
-
-            assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseTurtle, "TURTLE")))
-            assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseN3, "N3")))
-            assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseNTriples, "N-TRIPLES")))
-        }
-
-        @Test
-        fun getAllHarvestedHandlesTurtleAndOtherRDF() {
-            whenever(turtleService.findCatalogUnion(false))
-                .thenReturn(javaClass.classLoader.getResource("no_meta_all_catalogs.ttl")!!.readText())
-
-            val expected = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
-
-            val responseTurtle = modelService.getAll(Lang.TURTLE, false)
-            val responseN3 = modelService.getAll(Lang.N3, false)
-            val responseNTriples = modelService.getAll(Lang.NTRIPLES, false)
-
-            assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseTurtle, "TURTLE")))
-            assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseN3, "N3")))
-            assertTrue(expected.isIsomorphicWith(responseReader.parseResponse(responseNTriples, "N-TRIPLES")))
-        }
-
-    }
-
-    @Nested
     internal inner class CatalogById {
 
         @Test

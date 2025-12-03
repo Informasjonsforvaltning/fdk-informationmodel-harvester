@@ -115,34 +115,4 @@ class UpdateServiceTest {
         }
 
     }
-
-    @Nested
-    internal inner class UpdateUnionModel {
-
-        @Test
-        fun updateUnionModel() {
-            whenever(catalogRepository.findAll())
-                .thenReturn(listOf(CATALOG_DBO_0, CATALOG_DBO_1))
-            whenever(turtleService.findCatalog(CATALOG_ID_0, false))
-                .thenReturn(responseReader.readFile("no_meta_catalog_0.ttl"))
-            whenever(turtleService.findCatalog(CATALOG_ID_0, true))
-                .thenReturn(responseReader.readFile("catalog_0.ttl"))
-            whenever(turtleService.findCatalog(CATALOG_ID_1, true))
-                .thenReturn(responseReader.readFile("catalog_1.ttl"))
-            whenever(turtleService.findCatalog(CATALOG_ID_1, false))
-                .thenReturn(responseReader.readFile("harvest_response_1.ttl"))
-
-            updateService.updateUnionModel()
-
-            val expectedWithRecords = responseReader.parseFile("all_catalogs.ttl", "TURTLE")
-            val expectedNoRecords = responseReader.parseFile("no_meta_all_catalogs.ttl", "TURTLE")
-
-            argumentCaptor<String, Boolean>().apply {
-                verify(turtleService, times(2)).saveAsCatalogUnion(first.capture(), second.capture())
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.firstValue, Lang.TURTLE), expectedWithRecords, "updateUnionModel-withRecords"))
-                assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(first.secondValue, Lang.TURTLE), expectedNoRecords, "updateUnionModel-noRecords"))
-                assertEquals(listOf(true, false), second.allValues)
-            }
-        }
-    }
 }
