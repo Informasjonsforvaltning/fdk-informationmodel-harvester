@@ -36,6 +36,8 @@ class InformationModelHarvester(
                             HarvestException(source.url)
                         )
                         HarvestReport(
+                            dataSourceId = source.id,
+                            dataSourceUrl = source.url,
                             id = source.id,
                             url = source.url,
                             harvestError = true,
@@ -50,6 +52,8 @@ class InformationModelHarvester(
                             HarvestException(source.url)
                         )
                         HarvestReport(
+                            dataSourceId = source.id,
+                            dataSourceUrl = source.url,
                             id = source.id,
                             url = source.url,
                             harvestError = true,
@@ -66,6 +70,8 @@ class InformationModelHarvester(
             } catch (ex: Exception) {
                 LOGGER.error("Harvest of ${source.url} failed", ex)
                 HarvestReport(
+                    dataSourceId = source.id,
+                    dataSourceUrl = source.url,
                     id = source.id,
                     url = source.url,
                     harvestError = true,
@@ -86,6 +92,8 @@ class InformationModelHarvester(
         return if (!forceUpdate && dbData != null && harvested.isIsomorphicWith(dbData)) {
             LOGGER.info("No changes from last harvest of $sourceURL")
             HarvestReport(
+                dataSourceId = sourceId,
+                dataSourceUrl = sourceURL,
                 id = sourceId,
                 url = sourceURL,
                 harvestError = false,
@@ -137,6 +145,8 @@ class InformationModelHarvester(
 
         LOGGER.debug("Harvest of $sourceURL completed")
         return HarvestReport(
+            dataSourceId = sourceId,
+            dataSourceUrl = sourceURL,
             id = sourceId,
             url = sourceURL,
             harvestError = false,

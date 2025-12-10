@@ -94,6 +94,8 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest",
+            dataSourceUrl="http://localhost:5050/harvest",
             id="harvest",
             url="http://localhost:5050/harvest",
             dataType="informationmodel",
@@ -177,6 +179,8 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest2",
+            dataSourceUrl="http://localhost:5050/harvest2",
             id="harvest2",
             url="http://localhost:5050/harvest2",
             dataType="informationmodel",
@@ -217,6 +221,8 @@ class HarvesterTest {
         verify(turtleService, times(0)).saveInformationModel(any(), any(), any())
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest",
+            dataSourceUrl="http://localhost:5050/harvest",
             id="harvest",
             url="http://localhost:5050/harvest",
             dataType="informationmodel",
@@ -255,6 +261,8 @@ class HarvesterTest {
         verify(turtleService, times(1)).saveInformationModel(any(), any(), any())
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest",
+            dataSourceUrl="http://localhost:5050/harvest",
             id="harvest",
             url="http://localhost:5050/harvest",
             dataType="informationmodel",
@@ -327,6 +335,8 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest",
+            dataSourceUrl="http://localhost:5050/harvest",
             id="harvest",
             url="http://localhost:5050/harvest",
             dataType="informationmodel",
@@ -360,6 +370,8 @@ class HarvesterTest {
         verify(turtleService, times(0)).saveInformationModel(any(), any(), any())
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest",
+            dataSourceUrl="http://localhost:5050/harvest",
             id="harvest",
             url="http://localhost:5050/harvest",
             dataType="informationmodel",
@@ -396,6 +408,8 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest",
+            dataSourceUrl="http://localhost:5050/harvest",
             id="harvest",
             url="http://localhost:5050/harvest",
             dataType="informationmodel",
@@ -430,6 +444,8 @@ class HarvesterTest {
         val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest",
+            dataSourceUrl="http://localhost:5050/harvest",
             id="harvest",
             url="http://localhost:5050/harvest",
             dataType="informationmodel",
@@ -472,6 +488,8 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            dataSourceId="harvest",
+            dataSourceUrl="http://localhost:5050/harvest",
             id="harvest",
             url="http://localhost:5050/harvest",
             dataType="informationmodel",
