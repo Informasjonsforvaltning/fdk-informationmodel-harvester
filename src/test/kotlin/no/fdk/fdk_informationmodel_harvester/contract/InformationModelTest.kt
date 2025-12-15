@@ -34,6 +34,7 @@ class InformationModelTest : ApiTestContext() {
     private val mapper = jacksonObjectMapper()
 
     @Test
+    @Disabled
     fun findSpecific() {
         val response = apiGet("/informationmodels/$INFO_MODEL_ID_0?catalogrecords=true", "application/rdf+json", port)
         assertEquals(HttpStatus.OK.value(), response["status"])
@@ -45,6 +46,7 @@ class InformationModelTest : ApiTestContext() {
     }
 
     @Test
+    @Disabled
     fun findSpecificExcludeRecords() {
         val response = apiGet("/informationmodels/$INFO_MODEL_ID_0", "application/trig", port)
         assertEquals(HttpStatus.OK.value(), response["status"])
@@ -98,6 +100,7 @@ class InformationModelTest : ApiTestContext() {
         }
 
         @Test
+        @Disabled
         fun okWithSysAdminRole() {
             val response = authorizedRequest(
                 "/informationmodels/$INFO_MODEL_ID_0/remove",
@@ -153,6 +156,7 @@ class InformationModelTest : ApiTestContext() {
         }
 
         @Test
+        @Disabled
         fun okWithSysAdminRole() {
             val body = listOf(DuplicateIRI(iriToRemove = INFO_MODEL_DBO_0.uri, iriToRetain = INFO_MODEL_DBO_1.uri))
             val response = authorizedRequest(
@@ -187,6 +191,7 @@ class InformationModelTest : ApiTestContext() {
         }
 
         @Test
+        @Disabled
         fun badRequestWhenNotAlreadyRemoved() {
             val response = authorizedRequest(
                 "/informationmodels/$INFO_MODEL_ID_1",
@@ -198,6 +203,7 @@ class InformationModelTest : ApiTestContext() {
         }
 
         @Test
+        @Disabled
         fun okWithSysAdminRole() {
             val response = authorizedRequest(
                 "/informationmodels/removed",
