@@ -24,7 +24,12 @@ class InformationModelHarvester(
     private val applicationProperties: ApplicationProperties
 ) {
 
-    fun harvestInformationModelCatalog(source: HarvestDataSource, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport? =
+    fun harvestInformationModelCatalog(
+        source: HarvestDataSource,
+        harvestDate: Calendar,
+        forceUpdate: Boolean,
+        runId: String? = null
+    ): HarvestReport? =
         if (source.id != null && source.url != null) {
             try {
                 LOGGER.debug("Starting harvest of ${source.url}")
@@ -36,6 +41,7 @@ class InformationModelHarvester(
                             HarvestException(source.url)
                         )
                         HarvestReport(
+                            runId = runId,
                             dataSourceId = source.id,
                             dataSourceUrl = source.url,
                             id = source.id,
@@ -52,6 +58,7 @@ class InformationModelHarvester(
                             HarvestException(source.url)
                         )
                         HarvestReport(
+                            runId = runId,
                             dataSourceId = source.id,
                             dataSourceUrl = source.url,
                             id = source.id,
@@ -70,6 +77,7 @@ class InformationModelHarvester(
             } catch (ex: Exception) {
                 LOGGER.error("Harvest of ${source.url} failed", ex)
                 HarvestReport(
+                    runId = runId,
                     dataSourceId = source.id,
                     dataSourceUrl = source.url,
                     id = source.id,
@@ -85,13 +93,21 @@ class InformationModelHarvester(
             null
         }
 
-    private fun updateIfChanged(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport {
+    private fun updateIfChanged(
+        harvested: Model,
+        sourceId: String,
+        sourceURL: String,
+        harvestDate: Calendar,
+        forceUpdate: Boolean,
+        runId: String?
+    ): HarvestReport {
         val dbData = turtleService.findHarvestSource(sourceURL)
             ?.let { safeParseRDF(it, Lang.TURTLE) }
 
         return if (!forceUpdate && dbData != null && harvested.isIsomorphicWith(dbData)) {
             LOGGER.info("No changes from last harvest of $sourceURL")
             HarvestReport(
+                runId = runId,
                 dataSourceId = sourceId,
                 dataSourceUrl = sourceURL,
                 id = sourceId,
@@ -104,11 +120,18 @@ class InformationModelHarvester(
             LOGGER.info("Changes detected, saving data from $sourceURL and updating FDK meta data")
             turtleService.saveAsHarvestSource(sourceURL, harvested.createRDFResponse(Lang.TURTLE))
 
-            updateDB(harvested, sourceId, sourceURL, harvestDate, forceUpdate)
+            updateDB(harvested, sourceId, sourceURL, harvestDate, forceUpdate, runId)
         }
     }
 
-    private fun updateDB(harvested: Model, sourceId: String, sourceURL: String, harvestDate: Calendar, forceUpdate: Boolean): HarvestReport {
+    private fun updateDB(
+        harvested: Model,
+        sourceId: String,
+        sourceURL: String,
+        harvestDate: Calendar,
+        forceUpdate: Boolean,
+        runId: String?
+    ): HarvestReport {
         val updatedCatalogs = mutableListOf<CatalogMeta>()
         val updatedModels = mutableListOf<InformationModelMeta>()
         val removedModels = mutableListOf<InformationModelMeta>()
@@ -145,6 +168,7 @@ class InformationModelHarvester(
 
         LOGGER.debug("Harvest of $sourceURL completed")
         return HarvestReport(
+            runId = runId,
             dataSourceId = sourceId,
             dataSourceUrl = sourceURL,
             id = sourceId,
