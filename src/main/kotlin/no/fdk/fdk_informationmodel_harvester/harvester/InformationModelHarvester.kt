@@ -71,7 +71,7 @@ class InformationModelHarvester(
                     }
                     else -> updateIfChanged(
                         parseRDFResponse(adapter.getInformationModels(source), jenaWriterType),
-                        source.id, source.url, harvestDate, forceUpdate
+                        source.id, source.url, harvestDate, forceUpdate, runId
                     )
                 }
             } catch (ex: Exception) {
