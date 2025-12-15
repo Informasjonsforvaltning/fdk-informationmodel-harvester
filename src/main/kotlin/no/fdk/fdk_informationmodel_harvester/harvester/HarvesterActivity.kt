@@ -33,7 +33,7 @@ class HarvesterActivity(
 
     private val activitySemaphore = Semaphore(1)
 
-    fun initiateHarvest(params: HarvestAdminParameters, forceUpdate: Boolean) {
+    fun initiateHarvest(params: HarvestAdminParameters, forceUpdate: Boolean, runId: String? = null) {
         if (params.harvestAllModels()) LOGGER.debug("starting harvest of all information models, force update: $forceUpdate")
         else LOGGER.debug("starting harvest with parameters $params, force update: $forceUpdate")
 
@@ -47,9 +47,10 @@ class HarvesterActivity(
                             async {
                                 val (report, timeElapsed) = measureTimedValue {
                                     harvester.harvestInformationModelCatalog(
-                                            it,
-                                            Calendar.getInstance(),
-                                            forceUpdate
+                                        it,
+                                        Calendar.getInstance(),
+                                        forceUpdate,
+                                        runId
                                     )
                                 }
                                 Metrics.counter("harvest_count",
