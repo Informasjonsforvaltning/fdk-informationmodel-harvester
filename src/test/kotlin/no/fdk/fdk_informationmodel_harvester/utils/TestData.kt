@@ -1,6 +1,6 @@
 package no.fdk.fdk_informationmodel_harvester.utils
 
-import no.fdk.fdk_informationmodel_harvester.model.HarvestDataSource
+import no.fdk.fdk_informationmodel_harvester.model.HarvestTrigger
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap
 import java.util.*
 
@@ -30,34 +30,38 @@ const val CATALOG_ID_2 = "f25c939d-0722-3aa3-82b1-eaa457086444"
 val TEST_HARVEST_DATE: Calendar = Calendar.Builder().setTimeZone(TimeZone.getTimeZone("UTC")).setDate(2020, 9, 5).setTimeOfDay(13, 15, 39, 831).build()
 val NEW_TEST_HARVEST_DATE: Calendar = Calendar.Builder().setTimeZone(TimeZone.getTimeZone("UTC")).setDate(2020, 9, 15).setTimeOfDay(11, 52, 16, 122).build()
 
-val TEST_HARVEST_SOURCE = HarvestDataSource(
-    id = "harvest",
-    url = "$WIREMOCK_TEST_URI/harvest",
-    acceptHeaderValue = "text/turtle",
+val TEST_HARVEST_SOURCE = HarvestTrigger(
+    runId = "run0",
+    dataSourceId = "harvest",
+    dataSourceUrl = "$WIREMOCK_TEST_URI/harvest",
+    acceptHeader = "text/turtle",
     dataType = "informationmodel",
     dataSourceType = "DCAT-AP-NO"
 )
 
-val TEST_HARVEST_SOURCE_1 = HarvestDataSource(
-    id = "harvest1",
-    url = "$WIREMOCK_TEST_URI/harvest1",
-    acceptHeaderValue = "text/turtle",
+val TEST_HARVEST_SOURCE_1 = HarvestTrigger(
+    runId = "run1",
+    dataSourceId = "harvest1",
+    dataSourceUrl = "$WIREMOCK_TEST_URI/harvest1",
+    acceptHeader = "text/turtle",
     dataType = "informationmodel",
     dataSourceType = "DCAT-AP-NO"
 )
 
-val TEST_HARVEST_SOURCE_2 = HarvestDataSource(
-    id = "harvest2",
-    url = "$WIREMOCK_TEST_URI/harvest2",
-    acceptHeaderValue = "text/turtle",
+val TEST_HARVEST_SOURCE_2 = HarvestTrigger(
+    runId = "run2",
+    dataSourceId = "harvest2",
+    dataSourceUrl = "$WIREMOCK_TEST_URI/harvest2",
+    acceptHeader = "text/turtle",
     dataType = "informationmodel",
     dataSourceType = "DCAT-AP-NO"
 )
 
-val ERROR_HARVEST_SOURCE = HarvestDataSource(
-    id = "error-harvest",
-    url = "$WIREMOCK_TEST_URI/error-harvest",
-    acceptHeaderValue = "text/turtle",
+val ERROR_HARVEST_SOURCE = HarvestTrigger(
+    runId = "run-error",
+    dataSourceId = "error-harvest",
+    dataSourceUrl = "$WIREMOCK_TEST_URI/error-harvest",
+    acceptHeader = "text/turtle",
     dataType = "informationmodel",
     dataSourceType = "DCAT-AP-NO"
 )

@@ -129,8 +129,6 @@ class InformationModelServiceTest {
             }
 
             val expectedReport = HarvestReport(
-                id = "manual-delete-$INFO_MODEL_ID_0",
-                url = INFO_MODEL_DBO_0.uri,
                 harvestError = false,
                 startTime = "startTime",
                 endTime = "endTime",
@@ -211,8 +209,6 @@ class InformationModelServiceTest {
             }
 
             val expectedReport = HarvestReport(
-                id = "duplicate-delete",
-                url = "https://fellesdatakatalog.digdir.no/duplicates",
                 harvestError = false,
                 startTime = "startTime",
                 endTime = "endTime",
@@ -254,8 +250,6 @@ class InformationModelServiceTest {
             }
 
             val expectedReport = HarvestReport(
-                id = "duplicate-delete",
-                url = "https://fellesdatakatalog.digdir.no/duplicates",
                 harvestError = false,
                 startTime = "startTime",
                 endTime = "endTime",

@@ -44,7 +44,7 @@ class HarvesterTest {
         val harvested = responseReader.readFile("harvest_response_0.ttl")
         val savedInfoModel = responseReader.readFile("model_0.ttl")
 
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE.dataSourceUrl!!, TEST_HARVEST_SOURCE.acceptHeader!!))
             .thenReturn(harvested)
         whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
             .thenReturn(listOf(INFO_MODEL_DBO_0))
@@ -56,13 +56,13 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5050/informationmodels")
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         val harvestedModel = parseRDFResponse(harvested, Lang.TURTLE)
 
         argumentCaptor<String, String>().apply {
             verify(turtleService, times(1)).saveAsHarvestSource(first.capture(), second.capture())
-            assertEquals(TEST_HARVEST_SOURCE.url, first.firstValue)
+            assertEquals(TEST_HARVEST_SOURCE.dataSourceUrl, first.firstValue)
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), harvestedModel, "harvestDataSourceSavedWhenDBIsEmpty-harvested"))
         }
 
@@ -94,10 +94,9 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            runId = "run0",
             dataSourceId="harvest",
             dataSourceUrl="http://localhost:5050/harvest",
-            id="harvest",
-            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -119,7 +118,7 @@ class HarvesterTest {
         val savedModel2 = responseReader.readFile("model_2.ttl")
         val savedModel3 = responseReader.readFile("model_3.ttl")
 
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE_2))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE_2.dataSourceUrl!!, TEST_HARVEST_SOURCE_2.acceptHeader!!))
             .thenReturn(harvested)
         whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_2"))
             .thenReturn(listOf(INFO_MODEL_META_2, INFO_MODEL_META_3))
@@ -133,13 +132,13 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5050/informationmodels")
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE_2, TEST_HARVEST_DATE, false)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE_2, TEST_HARVEST_DATE)
 
         val harvestedModel = parseRDFResponse(harvested, Lang.TURTLE)
 
         argumentCaptor<String, String>().apply {
             verify(turtleService, times(1)).saveAsHarvestSource(first.capture(), second.capture())
-            assertEquals(TEST_HARVEST_SOURCE_2.url, first.firstValue)
+            assertEquals(TEST_HARVEST_SOURCE_2.dataSourceUrl, first.firstValue)
             Assertions.assertTrue(checkIfIsomorphicAndPrintDiff(parseRDFResponse(second.firstValue, Lang.TURTLE), harvestedModel, "sourceWithCodeListIsParsedCorrectly-harvested"))
         }
 
@@ -179,10 +178,9 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            runId = "run2",
             dataSourceId="harvest2",
             dataSourceUrl="http://localhost:5050/harvest2",
-            id="harvest2",
-            url="http://localhost:5050/harvest2",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -201,10 +199,10 @@ class HarvesterTest {
     @Test
     fun harvestDataSourceNotPersistedWhenNoChangesFromDB() {
         val harvested = responseReader.readFile("harvest_response_0.ttl")
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE.dataSourceUrl!!, TEST_HARVEST_SOURCE.acceptHeader!!))
             .thenReturn(harvested)
 
-        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.url!!))
+        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.dataSourceUrl))
             .thenReturn(harvested)
 
         whenever(valuesMock.catalogUri)
@@ -212,7 +210,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5050/informationmodels")
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         verify(turtleService, times(0)).saveAsHarvestSource(any(), any())
         verify(catalogRepository, times(0)).save(any())
@@ -221,10 +219,9 @@ class HarvesterTest {
         verify(turtleService, times(0)).saveInformationModel(any(), any(), any())
 
         val expectedReport = HarvestReport(
+            runId = "run0",
             dataSourceId="harvest",
             dataSourceUrl="http://localhost:5050/harvest",
-            id="harvest",
-            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -237,9 +234,9 @@ class HarvesterTest {
     @Test
     fun noChangesIgnoredWhenForceUpdateIsTrue() {
         val harvested = responseReader.readFile("harvest_response_0.ttl")
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE.dataSourceUrl!!, TEST_HARVEST_SOURCE.acceptHeader!!))
             .thenReturn(harvested)
-        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.url!!))
+        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.dataSourceUrl))
             .thenReturn(harvested)
         whenever(modelRepository.findById(INFO_MODEL_DBO_0.uri))
             .thenReturn(Optional.of(INFO_MODEL_DBO_0))
@@ -253,7 +250,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5050/informationmodels")
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, true)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE.copy(forceUpdate = true), TEST_HARVEST_DATE)
 
         verify(turtleService, times(1)).saveAsHarvestSource(any(), any())
         verify(modelRepository, times(0)).save(any())
@@ -261,10 +258,9 @@ class HarvesterTest {
         verify(turtleService, times(1)).saveInformationModel(any(), any(), any())
 
         val expectedReport = HarvestReport(
+            runId = "run0",
             dataSourceId="harvest",
             dataSourceUrl="http://localhost:5050/harvest",
-            id="harvest",
-            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -279,7 +275,7 @@ class HarvesterTest {
     @Test
     fun onlyCatalogMetaUpdatedWhenOnlyCatalogDataChangedFromDB() {
         val harvested = responseReader.readFile("harvest_response_0.ttl")
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE.dataSourceUrl!!, TEST_HARVEST_SOURCE.acceptHeader!!))
             .thenReturn(harvested)
 
         val catalogDiffTurtle = responseReader.readFile("harvest_response_0_catalog_diff.ttl")
@@ -306,7 +302,7 @@ class HarvesterTest {
         val expectedNoMetaCatalog = responseReader.parseFile("no_meta_catalog_0.ttl", "TURTLE")
         val harvestedModel = parseRDFResponse(harvested, Lang.TURTLE)
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, NEW_TEST_HARVEST_DATE, false)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, NEW_TEST_HARVEST_DATE)
 
         argumentCaptor<String, String>().apply {
             verify(turtleService, times(1)).saveAsHarvestSource(first.capture(), second.capture())
@@ -335,10 +331,9 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            runId = "run0",
             dataSourceId="harvest",
             dataSourceUrl="http://localhost:5050/harvest",
-            id="harvest",
-            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-15 13:52:16 +0200",
@@ -353,7 +348,7 @@ class HarvesterTest {
 
     @Test
     fun harvestWithErrorsIsNotPersisted() {
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE.dataSourceUrl!!, TEST_HARVEST_SOURCE.acceptHeader!!))
             .thenReturn(responseReader.readFile("harvest_error_response.ttl"))
 
         whenever(valuesMock.catalogUri)
@@ -361,7 +356,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5050/informationmodels")
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         verify(turtleService, times(0)).saveAsHarvestSource(any(), any())
         verify(catalogRepository, times(0)).save(any())
@@ -370,10 +365,9 @@ class HarvesterTest {
         verify(turtleService, times(0)).saveInformationModel(any(), any(), any())
 
         val expectedReport = HarvestReport(
+            runId = "run0",
             dataSourceId="harvest",
             dataSourceUrl="http://localhost:5050/harvest",
-            id="harvest",
-            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=true,
             errorMessage = "[line: 1, col: 1 ] Undefined prefix: digdir",
@@ -388,9 +382,9 @@ class HarvesterTest {
     fun removedModelsUpdatedAndAddedToReport() {
         val harvested = responseReader.readFile("harvest_response_0_old_model_removed.ttl")
         val old = responseReader.readFile("harvest_response_0.ttl")
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE.dataSourceUrl!!, TEST_HARVEST_SOURCE.acceptHeader!!))
             .thenReturn(harvested)
-        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.url!!))
+        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.dataSourceUrl))
             .thenReturn(old)
         whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
             .thenReturn(listOf(INFO_MODEL_DBO_0))
@@ -400,7 +394,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5050/informationmodels")
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         argumentCaptor<List<InformationModelMeta>>().apply {
             verify(modelRepository, times(1)).saveAll(capture())
@@ -408,10 +402,9 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            runId = "run0",
             dataSourceId="harvest",
             dataSourceUrl="http://localhost:5050/harvest",
-            id="harvest",
-            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -429,9 +422,9 @@ class HarvesterTest {
     fun allowEmptyCatalog() {
         val harvested = responseReader.readFile("harvest_response_0_empty.ttl")
         val old = responseReader.readFile("harvest_response_0.ttl")
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE.dataSourceUrl!!, TEST_HARVEST_SOURCE.acceptHeader!!))
             .thenReturn(harvested)
-        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.url!!))
+        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.dataSourceUrl))
             .thenReturn(old)
         whenever(modelRepository.findAllByIsPartOf("http://localhost:5050/catalogs/$CATALOG_ID_0"))
             .thenReturn(listOf(INFO_MODEL_DBO_0))
@@ -441,13 +434,12 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5050/informationmodels")
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         val expectedReport = HarvestReport(
+            runId = "run0",
             dataSourceId="harvest",
             dataSourceUrl="http://localhost:5050/harvest",
-            id="harvest",
-            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
@@ -464,9 +456,9 @@ class HarvesterTest {
     @Test
     fun earlierRemovedInfoModelWithNoChangesAddedToReport() {
         val harvested = responseReader.readFile("harvest_response_0.ttl")
-        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE))
+        whenever(adapter.getInformationModels(TEST_HARVEST_SOURCE.dataSourceUrl!!, TEST_HARVEST_SOURCE.acceptHeader!!))
             .thenReturn(harvested)
-        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.url!!))
+        whenever(turtleService.findHarvestSource(TEST_HARVEST_SOURCE.dataSourceUrl))
             .thenReturn(responseReader.readFile("harvest_response_0_old_model_removed.ttl"))
         whenever(modelRepository.findById(INFO_MODEL_DBO_0.uri))
             .thenReturn(Optional.of(INFO_MODEL_DBO_0.copy(removed = true)))
@@ -480,7 +472,7 @@ class HarvesterTest {
         whenever(valuesMock.informationModelUri)
             .thenReturn("http://localhost:5050/informationmodels")
 
-        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE, false)
+        val report = harvester.harvestInformationModelCatalog(TEST_HARVEST_SOURCE, TEST_HARVEST_DATE)
 
         argumentCaptor<InformationModelMeta>().apply {
             verify(modelRepository, times(1)).save(capture())
@@ -488,10 +480,9 @@ class HarvesterTest {
         }
 
         val expectedReport = HarvestReport(
+            runId = "run0",
             dataSourceId="harvest",
             dataSourceUrl="http://localhost:5050/harvest",
-            id="harvest",
-            url="http://localhost:5050/harvest",
             dataType="informationmodel",
             harvestError=false,
             startTime = "2020-10-05 15:15:39 +0200",
