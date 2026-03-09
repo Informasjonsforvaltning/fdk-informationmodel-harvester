@@ -13,7 +13,7 @@ on:
 
 permissions:
   contents: read
-
+  security-events: write
 jobs:
   codeql:
     name: Run codeql scan
